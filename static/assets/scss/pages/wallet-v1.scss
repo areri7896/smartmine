@@ -1,0 +1,62 @@
+// Initialize first
+@import "../init";
+
+// Import files  
+@import "home";
+
+//Wallet
+.wallet{
+  position: relative;
+  padding-bottom: toRem(44);
+  
+  .wallet-group{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    gap: toRem(24);
+    padding-bottom: toRem(24);
+    overflow-x: hidden;
+    @include media-breakpoint-down(xl) {
+      flex-direction: column;
+    }
+    .wallet-group--left{
+      display: flex;
+      flex-direction: column;
+      gap: toRem(24);
+      max-width: toRem(320);
+      @include media-breakpoint-down(xl) {
+        flex-direction: row;
+        max-width: 100%;
+
+        width: 100%;
+        overflow-y: hidden;
+        overflow-x: auto;
+        -ms-overflow-style: none;  /* Internet Explorer 10+ */
+        scrollbar-width: none;  /* Firefox */
+        &::-webkit-scrollbar { 
+          display: none;  /* Safari and Chrome */
+        }
+      }
+      @include media-breakpoint-down(md) {
+        gap: toRem(16);
+      }
+      .standard-card{
+        min-width: toRem(304);
+        @include media-breakpoint-down(xs-1) {
+          min-width: toRem(288);
+        }
+      }
+    }
+    .wallet-group--right{
+      display: flex;
+      flex-direction: column;
+      gap: toRem(24);
+      width: 100%;
+      overflow: hidden;
+    }
+  }
+}
+.advance-card.advance-card--type-3-v3{
+  width: 100%;
+  max-width: 100%;
+}

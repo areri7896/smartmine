@@ -1,0 +1,65 @@
+{% extends 'src/dashboard/base.html' %}
+{% load static %}
+{% load socialaccount %}
+<head>
+  <title>{% block title %}Sign Up{% endblock %}</title>
+
+ {% block css_links %}
+  <link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+  <!-- Start::Global Styles (used by all pages) -->
+  <link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Global Styles -->
+  <!-- Start::Page Styles (used by this page) -->
+  <link href="{% static 'assets/css/pages/sign-up.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Page Styles -->
+  {% endblock %}
+{% block content %}
+<body class="">
+    <div class="sign-up">
+      <div class="sign-up-card">
+        <div class="sign-up__heading">
+          <img src="{% static 'assets/media/images/icons/sm.png' %}" alt="" class="logo">
+          <p class="fb-sm sign-up__title">Let’s get you started by filling out the form</p>
+        </div>
+        <form action="#" class="sign-up__forms">
+          <div class="forms-name">
+            <div class="forms-group">
+              <input type="text" class="form-control" id="first-name" name="first-name" placeholder="Enter your first name">
+            </div>
+            <div class="forms-group">
+              <input type="text" class="form-control" id="last-name" name="last-name" placeholder="Enter your last name">
+            </div>          
+          </div>
+          <div class="forms-group">
+            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email">
+          </div>
+          <div class="forms-group">
+            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password">
+            <span class="form-group__password-toggle js-form-group__password-toggle" data-password="password"></span>
+          </div>
+          <div class="tnc">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input"  id="terms-condition" name="terms-condition"  id="terms-condition">
+              <label class="form-check-label fb-sm" for="terms-condition">I agree to the Terms and Conditions and the Trading Risk Notice</label>
+            </div>
+          </div>
+          <input type="submmit" class="btn btn-primary btn-pill btn-submit" value="Sign Up Now"></input>
+          <p class="fb-sm sign-up-info">
+            Already have an account? <a href="{% url 'account_login' %}" class="sign-up-link">Sign in now</a>
+          </p>
+        </form>
+      </div>
+    </div>
+    {% endblock %}
+  {% block js %}
+  <!-- Start::Global Bundle Scripts (used by all pages) -->
+  <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+  <script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
+  <!-- End::Global Bundle Scripts -->
+  <!-- Start::Page Scripts (used by this page) -->
+  <script src="{% static 'assets/js/pages/sign-up-page.js' %}"></script>
+  <!-- End::Page Scripts -->
+  {% endblock %}
+</body>
+
+</html>

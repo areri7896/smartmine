@@ -1,0 +1,146 @@
+{% load static %}
+
+{% block csx %}
+
+<link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+
+<!-- Start::Global Styles (used by all pages) -->
+<link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
+<!-- End::Global Styles -->
+<!-- Start::Plugins (used by this page) -->
+<link href="{% static 'assets/plugins/slick/slick.css' %}" rel="stylesheet" type="text/css" />
+<!-- End::Plugins -->
+<!-- Start::Page Styles (used by this page) -->
+<link href="{% static 'assets/css/pages/landing-page-v2.css' %}" rel="stylesheet" type="text/css" />
+<!-- End::Page Styles -->
+
+{% endblock %}
+
+<div class="container crypto-graph">
+    <div class="crypto-graph-carousel">
+      <div class="crypto-graph-carousel__items">
+        <div class="crypto-graph-item">
+          <img class="crypto-graph-item__crypto-icon" src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="btc">
+        </div>
+        <div class="crypto-graph-item crypto-graph-item__graph">
+          <div class="crypto-graph-item-graph__img">
+            <img src="{% static 'assets/media/images/graph/btc-graph.svg' %}" alt="btc graph">
+          </div>
+          <div class="crypto-graph-item-graph__inflution crypto-graph-item-graph__inflution--bullish">
+            <img src="{% static 'assets/media/images/icons/arrow-bullish.svg' %}" alt="Up">
+            <p class="fd-lg--bold">2.11%</p>
+          </div>
+        </div>
+        <div class="crypto-graph-item crypto-graph-item--fullname">
+          <p class="fb-regular crypto-graph-item__name">Bitcoin</p>
+        </div>
+        <div class="crypto-graph-item crypto-graph-item--price-codename">
+          <p class="fd-md fd-md--bold crypto-graph-item__price">USD 53,260.20</p>
+          <p class="fb-regular crypto-graph-item__code">BTC</p>
+        </div>
+      </div>
+      <div class="crypto-graph-carousel__items">
+        <div class="crypto-graph-item">
+          <img class="crypto-graph-item__crypto-icon" src="{% static 'assets/media/images/icons/logo-eth.svg' %}" alt="logo-eth">
+        </div>
+        <div class="crypto-graph-item crypto-graph-item__graph">
+          <div class="crypto-graph-item-graph__img">
+            <img src="{% static 'assets/media/images/graph/eth-graph.svg' %}" alt="eth graph">
+          </div>
+          <div class="crypto-graph-item-graph__inflution crypto-graph-item-graph__inflution--bearish">
+            <img src="{% static 'assets/media/images/icons/arrow-bearish.svg' %}" alt="Down">
+            <p class="fd-lg--bold">1.53%</p>
+          </div>
+        </div>
+        <div class="crypto-graph-item crypto-graph-item--fullname">
+          <p class="fb-regular crypto-graph-item__name">Ethereum</p>
+        </div>
+        <div class="crypto-graph-item crypto-graph-item--price-codename">
+          <p class="fd-md fd-md--bold crypto-graph-item__price">USD 1,643.80</p>
+          <p class="fb-regular crypto-graph-item__code">eth</p>
+        </div>
+      </div>
+      <div class="crypto-graph-carousel__items">
+        <div class="crypto-graph-item">
+          <img class="crypto-graph-item__crypto-icon" src="{% static 'assets/media/images/icons/logo-usdt.svg' %}" alt="usdt">
+        </div>
+        <div class="crypto-graph-item crypto-graph-item__graph">
+          <div class="crypto-graph-item-graph__img">
+            <img src="{% static 'assets/media/images/graph/usdt-graph.svg' %}" alt="usdt graph">
+          </div>
+          <div class="crypto-graph-item-graph__inflution crypto-graph-item-graph__inflution--bullish">
+            <img src="{% static 'assets/media/images/icons/arrow-bullish.svg' %}" alt="Up">
+            <p class="fd-lg--bold">0.11%</p>
+          </div>
+        </div>
+        <div class="crypto-graph-item crypto-graph-item--fullname">
+          <p class="fb-regular crypto-graph-item__name">Tether</p>
+        </div>
+        <div class="crypto-graph-item crypto-graph-item--price-codename">
+          <p class="fd-md fd-md--bold crypto-graph-item__price">USD 0.9999</p>
+          <p class="fb-regular crypto-graph-item__code">usdt</p>
+        </div>
+      </div>
+      <div class="crypto-graph-carousel__items">
+        <div class="crypto-graph-item">
+          <img class="crypto-graph-item__crypto-icon" src="{% static 'assets/media/images/icons/logo-bnb.svg' %}" alt="bnb">
+        </div>
+        <div class="crypto-graph-item crypto-graph-item__graph">
+          <div class="crypto-graph-item-graph__img">
+            <img src="{% static 'assets/media/images/graph/bnb-graph.svg' %}" alt="bnb graph">
+          </div>
+          <div class="crypto-graph-item-graph__inflution crypto-graph-item-graph__inflution--bullish">
+            <img src="{% static 'assets/media/images/icons/arrow-bullish.svg' %}" alt="Up">
+            <p class="fd-lg--bold">0.33%</p>
+          </div>
+        </div>
+        <div class="crypto-graph-item crypto-graph-item--fullname">
+          <p class="fb-regular crypto-graph-item__name">Binance Coin</p>
+        </div>
+        <div class="crypto-graph-item crypto-graph-item--price-codename">
+          <p class="fd-md fd-md--bold crypto-graph-item__price">USD 247.71</p>
+          <p class="fb-regular crypto-graph-item__code">bnb</p>
+        </div>
+      </div>
+      <div class="crypto-graph-carousel__items">
+        <div class="crypto-graph-item">
+          <img class="crypto-graph-item__crypto-icon" src="{% static 'assets/media/images/icons/logo-xrp.svg' %}" alt="xrp">
+        </div>
+        <div class="crypto-graph-item crypto-graph-item__graph">
+          <div class="crypto-graph-item-graph__img">
+            <img src="{% static 'assets/media/images/graph/xrp-graph.svg' %}" alt="xrp graph">
+          </div>
+          <div class="crypto-graph-item-graph__inflution crypto-graph-item-graph__inflution--bearish">
+            <img src="{% static 'assets/media/images/icons/arrow-bearish.svg' %}" alt="Up">
+            <p class="fd-lg--bold">1.49%</p>
+          </div>
+        </div>
+        <div class="crypto-graph-item crypto-graph-item--fullname">
+          <p class="fb-regular crypto-graph-item__name">XRP</p>
+        </div>
+        <div class="crypto-graph-item crypto-graph-item--price-codename">
+          <p class="fd-md fd-md--bold crypto-graph-item__price">USD 0.5464</p>
+          <p class="fb-regular crypto-graph-item__code">XRP</p>
+        </div>
+      </div>
+    </div>
+    <div class="slick__pagination">
+      <div class="crypto-graph-carousel__pagination slick__pagination--dots">
+        <div class="crypto-graph-carousel__slick-slider-dots slick-slider-dots"></div>
+      </div>
+    </div>
+  </div>
+
+{% block jsx %}
+ <!-- Start::Global Bundle Scripts (used by all pages) -->
+ <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+ <!-- End::Global Bundle Scripts -->
+ <!-- Start::Plugins (used by this page) -->
+ <script src="{% static 'assets/plugins/slick/slick.min.js' %}"></script>
+ <!-- End::Plugins -->
+ <!-- Start::Page Scripts (used by this page) -->
+ <script src="{% static 'assets/js/custom/custom-select.js' %}"></script>
+ <script src="{% static 'assets/js/pages/landing-page-v2.js' %}"></script>
+ <!-- End::Page Scripts -->
+ 
+{% endblock %}

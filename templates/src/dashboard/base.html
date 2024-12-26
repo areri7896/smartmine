@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>{% block title %}Dashboard | SmartMine - Landing Page & Dashboard{% endblock %}</title>
+  <meta content="Dashboard  | SmartMine - Landing Page & Dashboard" property="og:title">
+  <meta content="Dashboard | SmartMine - Landing Page & Dashboard" property="twitter:title">
+  <meta name="description" content="Landing Page & Dashboard" />
+  {% block css_links %}
+  <link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+
+  <!-- Start::Global Styles (used by all pages) -->
+  <link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Global Styles -->
+  <!-- Start::Plugins (used by this page) -->
+  <link href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Plugins -->
+  <!-- Start::Page Styles (used by this page) -->
+  <link href="{% static 'assets/css/pages/dashboard-v1.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Page Styles -->
+  <link href="{% static 'assets/css/pages/wallet-v1.css' %}" rel="stylesheet" type="text/css" />
+
+   {% endblock %}
+</head>
+
+<body class="">
+ 
+    {% block content %}
+
+
+
+
+    {% block js%}
+  <!-- Start::Global Bundle Scripts (used by all pages) -->
+  <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+  <script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
+  <!-- End::Global Bundle Scripts -->
+  <!-- Start::Plugins (used by this page) -->
+  <script src="{% static 'assets/plugins/apexcharts/apexcharts.min.js' %}"></script>
+  <script src="{% static 'assets/plugins/slick/slick.min.js' %}"></script>
+  <!-- End::Plugins -->
+  <!-- Start::Page Scripts (used by this page) -->
+  <script src="{% static 'assets/js/custom/chart.js' %}"></script>
+  <script src="{% static 'assets/js/pages/dashboard-page-v1.js' %}"></script>
+  <script src="{% static 'assets/js/custom/navbar.js' %}"></script>
+  <script src="{% static 'assets/js/custom/custom-select.js' %}"></script>
+  <!-- End::Page Scripts -->
+   {% endblock %}
+   {% endblock %}
+</body>
+
+</html>

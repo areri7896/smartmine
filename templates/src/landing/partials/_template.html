@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>{% block title %}SmartMine{% endblock %}</title>
+  <meta content="{% block title %}SmartMine - Landing Page & Dashboard{% endblock %}" property="og:title">
+  <meta content="{% block title %}SmartMine - Landing Page & Dashboard{% endblock %}" property="twitter:title">
+  <meta name="description" content="{% block description %}Landing Page & Dashboard {% endblock %}">
+
+  <link rel="shortcut icon" href="{% static 'assets/media/images/icons/smr.png' %}" type="image/x-icon">
+
+  <!-- Start::Global Styles (used by all pages) -->
+  <link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css">
+  <!-- End::Global Styles -->
+
+  <!-- Start::Page Styles (used by this page) -->
+  {% block css_page %}
+  {% endblock %}
+  <!-- End::Page Styles -->
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+  {% block content %}
+  {% endblock %}
+  
+  <!-- Start::Global Bundle Scripts (used by all pages) -->
+  <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+  <!-- End::Global Bundle Scripts -->
+
+ 
+
+  <!-- Start::Page Scripts (used by this page) -->
+  {% block js %}
+  {% endblock %}
+  <!-- End::Page Scripts -->
+</body>
+
+</html>

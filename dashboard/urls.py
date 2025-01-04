@@ -6,11 +6,11 @@ from . import views as dashboard_views
 urlpatterns = [
     path('', dashboard_views.dashboard, name='dashboard'),
     path('signin/', dashboard_views.signin, name='signin'),
-    path('logout/', dashboard_views.logoutUser, name='logout'),
+    # path('logout/', dashboard_views.logoutUser, name='logout'),
     path('exchange/', dashboard_views.exchange, name='exchange'),
     path('profile/', dashboard_views.profile, name='profile'),
     path('market/', dashboard_views.market, name='market'),
-    path('signup/', dashboard_views.signup, name='signup'),
+    # path('signup/', dashboard_views.signup, name='signup'),
     path('wallet/', dashboard_views.wallet, name='wallet'),
     # path('', dashboard_views., name=''),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

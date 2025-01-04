@@ -15,6 +15,19 @@
 <!-- End::Page Styles -->
 {% endblock %}
 {% block content %}
+{% if messages %}
+{% for message in messages %}
+    <div class="toast align-items-center text-bg-primary border-0 alert alert-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">
+         {{ message }}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+
+{% endfor %}
+{% endif %}
 <section class="hero hero-v2">
   <div class="hero__background hero__background--grid">
     <img class="hero__grid-bg" src="{% static 'assets/media/images/landing-page-v2/landing-page-v2-hero-grid-bg.png' %}" alt="Background Grid Hero" />
@@ -33,7 +46,7 @@
       <div class="hero__content">
         <h1 class="hero__title">A trusted and secure cryptocurrency exchange.</h1>
         <p class="fb-lg hero__subtitle">Your guide to the world of an open financial system. Get started with the easiest and most secure platform to buy and trade cryptocurrency.</p>
-        <a href="{% url 'signup' %}" class="btn btn-primary btn-lg btn-pill hero__link">Get Started Now</a>
+        <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg btn-pill hero__link">Get Started Now</a>
       </div>
       <div class="hero__illustration">
         <img src="{% static 'assets/media/images/landing-page-v2/landing-page-v2-hero-illustration.png' %}" alt="Hero Illustration" />
@@ -80,7 +93,7 @@
       <div class="feature__content">
         <h2 class="feature__title">The most trusted cryptocurrency platform.</h2>
         <p class="fb-regular feature__subtitle">SmartMine has a variety of features that make it the best place to start trading</p>
-        <a href="{% url 'signup' %}" class="btn btn-primary btn-pill feature__button">Let’s Trade Now</a>
+        <a href="{% url 'account_signup' %}" class="btn btn-primary btn-pill feature__button">Let’s Trade Now</a>
       </div>
     </div>
   </div>
@@ -493,6 +506,16 @@
   </div>
 </section>
 {% block js %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+  var toastList = toastElList.map(function (toastEl) {
+      return new bootstrap.Toast(toastEl)
+  })
+  toastList.forEach(toast => toast.show())
+});
+</script>
   <!-- Start::Global Bundle Scripts (used by all pages) -->
   <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
   <!-- End::Global Bundle Scripts -->

@@ -1,25 +1,47 @@
-{% extends "account/base_manage.html" %}
-{% load allauth i18n %}
-{% block head_title %}
-    {% trans "Sign Out" %}
-{% endblock head_title %}
+{% extends 'src/dashboard/base.html' %}
+{% load static %}
+{% load i18n %}
+{% load socialaccount %}
+{% load allauth account %}
+
+
+<title>{% block title %}Sign In{% endblock %}</title>
+
+{% block css_links %}
+  <link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+
+  <!-- Start::Global Styles (used by all pages) -->
+  <link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Global Styles -->
+
+  <!-- Start::Page Styles (used by this page) -->
+  <link href="{% static 'assets/css/pages/sign-in.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Page Styles -->
+{% endblock %}
+
 {% block content %}
-    {% element h1 %}
-        {% trans "Sign Out" %}
-    {% endelement %}
-    {% element p %}
-        {% trans 'Are you sure you want to sign out?' %}
-    {% endelement %}
-    {% url 'account_logout' as action_url %}
-    {% element form method="post" action=action_url no_visible_fields=True %}
-        {% slot body %}
-            {% csrf_token %}
-            {{ redirect_field }}
-        {% endslot %}
-        {% slot actions %}
-            {% element button type="submit" %}
-                {% trans 'Sign Out' %}
-            {% endelement %}
-        {% endslot %}
-    {% endelement %}
-{% endblock content %}
+<div class="sign-in">
+  <div class="sign-in-card">
+    <div class="sign-in__heading">
+      <img src="{% static 'assets/media/images/icons/smr.png' %}" alt="" class="logo">
+      <p class="fb-sm sign-in__title">You are about to Logout from SmartMine</p>
+    </div>
+
+    <form method="post" action="{% url 'account_logout' %}" class="sign-in__forms">
+      {% csrf_token %}
+        <input type="submit" class="btn btn-primary btn-pill btn-submit" value="Signout">
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+  <!-- Start::Global Bundle Scripts (used by all pages) -->
+  <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+  <script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
+  <!-- End::Global Bundle Scripts -->
+
+  <!-- Start::Page Scripts (used by this page) -->
+  <script src="{% static 'assets/js/pages/sign-in-page.js' %}"></script>
+  <!-- End::Page Scripts -->
+{% endblock %}

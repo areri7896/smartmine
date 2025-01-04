@@ -24,6 +24,9 @@ SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = config('DEBUG', default=False, cast=bool)
 
+# SECRET_KEY = os.environ["SECRET_KEY"]
+# DEBUG = os.environ["DEBUG", default=False, cast=bool]
+
 ALLOWED_HOSTS = []
 
 
@@ -38,10 +41,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    #installed apps
-    'smartmine',
-    'dashboard',
-
 
     #third party apps
     'allauth',
@@ -49,6 +48,13 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.coinbase',
     'allauth.socialaccount.providers.google',
+    'widget_tweaks',
+
+    #installed apps
+    'smartmine',
+    'dashboard',
+    'binapi'
+
 
 ]
 
@@ -58,6 +64,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
@@ -94,6 +101,22 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": os.environ["POSTGRES_DB"],
+#         "USER": os.environ["POSTGRES_USER"],
+#         "PASSWORD": os.environ["POSTGRES_PASSWORD"],
+#         "HOST": os.environ["POSTGRES_HOST"],
+#         "PORT": os.environ["POSTGRES_PORT"],
+#     }
+        # "options" : {
+        #     "POOL" : ""
+
+        # }
+# }
+
 SITE_ID = 1
 
 
@@ -151,7 +174,9 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         'AUTH_PARAMS': {
             'access_type': 'online',
-        }
+        },
+
+        'OAUTH_PKCE_ENABLED' : True
     }
 }
 
@@ -174,9 +199,20 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
+ACCOUNT_EMAIL_AUTHENTICATED_REDIRECTS_URL = None
 ACCOUNT_EMAIL_NOTIFICATIONS = True
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
+ACCOUNT_EMAIL_CONFIRMATION_HMAC= 1
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_LOGIN_ON_EMAIL_VERIFICATION = True
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
+ACCOUNT_EMAIL_UNKNOWN_ACCOUNTS = False
+ACCOUNT_PREVENT_ENUMERATION = True
+ACCOUNT_USERNAME_BLACKLIST = ['admin', 'staff', 'office']
 
 
 # ACCOUNT_SIGNUP_FORM_CLASS = 'main.forms.CustomSignupForm'
@@ -184,9 +220,13 @@ ACCOUNT_USERNAME_REQUIRED = False
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' 
-EMAIL_FILE_PATH = BASE_DIR / 'emails'
 # ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 DEFAULT_FROM_EMAIL = 'admin@smartmine.com'
+
+EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_FILE_PATH = BASE_DIR / 'emails'
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')

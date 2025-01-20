@@ -17,11 +17,12 @@
   <!-- Start::Page Styles (used by this page) -->
   <link href="{% static 'assets/css/pages/dashboard-v1.css' %}" rel="stylesheet" type="text/css" />
   <!-- End::Page Styles -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 <body class="">
   {% block content %}
  
-  <div class="dashboard dashboard--v1">
+<div class="dashboard dashboard--v1">
     <div class="container container--dashboard">
       <div class="dashboard__group">
         <!-- Section::Balance Section -->
@@ -248,9 +249,10 @@
             <div class="standard-card__vignette"></div>
           </div>
         </div>
-        <!-- End::Standard Card -->      <!-- Section::Exchange Section -->
+        <!-- End::Standard Card -->      
+         <!-- Section::Exchange Section -->
         <!-- Start::Advance Card -->
-        <div class="advance-card advance-card--type-1-v1">
+        <!-- <div class="advance-card advance-card--type-1-v1">
           <div class="advance-card__title">
             <h6 class="advance-card__title-text">Exchange</h6>
             <img src="{% static 'assets/media/images/icons/exchange-white.svg' %}" alt="" class="advance-card__title-icon">
@@ -324,8 +326,9 @@
             </div>
           </div>
           <button class="advance-card__button btn btn-primary btn-pill">Exchange</button>
-        </div>
-        <!-- End::Advance Card -->      <!-- Section::Overall Growth Section -->
+        </div> -->
+        <!-- End::Advance Card -->     
+          <!-- Section::Overall Growth Section -->
         <!-- Start::Complete Card -->
         <div class="complete-card complete-card--type-2-v1">
           <div class="complete-card__head">
@@ -544,6 +547,53 @@
       </div>    
     </div>
   </div>
+<div class="container"> <canvas id="tickerChart" width="800" height="400"></canvas></div>
+
+  <script>
+    async function fetchData() {
+        try {
+          const response = await fetch('/dashboard/api/tickers/');
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    }
+
+    async function plotChart() {
+        const data = await fetchData();
+        if (!data) return;
+
+        const labels = data.map(item => item.symbol);
+        const prices = data.map(item => parseFloat(item.price));
+
+        const ctx = document.getElementById('tickerChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Ticker Prices',
+                    data: prices,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+    
+
+    plotChart();
+</script>
 
   {% block jsx %}{% endblock %}
   {% block js %}

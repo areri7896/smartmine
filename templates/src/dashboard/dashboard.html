@@ -26,6 +26,7 @@
     <div class="container container--dashboard">
       <div class="dashboard__group">
         <!-- Section::Balance Section -->
+
         <!-- Start::Complete Card -->
         <div class="complete-card complete-card--type-1-v1">
           <div class="complete-card__balance">
@@ -437,6 +438,7 @@
         <!-- End::Complete Card -->      <!-- Section::Assets Carousel Section -->
         <div class="assets">
           <div class="assets__carousel">          
+      {% for ticker in tickers %}
             <div class="standard-card standard-card--type-3-v1 assets__item">
               <div class="container">
                 <div class="standard-card__content">
@@ -451,15 +453,17 @@
                     <p class="standard-card__content-value text-bullish">2.11%</p>
                   </div>
                   <div class="standard-card__content-desc">
-                    <p class="standard-card__content-desc-currency">Bitcoin</p>
+                    <p class="standard-card__content-desc-currency"> {{ ticker.symbol }} </p>
                     <div class="standard-card__content-desc-prices">
-                      <p class="standard-card__content-desc-price">USD 53,260.20</p>
-                      <p class="standard-card__content-desc-token">BTC</p>
+                      <p class="standard-card__content-desc-price">USD  {{ ticker.price }} </p>
+                      <p class="standard-card__content-desc-token">{{ ticker.symbol }}</p>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            {% endfor %}
+<!--
             <div class="standard-card standard-card--type-3-v1 assets__item">
               <div class="container">
                 <div class="standard-card__content">
@@ -529,6 +533,7 @@
                 </div>
               </div>
             </div>     
+            -->
           </div>
           <div class="slick__pagination">
             <div class="assets-carousel__arrows">

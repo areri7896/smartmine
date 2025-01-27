@@ -23,25 +23,29 @@
       <div class="wallet-group">
         <div class="wallet-group--left">
           <!-- Start::Standard Card -->
+          {% for asset in extracted_data %}
           <div class="standard-card standard-card--type-6-v1">
             <div class="container">
               <div class="standard-card__content">
                 <div class="standard-card__content-head">
                   <div class="standard-card__content-currency">
                     <img src="{% static 'assets/media/images/icons/Bitcoin.svg' %}" alt="" class="standard-card__content-currency-icon">
-                    <p class="standard-card__content-currency-name">BTC</p>
+                    <p class="standard-card__content-currency-name">{{ asset.asset }}</p>
                   </div>
                   <p class="standard-card__content-percentage text-bullish">0.25%</p>
                 </div>
-                <p class="standard-card__content-price-1">0.2133214214</p>
-                <p class="standard-card__content-price-2">3,230.98 USD</p>
+                <p class="standard-card__content-price-1">{{ asset.free }}</p>
+                <p class="standard-card__content-price-2">{{ asset.locked }}USD</p>
                 <div class="standard-card__content-chart-wrapper">
                   <div id="standard-card__content-chart-7" class="standard-card__content-chart-render"></div>
                 </div>
               </div>
             </div>
           </div>
-          <!-- End::Standard Card -->        <!-- Start::Standard Card -->
+          {% endfor %}
+          
+          End::Standard Card        <!-- Start::Standard Card -->
+          <!--
           <div class="standard-card standard-card--type-6-v2">
             <div class="container">
               <div class="standard-card__content">
@@ -59,9 +63,9 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div>-->
           <!-- End::Standard Card -->        <!-- Start::Standard Card -->
-          <div class="standard-card standard-card--type-6-v2">
+          <!--<div class="standard-card standard-card--type-6-v2">
             <div class="container">
               <div class="standard-card__content">
                 <div class="standard-card__content-head">
@@ -78,9 +82,10 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div>-->
           <!-- End::Standard Card -->
           <!-- Start::Standard Card -->
+           <!--
           <div class="standard-card standard-card--type-6-v3">
             <div class="container">
               <div class="standard-card__content">
@@ -96,7 +101,7 @@
                 </button>
               </div>
             </div>
-          </div>
+          </div> -->
           <!-- End::Standard Card -->      </div>
         <div class="wallet-group--right">
           <!-- Start::Advance Card -->

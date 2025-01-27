@@ -1,897 +1,1313 @@
+{% extends 'src/Dashboard/basic.html' %} {% load static %}
+<title>{% block title %}Exchange {% endblock %}</title>
 
-{% extends 'src/Dashboard/basic.html' %}
-{% load static %}
-  <title>{% block title %}Exchange {% endblock %}</title>
+{% block css_links %}
+<link
+  href="{% static 'assets/media/images/icons/logo.svg' %}"
+  rel="shortcut icon"
+  type="image/x-icon"
+/>
 
-  {% block css_links %}
-  <link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+<!-- Start::Global Styles (used by all pages) -->
+<link
+  href="{% static 'assets/css/styles.bundle.css' %}"
+  rel="stylesheet"
+  type="text/css"
+/>
+<!-- End::Global Styles -->
+<!-- Start::Plugins (used by this page) -->
+<link
+  href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}"
+  rel="stylesheet"
+  type="text/css"
+/>
+<!-- End::Plugins -->
+<!-- Start::Page Styles (used by this page) -->
+<link
+  href="{% static 'assets/css/pages/exchange-v1.css' %}"
+  rel="stylesheet"
+  type="text/css"
+/>
+<!-- End::Page Styles -->
+{% endblock %} {% block content %}
 
-  <!-- Start::Global Styles (used by all pages) -->
-  <link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
-  <!-- End::Global Styles -->
-  <!-- Start::Plugins (used by this page) -->
-  <link href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}" rel="stylesheet" type="text/css" />
-  <!-- End::Plugins -->
-  <!-- Start::Page Styles (used by this page) -->
-  <link href="{% static 'assets/css/pages/exchange-v1.css' %}" rel="stylesheet" type="text/css" />
-  <!-- End::Page Styles -->
-  {% endblock %}
+<div class="container container--dashboard container--dashboard--exchange-v1">
+  <div class="dashboard__group dashboard__group--exchange-v1">
+    <div class="dashboard__group-left">
+      <!-- Section::Crypto Card Info Section -->
+      <!-- Start::Standard Card -->
 
-
-    {% block content %}
-    
-    <div class="container container--dashboard container--dashboard--exchange-v1">
-      <div class="dashboard__group dashboard__group--exchange-v1">
-        <div class="dashboard__group-left">
-          <!-- Section::Crypto Card Info Section -->
-          <!-- Start::Standard Card -->
-          <div class="standard-card standard-card--type-8-v2">
-            <div class="standard-card__container">
-              <div class="standard-card__items">
-                <div class="standard-card__item standard-card__item--1">
-                  <div class="standard-card__item-left">
-                    <img src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="" class="standard-card__item-image">
-                    <div class="standard-card__item-desc">
-                      <p class="fb-regular standard-card__item-title">Bitcoin</p> 
-                      <p class="fd-sm fd-sm--bold standard-card__item-crypto">BTC/USD</p> 
+      <div class="standard-card standard-card--type-8-v2">
+        <div class="standard-card__container">
+          <div class="standard-card__items">
+            <div class="standard-card__item standard-card__item--1">
+              <div class="standard-card__item-left">
+                <img
+                  src="{% static 'assets/media/images/icons/logo-btc.svg' %}"
+                  alt=""
+                  class="standard-card__item-image"
+                />
+                <div class="standard-card__item-desc">
+                  <p class="fb-regular standard-card__item-title">Bitcoin</p>
+                  <p class="fd-sm fd-sm--bold standard-card__item-crypto">
+                    BTC/USD
+                  </p>
+                </div>
+                <img
+                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+                  alt=""
+                  class="standard-card__item-arrow"
+                />
+              </div>
+              <div class="standard-card__item-collapse">
+                <div class="item-collapse__group-1">
+                  <div class="item-collapse__title">
+                    <p class="fb-sm item-collapse__title-text">24h change</p>
+                    <div class="item-collapse__title-influsion">
+                      <img
+                        src="{% static 'assets/media/images/icons/arrow-bullish.svg' %}"
+                        alt=""
+                        class="item-collapse__title-influsion-icon"
+                      />
+                      <p
+                        class="fb-regular fb-regular--bold item-collapse__title-influsion-value text-bullish"
+                      >
+                        2.11%
+                      </p>
                     </div>
-                    <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="" class="standard-card__item-arrow">
                   </div>
-                  <div class="standard-card__item-collapse">
-                    <div class="item-collapse__group-1">
-                      <div class="item-collapse__title">
-                        <p class="fb-sm item-collapse__title-text">24h change</p>
-                        <div class="item-collapse__title-influsion">
-                          <img src="{% static 'assets/media/images/icons/arrow-bullish.svg' %}" alt="" class="item-collapse__title-influsion-icon">
-                          <p class="fb-regular fb-regular--bold item-collapse__title-influsion-value text-bullish">2.11%</p>
-                        </div>
-                      </div>
-                      <div class="item-collapse__chart-wrapper">
-                        <div id="item-collapse__chart-line-2" class="item-collapse__chart-render"></div>
-                      </div>
-                    </div>
-                    <div class="item-collapse__group-2">
-                      <p class="fb-sm item-collapse__price">Last Price: <span class="item-collapse__price-value text-bullish">18432.320</span></p>
-                      <p class="fb-sm item-collapse__price">24 h Low: <span class="item-collapse__price-value text-bearish">18432.320</span></p>
-                    </div>
+                  <div class="item-collapse__chart-wrapper">
+                    <div
+                      id="item-collapse__chart-line-2"
+                      class="item-collapse__chart-render"
+                    ></div>
                   </div>
                 </div>
-                <div class="standard-card__item standard-card__item--2">
-                  <div class="standard-card__item-left">
-                    <p class="fb-regular standard-card__item-title">24h Change</p>
-                    <div class="standard-card__item-influsion">
-                      <img src="{% static 'assets/media/images/icons/arrow-bullish.svg' %}" alt="" class="standard-card__item-influsion-icon">
-                      <p class="fd-sm fd-sm--bold standard-card__item-influsion-value text-bullish">0.53%</p>
-                    </div>
-                  </div>
-                  <div class="standard-card__item-chart-wrapper">
-                    <div id="standard-card__item-line-2" class="standard-card__item-chart-render"></div>
-                  </div>
-                </div>
-                <div class="standard-card__item standard-card__item--3">
-                  <p class="fb-regular standard-card__item-title">Last Price</p>
-                  <p class="fd-sm fd-sm--bold standard-card__item-value">18372.595198 USD</p> 
-                </div>
-                <div class="standard-card__item standard-card__item--4">
-                  <p class="fb-regular standard-card__item-title">24h Low</p>
-                  <p class="fd-sm fd-sm--bold standard-card__item-value">18372.595198 USD</p> 
+                <div class="item-collapse__group-2">
+                  <p class="fb-sm item-collapse__price">
+                    Last Price:
+                    <span class="item-collapse__price-value text-bullish"
+                      >18432.320</span
+                    >
+                  </p>
+                  <p class="fb-sm item-collapse__price">
+                    24 h Low:
+                    <span class="item-collapse__price-value text-bearish"
+                      >18432.320</span
+                    >
+                  </p>
                 </div>
               </div>
             </div>
-          </div>
-          <!-- End::Standard Card -->        <!-- Section::Candlestick Chart Section -->
-          <!-- Start::Complete Card -->
-          <div class="complete-card complete-card--type-3">
-            <div class="complete-card__head">
-              <div class="complete-card__head-title-wrapper">
-                <h5 class="complete-card__head-title">BTC/ USD</h5>
-                <div class="dropdown complete-card__dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-expanded="false">
-                    1 min
-                    <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="">
-                  </button>
-                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
-                    <li><a class="dropdown-item" href="#">1 min</a></li>
-                    <li><a class="dropdown-item" href="#">3 min</a></li>
-                    <li><a class="dropdown-item" href="#">30 min</a></li>
-                    <li><a class="dropdown-item" href="#">1 hour</a></li>
-                    <li><a class="dropdown-item" href="#">24 hour</a></li>
-                    <li><a class="dropdown-item" href="#">1 day</a></li>
-                    <li><a class="dropdown-item" href="#">1 week</a></li>
-                  </ul>
+            {{ df }}
+            <div class="standard-card__item standard-card__item--2">
+              <div class="standard-card__item-left">
+                <p class="fb-regular standard-card__item-title">24h Change</p>
+                <div class="standard-card__item-influsion">
+                  <img
+                    src="{% static 'assets/media/images/icons/arrow-bullish.svg' %}"
+                    alt=""
+                    class="standard-card__item-influsion-icon"
+                  />
+                  <p
+                    class="fd-sm fd-sm--bold standard-card__item-influsion-value text-bullish"
+                  >
+                    0.53%
+                  </p>
                 </div>
               </div>
-              <ul class="complete-card__head-tabs" id="pills-tab" role="tablist">
-                <li class="complete-card__head-tab">
-                  <button class="fb-regular fb-regular--bold complete-card__head-tab-text active" id="chart-price-2-tab" data-bs-toggle="pill" data-bs-target="#chart-price-2" type="button" role="tab" aria-controls="chart-price-2" aria-selected="true">Price</button>
+              <div class="standard-card__item-chart-wrapper">
+                <div
+                  id="standard-card__item-line-2"
+                  class="standard-card__item-chart-render"
+                ></div>
+              </div>
+            </div>
+            <div class="standard-card__item standard-card__item--3">
+              <p class="fb-regular standard-card__item-title">Last Price</p>
+              <p class="fd-sm fd-sm--bold standard-card__item-value">
+                18372.595198 USD
+              </p>
+            </div>
+            <div class="standard-card__item standard-card__item--4">
+              <p class="fb-regular standard-card__item-title">24h Low</p>
+              <p class="fd-sm fd-sm--bold standard-card__item-value">
+                18372.595198 USD
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End::Standard Card -->
+      <!-- Section::Candlestick Chart Section -->
+      <!-- Start::Complete Card -->
+      <div class="complete-card complete-card--type-3">
+        <div class="complete-card__head">
+          <div class="complete-card__head-title-wrapper">
+            <h5 class="complete-card__head-title">BTC/ USD</h5>
+            <div class="dropdown complete-card__dropdown">
+              <button
+                class="btn btn-secondary dropdown-toggle"
+                type="button"
+                id="dropdownMenuButton3"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                1 min
+                <img
+                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+                  alt=""
+                />
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
+                <li><a class="dropdown-item" href="#">1 min</a></li>
+                <li><a class="dropdown-item" href="#">3 min</a></li>
+                <li><a class="dropdown-item" href="#">30 min</a></li>
+                <li><a class="dropdown-item" href="#">1 hour</a></li>
+                <li><a class="dropdown-item" href="#">24 hour</a></li>
+                <li><a class="dropdown-item" href="#">1 day</a></li>
+                <li><a class="dropdown-item" href="#">1 week</a></li>
+              </ul>
+            </div>
+          </div>
+          <ul class="complete-card__head-tabs" id="pills-tab" role="tablist">
+            <li class="complete-card__head-tab">
+              <button
+                class="fb-regular fb-regular--bold complete-card__head-tab-text active"
+                id="chart-price-2-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#chart-price-2"
+                type="button"
+                role="tab"
+                aria-controls="chart-price-2"
+                aria-selected="true"
+              >
+                Price
+              </button>
+            </li>
+            <li class="complete-card__head-tab">
+              <button
+                class="fb-regular fb-regular--bold complete-card__head-tab-text"
+                id="chart-depth-2-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#chart-depth-2"
+                type="button"
+                role="tab"
+                aria-controls="chart-depth-2"
+                aria-selected="false"
+              >
+                Depth
+              </button>
+            </li>
+          </ul>
+          <div class="complete-card__head-values">
+            <p class="fb-sm complete-card__head-menu">
+              Open:<span class="complete-card__head-value">18432.320</span>
+            </p>
+            <p class="fb-sm complete-card__head-menu">
+              High:<span class="complete-card__head-value">18432.320</span>
+            </p>
+            <p class="fb-sm complete-card__head-menu">
+              Low:<span class="complete-card__head-value">18432.320</span>
+            </p>
+            <p class="fb-sm complete-card__head-menu">
+              Close:<span class="complete-card__head-value">18432.320</span>
+            </p>
+          </div>
+          <div class="complete-card__head-dropdown">
+            <div class="dropdown complete-card__dropdown">
+              <button
+                class="btn btn-secondary dropdown-toggle"
+                type="button"
+                id="dropdownMenuButton4"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                Price
+                <img
+                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+                  alt=""
+                />
+              </button>
+              <ul
+                class="dropdown-menu"
+                aria-labelledby="dropdownMenuButton4"
+                id="pills-tab"
+                role="tablist"
+              >
+                <li>
+                  <a
+                    class="dropdown-item active"
+                    href="#"
+                    id="chart-price-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#chart-price"
+                    role="tab"
+                    aria-controls="chart-price"
+                    aria-selected="true"
+                    >Price</a
+                  >
                 </li>
-                <li class="complete-card__head-tab">
-                  <button class="fb-regular fb-regular--bold complete-card__head-tab-text" id="chart-depth-2-tab" data-bs-toggle="pill" data-bs-target="#chart-depth-2" type="button" role="tab" aria-controls="chart-depth-2" aria-selected="false">Depth</button>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="#"
+                    id="chart-depth-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#chart-depth"
+                    role="tab"
+                    aria-controls="chart-depth"
+                    aria-selected="false"
+                    >Depth</a
+                  >
                 </li>
               </ul>
-              <div class="complete-card__head-values">
-                <p class="fb-sm complete-card__head-menu">Open:<span class="complete-card__head-value">18432.320</span></p>
-                <p class="fb-sm complete-card__head-menu">High:<span class="complete-card__head-value">18432.320</span></p>
-                <p class="fb-sm complete-card__head-menu">Low:<span class="complete-card__head-value">18432.320</span></p>
-                <p class="fb-sm complete-card__head-menu">Close:<span class="complete-card__head-value">18432.320</span></p>
-              </div>
-              <div class="complete-card__head-dropdown">
-                <div class="dropdown complete-card__dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton4" data-bs-toggle="dropdown" aria-expanded="false">
-                    Price
-                    <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="">
-                  </button>
-                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton4" id="pills-tab" role="tablist">
-                    <li><a class="dropdown-item active" href="#" id="chart-price-tab" data-bs-toggle="pill" data-bs-target="#chart-price" role="tab" aria-controls="chart-price" aria-selected="true">Price</a></li>
-                    <li><a class="dropdown-item" href="#" id="chart-depth-tab" data-bs-toggle="pill" data-bs-target="#chart-depth" role="tab" aria-controls="chart-depth" aria-selected="false">Depth</a></li>
-                  </ul>
-                </div>
-                <div class="dropdown complete-card__dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton5" data-bs-toggle="dropdown" aria-expanded="false">
-                    1 min
-                    <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="">
-                  </button>
-                  <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton5" id="pills-tab" role="tablist">
-                    <li><a class="dropdown-item" href="#">1 min</a></li>
-                    <li><a class="dropdown-item" href="#">3 min</a></li>
-                    <li><a class="dropdown-item" href="#">30 min</a></li>
-                    <li><a class="dropdown-item" href="#">1 hour</a></li>
-                    <li><a class="dropdown-item" href="#">24 hour</a></li>
-                    <li><a class="dropdown-item" href="#">1 day</a></li>
-                    <li><a class="dropdown-item" href="#">1 week</a></li>
-                  </ul>
-                </div>
-              </div>
             </div>
-            <div class="tab-content tab-content--desktop">
-              <div class="tab-pane fade show active" id="chart-price" role="tabpanel" aria-labelledby="chart-price-tab">
-                <div class="complete-card__chart-wrapper">
-                  <div id="complete-card__chart-candlestick-1" class="complete-card__chart-render"></div>
-                  <img src="{% static 'assets/media/images/background-bar.png' %}" alt="" class="complete-card__chart-candlestick-column-bar">
-                  <div class="complete-card__chart-area-vignette--left"></div>
-                  <div class="complete-card__chart-area-vignette--top"></div>
-                  <div class="complete-card__chart-area-vignette--right"></div>
-                </div>
-              </div>
-          
-              <div class="tab-pane fade" id="chart-depth" role="tabpanel" aria-labelledby="chart-depth-tab">
-                <div class="complete-card__chart-wrapper">
-                  <div id="complete-card__chart-depth-1" class="complete-card__chart-render"></div>
-                </div>
-              </div>
+            <div class="dropdown complete-card__dropdown">
+              <button
+                class="btn btn-secondary dropdown-toggle"
+                type="button"
+                id="dropdownMenuButton5"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                1 min
+                <img
+                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+                  alt=""
+                />
+              </button>
+              <ul
+                class="dropdown-menu"
+                aria-labelledby="dropdownMenuButton5"
+                id="pills-tab"
+                role="tablist"
+              >
+                <li><a class="dropdown-item" href="#">1 min</a></li>
+                <li><a class="dropdown-item" href="#">3 min</a></li>
+                <li><a class="dropdown-item" href="#">30 min</a></li>
+                <li><a class="dropdown-item" href="#">1 hour</a></li>
+                <li><a class="dropdown-item" href="#">24 hour</a></li>
+                <li><a class="dropdown-item" href="#">1 day</a></li>
+                <li><a class="dropdown-item" href="#">1 week</a></li>
+              </ul>
             </div>
-          
-            <div class="tab-content tab-content--mobile">
-              <div class="tab-pane fade show active" id="chart-price-2" role="tabpanel" aria-labelledby="chart-price-2-tab">
-                <div class="complete-card__chart-wrapper">
-                  <div id="complete-card__chart-candlestick-2" class="complete-card__chart-render"></div>
-                  <img src="{% static 'assets/media/images/background-bar.png' %}" alt="" class="complete-card__chart-candlestick-column-bar">
-                  <div class="complete-card__chart-area-vignette--left"></div>
-                  <div class="complete-card__chart-area-vignette--top"></div>
-                  <div class="complete-card__chart-area-vignette--right"></div>
-                </div>
+          </div>
+        </div>
+        <div class="tab-content tab-content--desktop">
+          <div
+            class="tab-pane fade show active"
+            id="chart-price"
+            role="tabpanel"
+            aria-labelledby="chart-price-tab"
+          >
+            <div class="complete-card__chart-wrapper">
+              <div
+                id="complete-card__chart-candlestick-1"
+                class="complete-card__chart-render"
+              ></div>
+              <img
+                src="{% static 'assets/media/images/background-bar.png' %}"
+                alt=""
+                class="complete-card__chart-candlestick-column-bar"
+              />
+              <div class="complete-card__chart-area-vignette--left"></div>
+              <div class="complete-card__chart-area-vignette--top"></div>
+              <div class="complete-card__chart-area-vignette--right"></div>
+            </div>
+          </div>
+
+          <div
+            class="tab-pane fade"
+            id="chart-depth"
+            role="tabpanel"
+            aria-labelledby="chart-depth-tab"
+          >
+            <div class="complete-card__chart-wrapper">
+              <div
+                id="complete-card__chart-depth-1"
+                class="complete-card__chart-render"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content tab-content--mobile">
+          <div
+            class="tab-pane fade show active"
+            id="chart-price-2"
+            role="tabpanel"
+            aria-labelledby="chart-price-2-tab"
+          >
+            <div class="complete-card__chart-wrapper">
+              <div
+                id="complete-card__chart-candlestick-2"
+                class="complete-card__chart-render"
+              ></div>
+              <img
+                src="{% static 'assets/media/images/background-bar.png' %}"
+                alt=""
+                class="complete-card__chart-candlestick-column-bar"
+              />
+              <div class="complete-card__chart-area-vignette--left"></div>
+              <div class="complete-card__chart-area-vignette--top"></div>
+              <div class="complete-card__chart-area-vignette--right"></div>
+            </div>
+          </div>
+
+          <div
+            class="tab-pane fade"
+            id="chart-depth-2"
+            role="tabpanel"
+            aria-labelledby="chart-depth-2-tab"
+          >
+            <div class="complete-card__chart-wrapper">
+              <div
+                id="complete-card__chart-depth-2"
+                class="complete-card__chart-render"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End::Complete Card -->
+      <!-- Section::Market Trades Table Section -->
+      <!-- Start::Table Section -->
+      <div class="table-wrapper table--type-3">
+        <div class="table__title">
+          <h6 class="table__title-text">Market Trades</h6>
+          <nav class="navbar">
+            <div class="table__title-tabs" id="pills-tab" role="tablist">
+              <li class="nav-item">
+                <p
+                  class="fb-regular fb-regular--bold table__title-tab active"
+                  id="pills-market-trades-open-order-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-market-trades-open-order"
+                  role="tab"
+                  aria-controls="pills-market-trades-open-order"
+                  aria-selected="true"
+                >
+                  Open Order
+                </p>
+              </li>
+              <li class="nav-item">
+                <p
+                  class="fb-regular fb-regular--bold table__title-tab"
+                  id="pills-market-trades-order-history-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-market-trades-order-history"
+                  role="tab"
+                  aria-controls="pills-market-trades-order-history"
+                  aria-selected="false"
+                >
+                  Order History
+                </p>
+              </li>
+              <li class="nav-item">
+                <p
+                  class="fb-regular fb-regular--bold table__title-tab"
+                  id="pills-market-trades-order-book-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-market-trades-order-book"
+                  role="tab"
+                  aria-controls="pills-market-trades-order-book"
+                  aria-selected="false"
+                >
+                  Order Book
+                </p>
+              </li>
+            </div>
+          </nav>
+          <div class="dropdown table__dropdown">
+            <button
+              class="btn btn-secondary dropdown-toggle"
+              type="button"
+              id="dropdownMenuButton1"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Open Orders
+              <img
+                src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+                alt=""
+              />
+            </button>
+            <ul
+              class="dropdown-menu"
+              aria-labelledby="dropdownMenuButton1"
+              id="pills-tab"
+              role="tablist"
+            >
+              <li>
+                <a
+                  class="dropdown-item active"
+                  href="#"
+                  id="pills-market-trades-open-order-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-market-trades-open-order"
+                  role="tab"
+                  aria-controls="pills-market-trades-open-order"
+                  aria-selected="true"
+                  >Open Order</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  id="pills-market-trades-order-history-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-market-trades-order-history"
+                  role="tab"
+                  aria-controls="pills-market-trades-order-history"
+                  aria-selected="false"
+                  >Order History</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  id="pills-market-trades-order-book-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-market-trades-order-book"
+                  role="tab"
+                  aria-controls="pills-market-trades-order-book"
+                  aria-selected="false"
+                  >Order Book</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="tab-content">
+          <div
+            class="tab-pane fade show active"
+            id="pills-market-trades-open-order"
+            role="tabpanel"
+            aria-labelledby="pills-market-trades-open-order-tab"
+          >
+            <div class="table-container">
+              <table class="table table-content">
+                <thead>
+                  <tr>
+                    <th class="fb-regular table__head">Time</th>
+                    <th class="fb-regular table__head">Price (ETH)</th>
+                    <th class="fb-regular table__head">Amount (BTC)</th>
+                    <th class="fb-regular table__head">Total (ETH)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bearish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bearish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bearish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bearish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div
+            class="tab-pane fade"
+            id="pills-market-trades-order-history"
+            role="tabpanel"
+            aria-labelledby="pills-market-trades-order-history-tab"
+          >
+            <div class="table-container">
+              <table class="table table-content">
+                <thead>
+                  <tr>
+                    <th class="fb-regular table__head">Time</th>
+                    <th class="fb-regular table__head">Price (ETH)</th>
+                    <th class="fb-regular table__head">Amount (BTC)</th>
+                    <th class="fb-regular table__head">Total (ETH)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bearish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bearish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bearish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bearish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div
+            class="tab-pane fade"
+            id="pills-market-trades-order-book"
+            role="tabpanel"
+            aria-labelledby="pills-market-trades-order-book-tab"
+          >
+            <div class="table-container">
+              <table class="table table-content">
+                <thead>
+                  <tr>
+                    <th class="fb-regular table__head">Time</th>
+                    <th class="fb-regular table__head">Price (ETH)</th>
+                    <th class="fb-regular table__head">Amount (BTC)</th>
+                    <th class="fb-regular table__head">Total (ETH)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bearish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bearish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bearish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bearish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p class="fb-regular">12:34:44</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular text-bullish">243546.12443536</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">12425.21435364</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular">24324.320214535</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="table__vignette"></div>
+      </div>
+      <!-- End::Table Section -->
+    </div>
+    <div class="dashboard__group-right">
+      <!-- Section::Crypto Exchange Section -->
+      <!-- Start::Advance Card -->
+      <div class="advance-card advance-card--type-2">
+        <div class="advance-card__title">
+          <h6 class="advance-card__title-text">Bitcoin</h6>
+          <img
+            src="{% static 'assets/media/images/icons/logo-btc.svg' %}"
+            alt=""
+            class="advance-card__title-image"
+          />
+        </div>
+        <div class="advance-card__form">
+          <div class="advance-card__form-title">
+            <p class="advance-card__form-title-text">Current Balance</p>
+          </div>
+          <div class="forms-purchase forms-purchase--advance-card">
+            <div class="forms-group forms-group--value">
+              <input
+                type="number"
+                min="0"
+                value="4000"
+                class="form-control forms-purchase__value"
+              />
+            </div>
+            <div
+              class="forms-group forms-group--purchase js-forms-group--purchase"
+              id="custom-select-purchase3"
+            >
+              <div class="forms-group__items selected" data-selected="btc">
+                <p class="fg-items__value">BTC</p>
               </div>
-          
-              <div class="tab-pane fade" id="chart-depth-2" role="tabpanel" aria-labelledby="chart-depth-2-tab">
-                <div class="complete-card__chart-wrapper">
-                  <div id="complete-card__chart-depth-2" class="complete-card__chart-render"></div>
+              <div class="forms-group__dropdown js-forms-group__dropdown">
+                <div class="forms-group__items" data-selected="usd">
+                  <p class="fg-items__value">USD</p>
+                </div>
+                <div class="forms-group__items active" data-selected="btc">
+                  <p class="fg-items__value">BTC</p>
+                </div>
+                <div class="forms-group__items" data-selected="eth">
+                  <p class="fg-items__value">ETH</p>
+                </div>
+                <div class="forms-group__items" data-selected="bnb">
+                  <p class="fg-items__value">BNB</p>
                 </div>
               </div>
             </div>
           </div>
-          <!-- End::Complete Card -->        <!-- Section::Market Trades Table Section -->
-          <!-- Start::Table Section -->
-          <div class="table-wrapper table--type-3">
-            <div class="table__title">
-              <h6 class="table__title-text">Market Trades</h6>
-              <nav class="navbar">
-                <div class="table__title-tabs" id="pills-tab" role="tablist">
-                  <li class="nav-item">
-                    <p class="fb-regular fb-regular--bold table__title-tab active" id="pills-market-trades-open-order-tab" data-bs-toggle="pill" data-bs-target="#pills-market-trades-open-order" role="tab" aria-controls="pills-market-trades-open-order" aria-selected="true">Open Order</p>
-                  </li>
-                  <li class="nav-item">
-                    <p class="fb-regular fb-regular--bold table__title-tab" id="pills-market-trades-order-history-tab" data-bs-toggle="pill" data-bs-target="#pills-market-trades-order-history" role="tab" aria-controls="pills-market-trades-order-history" aria-selected="false">Order History</p>
-                  </li>
-                  <li class="nav-item">
-                    <p class="fb-regular fb-regular--bold table__title-tab" id="pills-market-trades-order-book-tab" data-bs-toggle="pill" data-bs-target="#pills-market-trades-order-book" role="tab" aria-controls="pills-market-trades-order-book" aria-selected="false">Order Book</p>
-                  </li>
-                </div>
-              </nav>
-              <div class="dropdown table__dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                  Open Orders
-                  <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="">
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" id="pills-tab" role="tablist">
-                  <li><a class="dropdown-item active" href="#" id="pills-market-trades-open-order-tab" data-bs-toggle="pill" data-bs-target="#pills-market-trades-open-order" role="tab" aria-controls="pills-market-trades-open-order" aria-selected="true">Open Order</a></li>
-                  <li><a class="dropdown-item" href="#" id="pills-market-trades-order-history-tab" data-bs-toggle="pill" data-bs-target="#pills-market-trades-order-history" role="tab" aria-controls="pills-market-trades-order-history" aria-selected="false">Order History</a></li>
-                  <li><a class="dropdown-item" href="#" id="pills-market-trades-order-book-tab" data-bs-toggle="pill" data-bs-target="#pills-market-trades-order-book" role="tab" aria-controls="pills-market-trades-order-book" aria-selected="false">Order Book</a></li>
-                </ul>
-              </div>
+        </div>
+        <div class="advance-card__form">
+          <div class="advance-card__form-title">
+            <p class="advance-card__form-title-text">Volume (24h)</p>
+            <div class="advance-card__form-title-percent">
+              <img
+                src="{% static 'assets/media/images/icons/arrow-bullish.svg' %}"
+                alt=""
+                class="advance-card__form-title-percent-image"
+              />
+              <p class="advance-card__form-title-percent-value text-bullish">
+                2.36%
+              </p>
             </div>
-            <div class="tab-content">
-              <div class="tab-pane fade show active" id="pills-market-trades-open-order" role="tabpanel" aria-labelledby="pills-market-trades-open-order-tab">
-                <div class="table-container">
-                  <table class="table table-content">
-                    <thead>
-                      <tr>
-                        <th class="fb-regular table__head">Time</th>
-                        <th class="fb-regular table__head">Price (ETH)</th>
-                        <th class="fb-regular table__head">Amount (BTC)</th>
-                        <th class="fb-regular table__head">Total (ETH)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bearish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bearish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bearish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bearish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <div class="tab-pane fade" id="pills-market-trades-order-history" role="tabpanel" aria-labelledby="pills-market-trades-order-history-tab">
-                <div class="table-container">
-                  <table class="table table-content">
-                    <thead>
-                      <tr>
-                        <th class="fb-regular table__head">Time</th>
-                        <th class="fb-regular table__head">Price (ETH)</th>
-                        <th class="fb-regular table__head">Amount (BTC)</th>
-                        <th class="fb-regular table__head">Total (ETH)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bearish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bearish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bearish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bearish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <div class="tab-pane fade" id="pills-market-trades-order-book" role="tabpanel" aria-labelledby="pills-market-trades-order-book-tab">
-                <div class="table-container">
-                  <table class="table table-content">
-                    <thead>
-                      <tr>
-                        <th class="fb-regular table__head">Time</th>
-                        <th class="fb-regular table__head">Price (ETH)</th>
-                        <th class="fb-regular table__head">Amount (BTC)</th>
-                        <th class="fb-regular table__head">Total (ETH)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bearish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bearish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bearish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bearish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <p class="fb-regular">12:34:44</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular text-bullish">243546.12443536</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">12425.21435364</p>
-                        </td>
-                        <td>
-                          <p class="fb-regular">24324.320214535</p>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-            <div class="table__vignette"></div>
           </div>
-          <!-- End::Table Section -->      </div>
-        <div class="dashboard__group-right">
-          <!-- Section::Crypto Exchange Section -->
-          <!-- Start::Advance Card -->
-          <div class="advance-card advance-card--type-2">
-            <div class="advance-card__title">
-              <h6 class="advance-card__title-text">Bitcoin</h6>
-              <img src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="" class="advance-card__title-image">
+          <div class="forms-purchase forms-purchase--advance-card">
+            <div class="forms-group forms-group--value">
+              <input
+                type="number"
+                min="0"
+                value="4000"
+                class="form-control forms-purchase__value"
+              />
             </div>
-            <div class="advance-card__form">
-              <div class="advance-card__form-title">
-                <p class="advance-card__form-title-text">Current Balance</p>
+            <div
+              class="forms-group forms-group--purchase js-forms-group--purchase"
+              id="custom-select-purchase4"
+            >
+              <div class="forms-group__items selected" data-selected="usd">
+                <p class="fg-items__value">USD</p>
               </div>
-              <div class="forms-purchase forms-purchase--advance-card">
-                <div class="forms-group forms-group--value">
-                  <input type="number" min="0" value="4000" class="form-control forms-purchase__value">
+              <div class="forms-group__dropdown js-forms-group__dropdown">
+                <div class="forms-group__items active" data-selected="usd">
+                  <p class="fg-items__value">USD</p>
                 </div>
-                <div class="forms-group forms-group--purchase js-forms-group--purchase" id="custom-select-purchase3">
-                  <div class="forms-group__items selected" data-selected="btc">
-                    <p class="fg-items__value">BTC</p>
-                  </div>
-                  <div class="forms-group__dropdown js-forms-group__dropdown">
-                    <div class="forms-group__items" data-selected="usd">
-                      <p class="fg-items__value">USD</p>
-                    </div>
-                    <div class="forms-group__items active" data-selected="btc">
-                      <p class="fg-items__value">BTC</p>
-                    </div>
-                    <div class="forms-group__items" data-selected="eth">
-                      <p class="fg-items__value">ETH</p>
-                    </div>
-                    <div class="forms-group__items" data-selected="bnb">
-                      <p class="fg-items__value">BNB</p>
-                    </div>
-                  </div>
+                <div class="forms-group__items" data-selected="btc">
+                  <p class="fg-items__value">BTC</p>
+                </div>
+                <div class="forms-group__items" data-selected="eth">
+                  <p class="fg-items__value">ETH</p>
+                </div>
+                <div class="forms-group__items" data-selected="bnb">
+                  <p class="fg-items__value">BNB</p>
                 </div>
               </div>
             </div>
-            <div class="advance-card__form">
-              <div class="advance-card__form-title">
-                <p class="advance-card__form-title-text">Volume (24h)</p>
-                <div class="advance-card__form-title-percent">
-                  <img src="{% static 'assets/media/images/icons/arrow-bullish.svg' %}" alt="" class="advance-card__form-title-percent-image">
-                  <p class="advance-card__form-title-percent-value text-bullish">2.36%</p>
-                </div>
+          </div>
+        </div>
+        <div class="advance-card__payment">
+          <div class="advance-card__payment-title">
+            <p class="advance-card__payment-title-text">Payment Method</p>
+          </div>
+          <div
+            class="forms-group forms-select js-forms-select"
+            id="custom-select-form-1"
+          >
+            <div class="forms-group__items selected" data-selected="usd">
+              <img
+                class="fg-items__icon"
+                src="{% static 'assets/media/images/icons/usd.svg' %}"
+                alt=""
+              />
+              <p class="fg-items__value">Paywallet</p>
+            </div>
+            <img
+              class="forms-select__arrow-down"
+              src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+              alt=""
+            />
+            <div class="forms-group__dropdown js-forms-group__dropdown">
+              <div class="forms-group__items active" data-selected="usd">
+                <img
+                  class="fg-items__icon"
+                  src="{% static 'assets/media/images/icons/usd.svg' %}"
+                  alt=""
+                />
+                <p class="fg-items__value">Paywallet</p>
               </div>
-              <div class="forms-purchase forms-purchase--advance-card">
-                <div class="forms-group forms-group--value">
-                  <input type="number" min="0" value="4000" class="form-control forms-purchase__value">
-                </div>
-                <div class="forms-group forms-group--purchase js-forms-group--purchase" id="custom-select-purchase4">
-                  <div class="forms-group__items selected" data-selected="usd">
-                    <p class="fg-items__value">USD</p>
-                  </div>
-                  <div class="forms-group__dropdown js-forms-group__dropdown">
-                    <div class="forms-group__items active" data-selected="usd">
-                      <p class="fg-items__value">USD</p>
-                    </div>
-                    <div class="forms-group__items" data-selected="btc">
-                      <p class="fg-items__value">BTC</p>
-                    </div>
-                    <div class="forms-group__items" data-selected="eth">
-                      <p class="fg-items__value">ETH</p>
-                    </div>
-                    <div class="forms-group__items" data-selected="bnb">
-                      <p class="fg-items__value">BNB</p>
-                    </div>
-                  </div>
-                </div>
+              <div class="forms-group__items" data-selected="btc">
+                <img
+                  class="fg-items__icon"
+                  src="{% static 'assets/media/images/icons/logo-btc.svg' %}"
+                  alt=""
+                />
+                <p class="fg-items__value">BTC</p>
+              </div>
+              <div class="forms-group__items" data-selected="eth">
+                <img
+                  class="fg-items__icon"
+                  src="{% static 'assets/media/images/icons/logo-eth.svg' %}"
+                  alt=""
+                />
+                <p class="fg-items__value">ETH</p>
+              </div>
+              <div class="forms-group__items" data-selected="bnb">
+                <img
+                  class="fg-items__icon"
+                  src="{% static 'assets/media/images/icons/logo-bnb.svg' %}"
+                  alt=""
+                />
+                <p class="fg-items__value">BNB</p>
               </div>
             </div>
-            <div class="advance-card__payment">
-              <div class="advance-card__payment-title">
-                <p class="advance-card__payment-title-text">Payment Method</p>
+          </div>
+        </div>
+        <div class="advance-card__buttons">
+          <button class="btn btn-secondary advance-card__button button--green">
+            Buy
+          </button>
+          <button class="btn btn-secondary advance-card__button button--red">
+            Sell
+          </button>
+        </div>
+      </div>
+      <!-- End::Advance Card -->
+      <!-- Section::Crypto Exchange Section -->
+      <!-- Start::Advance Card -->
+      <div class="advance-card advance-card--type-1-v2">
+        <div class="advance-c ard__title">
+          <h6 class="advance-card__title-text">Exchange</h6>
+          <img
+            src="{% static 'assets/media/images/icons/exchange-white.svg' %}"
+            alt=""
+            class="advance-card__title-icon"
+          />
+        </div>
+        <div class="advance-card__price">
+          <div class="advance-card__price-crypto">
+            <p class="advance-card__price-crypto-value">1</p>
+            <p class="advance-card__price-crypto-name">BTC</p>
+          </div>
+          <img
+            src="{% static 'assets/media/images/icons/arrow-right-white.svg' %}"
+            alt=""
+            class="advance-card__price-arrow"
+          />
+          <div class="advance-card__price-currency">
+            <p class="advance-card__price-currency-value">53,260.20</p>
+            <p class="advance-card__price-currency-name">USD</p>
+          </div>
+        </div>
+        <div class="advance-card__forms-currency">
+          <div class="advance-card__forms-currency--get">
+            <p class="advance-card__forms-currency__title">Get</p>
+            <div class="forms-purchase forms-purchase--advance-card">
+              <div class="forms-group forms-group--value">
+                <input
+                  type="number"
+                  min="0"
+                  value="4000"
+                  class="form-control forms-purchase__value"
+                />
               </div>
-              <div class="forms-group forms-select js-forms-select" id="custom-select-form-1">
+              <div class="forms-purchase__line"></div>
+              <div
+                class="forms-group forms-group--purchase js-forms-group--purchase"
+                id="custom-select-purchase1"
+              >
                 <div class="forms-group__items selected" data-selected="usd">
-                  <img class="fg-items__icon" src="{% static 'assets/media/images/icons/usd.svg' %}" alt="">
-                  <p class="fg-items__value">Paywallet</p>
+                  <img
+                    class="fg-items__icon"
+                    src="{% static 'assets/media/images/icons/usd.svg' %}"
+                    alt=""
+                  />
+                  <p class="fg-items__value">USD</p>
                 </div>
-                <img class="forms-select__arrow-down" src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="">
+                <img
+                  class="forms-currency__icon-arrow-down"
+                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+                  alt=""
+                />
                 <div class="forms-group__dropdown js-forms-group__dropdown">
                   <div class="forms-group__items active" data-selected="usd">
-                    <img class="fg-items__icon" src="{% static 'assets/media/images/icons/usd.svg' %}" alt="">
-                    <p class="fg-items__value">Paywallet</p>
+                    <img
+                      class="fg-items__icon"
+                      src="{% static 'assets/media/images/icons/usd.svg' %}"
+                      alt=""
+                    />
+                    <p class="fg-items__value">USD</p>
                   </div>
                   <div class="forms-group__items" data-selected="btc">
-                    <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="">
+                    <img
+                      class="fg-items__icon"
+                      src="{% static 'assets/media/images/icons/logo-btc.svg' %}"
+                      alt=""
+                    />
                     <p class="fg-items__value">BTC</p>
                   </div>
                   <div class="forms-group__items" data-selected="eth">
-                    <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-eth.svg' %}" alt="">
+                    <img
+                      class="fg-items__icon"
+                      src="{% static 'assets/media/images/icons/logo-eth.svg' %}"
+                      alt=""
+                    />
                     <p class="fg-items__value">ETH</p>
                   </div>
                   <div class="forms-group__items" data-selected="bnb">
-                    <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-bnb.svg' %}" alt="">
+                    <img
+                      class="fg-items__icon"
+                      src="{% static 'assets/media/images/icons/logo-bnb.svg' %}"
+                      alt=""
+                    />
                     <p class="fg-items__value">BNB</p>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="advance-card__buttons">
-              <button class="btn btn-secondary advance-card__button button--green">Buy</button>
-              <button class="btn btn-secondary advance-card__button button--red">Sell</button>
-            </div>
           </div>
-          <!-- End::Advance Card -->        <!-- Section::Crypto Exchange Section -->
-          <!-- Start::Advance Card -->
-          <div class="advance-card advance-card--type-1-v2">
-            <div class="advance-c ard__title">
-              <h6 class="advance-card__title-text">Exchange</h6>
-              <img src="{% static 'assets/media/images/icons/exchange-white.svg' %}" alt="" class="advance-card__title-icon">
-            </div>
-            <div class="advance-card__price">
-              <div class="advance-card__price-crypto">
-                <p class="advance-card__price-crypto-value">1</p>
-                <p class="advance-card__price-crypto-name">BTC</p>
+          <div class="advance-card__forms-currency--pay">
+            <p class="advance-card__forms-currency__title">Pay</p>
+            <div class="forms-purchase forms-purchase--advance-card">
+              <div class="forms-group forms-group--value">
+                <input
+                  type="number"
+                  min="0"
+                  value="4000"
+                  class="form-control forms-purchase__value"
+                />
               </div>
-              <img src="{% static 'assets/media/images/icons/arrow-right-white.svg' %}" alt="" class="advance-card__price-arrow">
-              <div class="advance-card__price-currency">
-                <p class="advance-card__price-currency-value">53,260.20</p>
-                <p class="advance-card__price-currency-name">USD</p>
-              </div>
-            </div>
-            <div class="advance-card__forms-currency">
-              <div class="advance-card__forms-currency--get">
-                <p class="advance-card__forms-currency__title">Get</p>
-                <div class="forms-purchase forms-purchase--advance-card">
-                  <div class="forms-group forms-group--value">
-                    <input type="number" min="0" value="4000" class="form-control forms-purchase__value">
-                  </div>
-                  <div class="forms-purchase__line"></div>
-                  <div class="forms-group forms-group--purchase js-forms-group--purchase" id="custom-select-purchase1">
-                    <div class="forms-group__items selected" data-selected="usd">
-                      <img class="fg-items__icon" src="{% static 'assets/media/images/icons/usd.svg' %}" alt="">
-                      <p class="fg-items__value">USD</p>
-                    </div>
-                    <img class="forms-currency__icon-arrow-down" src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="">
-                    <div class="forms-group__dropdown js-forms-group__dropdown">
-                      <div class="forms-group__items active" data-selected="usd">
-                        <img class="fg-items__icon" src="{% static 'assets/media/images/icons/usd.svg' %}" alt="">
-                        <p class="fg-items__value">USD</p>
-                      </div>
-                      <div class="forms-group__items" data-selected="btc">
-                        <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="">
-                        <p class="fg-items__value">BTC</p>
-                      </div>
-                      <div class="forms-group__items" data-selected="eth">
-                        <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-eth.svg' %}" alt="">
-                        <p class="fg-items__value">ETH</p>
-                      </div>
-                      <div class="forms-group__items" data-selected="bnb">
-                        <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-bnb.svg' %}" alt="">
-                        <p class="fg-items__value">BNB</p>
-                      </div>
-                    </div>
-                  </div>
+              <div class="forms-purchase__line"></div>
+              <div
+                class="forms-group forms-group--purchase js-forms-group--purchase"
+                id="custom-select-purchase2"
+              >
+                <div class="forms-group__items selected" data-selected="usd">
+                  <img
+                    class="fg-items__icon"
+                    src="{% static 'assets/media/images/icons/logo-btc.svg' %}"
+                    alt=""
+                  />
+                  <p class="fg-items__value">BTC</p>
                 </div>
-              </div>
-              <div class="advance-card__forms-currency--pay">
-                <p class="advance-card__forms-currency__title">Pay</p>
-                <div class="forms-purchase forms-purchase--advance-card">
-                  <div class="forms-group forms-group--value">
-                    <input type="number" min="0" value="4000" class="form-control forms-purchase__value">
+                <img
+                  class="forms-currency__icon-arrow-down"
+                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+                  alt=""
+                />
+                <div class="forms-group__dropdown js-forms-group__dropdown">
+                  <div class="forms-group__items active" data-selected="btc">
+                    <img
+                      class="fg-items__icon"
+                      src="{% static 'assets/media/images/icons/logo-btc.svg' %}"
+                      alt=""
+                    />
+                    <p class="fg-items__value">BTC</p>
                   </div>
-                  <div class="forms-purchase__line"></div>
-                  <div class="forms-group forms-group--purchase js-forms-group--purchase" id="custom-select-purchase2">
-                    <div class="forms-group__items selected" data-selected="usd">
-                      <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="">
-                      <p class="fg-items__value">BTC</p>
-                    </div>
-                    <img class="forms-currency__icon-arrow-down" src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="">
-                    <div class="forms-group__dropdown js-forms-group__dropdown">
-                      <div class="forms-group__items active" data-selected="btc">
-                        <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="">
-                        <p class="fg-items__value">BTC</p>
-                      </div>
-                      <div class="forms-group__items" data-selected="eth">
-                        <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-eth.svg' %}" alt="">
-                        <p class="fg-items__value">ETH</p>
-                      </div>
-                      <div class="forms-group__items" data-selected="bnb">
-                        <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-bnb.svg' %}" alt="">
-                        <p class="fg-items__value">BNB</p>
-                      </div>
-                    </div>
+                  <div class="forms-group__items" data-selected="eth">
+                    <img
+                      class="fg-items__icon"
+                      src="{% static 'assets/media/images/icons/logo-eth.svg' %}"
+                      alt=""
+                    />
+                    <p class="fg-items__value">ETH</p>
+                  </div>
+                  <div class="forms-group__items" data-selected="bnb">
+                    <img
+                      class="fg-items__icon"
+                      src="{% static 'assets/media/images/icons/logo-bnb.svg' %}"
+                      alt=""
+                    />
+                    <p class="fg-items__value">BNB</p>
                   </div>
                 </div>
               </div>
             </div>
-            <button class="advance-card__button btn btn-primary btn-pill">Exchange</button>
           </div>
-          <!-- End::Advance Card -->      </div>
+        </div>
+        <button class="advance-card__button btn btn-primary btn-pill">
+          Exchange
+        </button>
       </div>
-    </div>  
-    
-    {% block js %}
+      <!-- End::Advance Card -->
+    </div>
+  </div>
+</div>
 
-  <!-- Start::Global Bundle Scripts (used by all pages) -->
-  <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
-  <script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
-  <!-- End::Global Bundle Scripts -->
-  <!-- Start::Plugins (used by this page) -->
-  <script src="{% static 'assets/plugins/apexcharts/apexcharts.min.js' %}"></script>
-  <script src="{% static 'assets/plugins/slick/slick.min.js' %}"></script>
-  <!-- End::Plugins -->
-  <!-- Start::Page Scripts (used by this page) -->
-  <script src="{% static 'assets/js/custom/chart.js' %}"></script>
-  <script src="{% static 'assets/js/custom/navbar.js' %}"></script>
-  <script src="{% static 'assets/js/custom/custom-select.js' %}"></script>
-  <script src="{% static 'assets/js/custom/dropdown.js' %}"></script>
-  <!-- End::Page Scripts -->
-{% endblock %}
-{% endblock %}
+{% block js %}
+
+<!-- Start::Global Bundle Scripts (used by all pages) -->
+<script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+<script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
+<!-- End::Global Bundle Scripts -->
+<!-- Start::Plugins (used by this page) -->
+<script src="{% static 'assets/plugins/apexcharts/apexcharts.min.js' %}"></script>
+<script src="{% static 'assets/plugins/slick/slick.min.js' %}"></script>
+<!-- End::Plugins -->
+<!-- Start::Page Scripts (used by this page) -->
+<script src="{% static 'assets/js/custom/chart.js' %}"></script>
+<script src="{% static 'assets/js/custom/navbar.js' %}"></script>
+<script src="{% static 'assets/js/custom/custom-select.js' %}"></script>
+<script src="{% static 'assets/js/custom/dropdown.js' %}"></script>
+<!-- End::Page Scripts -->
+{% endblock %} {% endblock %}

@@ -24,20 +24,20 @@ load_dotenv()
 api_key = os.environ['BINANCE_API_KEY']
 api_secret = os.environ['BINANCE_SECRET_KEY']
 client = Client(api_key, api_secret, testnet=True)
-tickers = client.get_all_tickers()
-df = pd.DataFrame(tickers)
-df.head()
-# print(tickers)
+# tickers = client.get_all_tickers()
+# df = pd.DataFrame(tickers)
+# df.head()
+# # print(tickers)
 
 
-url = 'https://api1.binance.com'
-api_call = '/api/v3/ticker/price'
-headers = {'content-type': 'application/json', 'X-MBX-APIKEY': api_key}
-response = requests.get(url + api_call , headers=headers)
-response = json.loads(response.text)
-df = pd.DataFrame.from_records(response)
-# print(response)
-df.head()
+# url = 'https://api1.binance.com'
+# api_call = '/api/v3/ticker/price'
+# headers = {'content-type': 'application/json', 'X-MBX-APIKEY': api_key}
+# response = requests.get(url + api_call , headers=headers)
+# response = json.loads(response.text)
+# df = pd.DataFrame.from_records(response)
+# # print(response)
+# df.head()
 
 #checking server status
 client.ping() #empty response no errors
@@ -96,14 +96,14 @@ def get_ticker_data(request):
 def dashboard(request): 
     api_key = os.environ['BINANCE_API_KEY']
     api_secret = os.environ['BINANCE_SECRET_KEY']
-    client = Client(api_key, api_secret, testnet=True)
+    client = Client(api_key, api_secret, testnet=False)
     tickers = client.get_all_tickers()
     df = pd.DataFrame(tickers)
     df.head()
     # tick_symbol = [ticker['symbol'] for ticker in tickers]
     # tick_price = [ticker['price'] for ticker in tickers]
     combined_tickers = [(ticker['symbol'], ticker['price']) for ticker in tickers]
-    context = {'tickers': combined_tickers, 'df':df}
+    context = {'tks': combined_tickers, 'df':df, 'tickers': tickers}
 
     # context = {'tick_symbol':tick_symbol, 'tick_price':tick_price}
     return render(request, 'src/dashboard/dashboard.html', context)
@@ -124,8 +124,39 @@ def asset_balance(request):
 
 @login_required
 def wallet(request):
+    api_key = os.environ['BINANCE_API_KEY']
+    api_secret = os.environ['BINANCE_SECRET_KEY']
+    client = Client(api_key, api_secret)
+    account_info = client.get_account()
+    balances = account_info['balances']
+    # print(balances)
+    reference_assets = ['BTC', 'ETH', 'XRP', 'USDT', 'ACT', 'OGN', 'ITC']
+    extracted_data = []
+    for entry in balances:
+        if entry['asset'] in reference_assets:
+            asset = entry['asset']
+            free = float(entry['free'])
+            locked = float(entry['locked'])
+            extracted_data.append({'asset': asset, 'free': free, 'locked': locked})
 
-    return render(request, 'src/dashboard/wallet.html')
+    TotalBalance = 0
+
+    for i in balances:
+        if float(i['free']) > 0:
+            try:
+                avg_price_info = client.get_avg_price(symbol=i['asset'] + 'USDT')
+                price = float(avg_price_info['price'])
+                TotalBalance += float(i['free']) * price
+            except Exception as e:
+                print(f"Error fetching price for {i['asset']}USDT: {e}")
+
+    print("Total Balance:", TotalBalance, "asset:" ,asset, "free:", free)
+    print("Extracted Data:", extracted_data)
+
+    context = {'total_balance': TotalBalance, 'asset':asset, 'free':free, 'locked':locked, 'extracted_data': extracted_data}
+    # Pass the total balance to the template
+    return render(request, 'src/dashboard/wallet.html', context)
+
 
 
 def exchange(request):
@@ -137,19 +168,19 @@ def exchange(request):
 
 def mkt_data(request):
     market_depth = client.get_order_book(symbol = 'BTCBUSD')
-    market_depth 
     bids = pd.DataFrame(market_depth['bids'])
     bids.column = ['price', 'bids']
     asks = pd.DataFrame(market_depth['asks'])
     asks.columns =['price', 'asks']
     df = pd.concat([bids,asks]).fillna(0)
-    return df
+    context ={'df':df}
+    return render(request, 'src/dashboard/exchange.html', context )
 
 def recent_trades(request):
     recent_trade= client.get_recent_trades(symbol='BTCBUSD')
     df = pd.DataFrame(recent_trade)
     df.head()
-    return df
+    return render(request, )
 
 def avg_price(request):
     avg_price = client.get_avg_price()

@@ -32,8 +32,15 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 # SECRET_KEY = os.environ["SECRET_KEY"]
 # DEBUG = os.environ["DEBUG", default=False, cast=bool]
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['2qd-talented-lyell.circumeo-apps.net',
+    'localhost',
+    'https://2qd-talented-lyell.circumeo-apps.net',
+    '127.0.0.1',]
 
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://2qd-talented-lyell.circumeo-apps.net'
+]
 
 # Application definition
 
@@ -115,11 +122,10 @@ DATABASES = {
 #         "PASSWORD": os.environ["POSTGRES_PASSWORD"],
 #         "HOST": os.environ["POSTGRES_HOST"],
 #         "PORT": os.environ["POSTGRES_PORT"],
+#     "OPTIONS" : {
+#         "pool" : True,
+#         },
 #     }
-        # "options" : {
-        #     "POOL" : ""
-
-        # }
 # }
 
 SITE_ID = 1

@@ -150,8 +150,8 @@ def wallet(request):
             except Exception as e:
                 print(f"Error fetching price for {i['asset']}USDT: {e}")
 
-    print("Total Balance:", TotalBalance, "asset:" ,asset, "free:", free)
-    print("Extracted Data:", extracted_data)
+    # print("Total Balance:", TotalBalance, "asset:" ,asset, "free:", free)
+    # print("Extracted Data:", extracted_data)
 
     context = {'total_balance': TotalBalance, 'asset':asset, 'free':free, 'locked':locked, 'extracted_data': extracted_data}
     # Pass the total balance to the template

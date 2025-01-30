@@ -1,66 +1,91 @@
-
-{% extends 'src/dashboard/base.html' %}
-{% load static %}
-{% load i18n %}
-{% load socialaccount %}
-{% load allauth account %}
-{% load widget_tweaks %}
-
+{% extends 'src/dashboard/base.html' %} {% load static %} {% load i18n %} {%
+load socialaccount %} {% load allauth account %} {% load widget_tweaks %}
 
 <title>{% block title %}Sign In{% endblock %}</title>
 
 {% block css_links %}
-  <link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+<link
+  href="{% static 'assets/media/images/icons/logo.svg' %}"
+  rel="shortcut icon"
+  type="image/x-icon"
+/>
 
-  <!-- Start::Global Styles (used by all pages) -->
-  <link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
-  <!-- End::Global Styles -->
+<!-- Start::Global Styles (used by all pages) -->
+<link
+  href="{% static 'assets/css/styles.bundle.css' %}"
+  rel="stylesheet"
+  type="text/css"
+/>
+<!-- End::Global Styles -->
 
-  <!-- Start::Page Styles (used by this page) -->
-  <link href="{% static 'assets/css/pages/sign-in.css' %}" rel="stylesheet" type="text/css" />
-  <!-- End::Page Styles -->
-{% endblock %}
-
-{% block content %}
+<!-- Start::Page Styles (used by this page) -->
+<link
+  href="{% static 'assets/css/pages/sign-in.css' %}"
+  rel="stylesheet"
+  type="text/css"
+/>
+<!-- End::Page Styles -->
+{% endblock %} {% block content %}
 <div class="sign-in">
   <div class="sign-in-card">
     <div class="sign-in__heading">
-      <img src="{% static 'assets/media/images/icons/smr.png' %}" alt="" class="logo">
-      <p class="fb-sm sign-in__title">Welcome! Verify {{ request.user.email }} as Your Email Address to access your SmartMine Account</p>
+      <img
+        src="{% static 'assets/media/images/icons/smr.png' %}"
+        alt=""
+        class="logo"
+      />
+      <p class="fb-sm sign-in__title">
+        Welcome! A verification email has been sent to your registered email
+        address. Please check your inbox to verify and access your SmartMine
+        account.
+      </p>
     </div>
-    {% if messages %}
-    {% for message in messages %}
-        <div class="toast align-items-center text-bg-primary border-0 alert alert-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="d-flex">
-            <div class="toast-body">
-             {{ message }}
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
+    {% if messages %} {% for message in messages %}
+    <div
+      class="toast align-items-center text-bg-primary border-0 alert alert-{{ message.tags }}"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">{{ message }}</div>
+        <button
+          type="button"
+          class="btn-close btn-close-white me-2 m-auto"
+          data-bs-dismiss="toast"
+          aria-label="Close"
+        ></button>
+      </div>
+    </div>
+
+    {% endfor %} {% endif %}
+
+    <div class="col-14 mb-2">
+      <div class="component">
+        <h4 class="component__title mb-3" style="text-align: center">
+          Verify Your Email Address
+        </h4>
+        <div class="component__content">
+          <!-- <h1 class="my-3">Verify Your Email Address</h1> -->
+          <p class="my-3" style="text-align: center">
+            We've sent you a verification email. Please follow the link provided
+            to complete your signup. If you don’t see it in your inbox, check
+            your spam folder. If you haven’t received it within a few minutes,
+            contact us for assistance
+          </p>
         </div>
+      </div>
 
-    {% endfor %}
-    {% endif %}
+      {% block js %}
+      <!-- Start::Global Bundle Scripts (used by all pages) -->
+      <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+      <script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
+      <!-- End::Global Bundle Scripts -->
 
-      <div class="col-14 mb-2">
-        <div class="component">
-          <h4 class="component__title mb-3" style="text-align: center;">Verify Your Email Address</h4>
-          <div class="component__content">
-            <!-- <h1 class="my-3">Verify Your Email Address</h1> -->
-            <p class="my-3" style="text-align: center;">We have sent an email to you for verification. Follow the link provided to finalize the signup process. If you do not see the verification email in your main inbox, check your spam folder. Please contact us if you do not receive the verification email within a few minutes</p>
-          </div>
-        </div>
-
-
-        
-        {% block js %}
-        <!-- Start::Global Bundle Scripts (used by all pages) -->
-        <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
-        <script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
-        <!-- End::Global Bundle Scripts -->
-        
-        <!-- Start::Page Scripts (used by this page) -->
-        <script src="{% static 'assets/js/pages/sign-in-page.js' %}"></script>
-        <!-- End::Page Scripts -->
-        {% endblock %}
-        {% endblock %}
+      <!-- Start::Page Scripts (used by this page) -->
+      <script src="{% static 'assets/js/pages/sign-in-page.js' %}"></script>
+      <!-- End::Page Scripts -->
+      {% endblock %} {% endblock %}
+    </div>
+  </div>
+</div>

@@ -1022,40 +1022,73 @@
       </div>
     </div>
   </div>
+  <!-- Toast Notification -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div
+      id="subscribe-toast"
+      class="toast align-items-center text-white bg-success border-0"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="d-flex">
+        <div class="toast-body">Subscribed successfully!</div>
+        <button
+          type="button"
+          class="btn-close btn-close-white me-2 m-auto"
+          data-bs-dismiss="toast"
+          aria-label="Close"
+        ></button>
+      </div>
+    </div>
+  </div>
 </section>
 {% block js %}
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    var toastElList = [].slice.call(document.querySelectorAll(".toast"));
-    var toastList = toastElList.map(function (toastEl) {
-      return new bootstrap.Toast(toastEl);
-    });
-    toastList.forEach((toast) => toast.show());
-  });
-
-  document.addEventListener("DOMContentLoaded", function () {
-    const priceElement = document.querySelector(".fd-md--bold.value"); // Update the correct selector
+    const priceElement = document.querySelector(
+      ".buy-sell-cards__detail--prices .fd-md.fd-md--bold.value"
+    );
+    const notesElement = document.querySelector(
+      ".buy-sell-cards__detail--prices .fb-regular.notes"
+    );
 
     async function fetchPrice() {
       try {
-        const response = await fetch("get-price/BTCUSDT/"); // Change symbol as needed
+        const response = await fetch("/get-price/BTCUSDT/"); // Ensure endpoint matches Django URL
+        if (!response.ok) throw new Error("Network response was not OK");
+
         const data = await response.json();
+
         if (data.price) {
+          // Update price display
           priceElement.innerHTML = `${parseFloat(data.price).toFixed(
             2
           )} <span class="fb-lg currency">USD</span>`;
+
+          // Update the notes text
+          notesElement.innerHTML = `1 ${data.symbol} is roughly`;
         } else {
           priceElement.innerHTML = "Price Unavailable";
         }
       } catch (error) {
         console.error("Error fetching price:", error);
+        priceElement.innerHTML = "Error fetching price";
       }
     }
 
     fetchPrice();
-    setInterval(fetchPrice, 5000); // Refresh every 5 seconds
+    setInterval(fetchPrice, 5000); // Refresh price every 5 seconds
   });
+
+  function showToast(message) {
+    const toastElement = document.getElementById("subscribe-toast");
+    const toastBody = toastElement.querySelector(".toast-body");
+    toastBody.textContent = message;
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+  }
 </script>
 <!-- Start::Global Bundle Scripts (used by all pages) -->
 <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>

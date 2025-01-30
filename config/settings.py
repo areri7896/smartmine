@@ -42,6 +42,11 @@ CSRF_TRUSTED_ORIGINS = [
     'https://2qd-talented-lyell.circumeo-apps.net'
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    'https://2qd-talented-lyell.circumeo-apps.net',
+    '127.0.0.1',
+]
 # Application definition
 
 INSTALLED_APPS = [

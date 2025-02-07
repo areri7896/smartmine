@@ -155,7 +155,7 @@ def subscribe(request):
         Subscriber.objects.create(email=email)
 
         # Send confirmation email
-        subject = "Thank You for Subscribing!"
+        subject = "Thank You for Subscribing! To Smartmine"
         message = f"Hello,\n\nThank you for subscribing to our updates. You'll now receive the latest news about our exchange and products.\n\nBest Regards,\nYour Company Team"
         send_mail(subject, message, "your-email@gmail.com", [email])
 

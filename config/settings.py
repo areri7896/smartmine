@@ -66,11 +66,13 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.coinbase',
     'allauth.socialaccount.providers.google',
     'widget_tweaks',
+    'django_daraja',
 
     #installed apps
     'smartmine',
     'dashboard',
-    'binapi'
+    'binapi',
+    # 'payment',
 
 
 ]
@@ -246,3 +248,14 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
 EMAIL_HOST_USER = 'plpgroup25@gmail.com'
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+# M-Pesa Daraja API credentials
+MPESA_CONSUMER_KEY = config('MPESA_CONSUMER_KEY')
+MPESA_CONSUMER_SECRET = config('MPESA_CONSUMER_SECRET')
+MPESA_SHORTCODE = config('MPESA_SHORTCODE')
+MPESA_EXPRESS_SHORTCODE = config('MPESA_EXPRESS_SHORTCODE', default='174379')
+MPESA_PASSKEY = config('MPESA_PASSKEY')
+MPESA_ENVIRONMENT = 'sandbox'  # or 'production'
+MPESA_SHORTCODE_TYPE = config('MPESA_SHORTCODE_TYPE')
+MPESA_INITIATOR_USERNAME = config('MPESA_INITIATOR_USERNAME')
+MPESA_INITIATOR_SECURITY_CREDENTIAL = config('MPESA_INITIATOR_SECURITY_CREDENTIAL')

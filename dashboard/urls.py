@@ -12,6 +12,7 @@ urlpatterns = [
     path('market/', dashboard_views.market, name='market'),
     # path('signup/', dashboard_views.signup, name='signup'),
     path('wallet/', dashboard_views.wallet, name='wallet'),
+    # path('mpay/', dashboard_views.mpay, name='mpay'),
     path('dt', dashboard_views.mkt_data, name='data'),
 
     path('api/tickers/', dashboard_views.get_ticker_data, name='get_ticker_data'),

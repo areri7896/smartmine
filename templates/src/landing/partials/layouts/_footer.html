@@ -146,7 +146,7 @@ document.getElementById("subscribe-form").addEventListener("submit", function (e
     toast.show();
   }
 </script> -->
-<script>
+<!-- <script>
   document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector(".mini-form");
     const toastElement = document.getElementById("subscribe-toast");
@@ -180,6 +180,74 @@ document.getElementById("subscribe-form").addEventListener("submit", function (e
       const toastBody = toastElement.querySelector(".toast-body");
       toastBody.textContent = message;
       toast.show(); // Correctly show the toast
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        document.cookie.split(";").forEach(cookie => {
+          cookie = cookie.trim();
+          if (cookie.startsWith(name + "=")) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          }
+        });
+      }
+      return cookieValue;
+    }
+  });
+</script> -->
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".mini-form").forEach(form => {
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        
+        const emailInput = this.querySelector(".mini-form__input");
+        const email = emailInput.value.trim();
+        const messageElement = this.querySelector("#subscribe-message");
+
+        if (!email) {
+          messageElement.textContent = "Please enter a valid email.";
+          messageElement.style.color = "red";
+          return;
+        }
+
+        fetch("/subscribe/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: `email=${encodeURIComponent(email)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            emailInput.value = ""; // Clear input field
+            messageElement.textContent = "Subscribed successfully! 🎉";
+            messageElement.style.color = "green";
+            showToast("Subscribed successfully!");
+          } else {
+            messageElement.textContent = data.error;
+            messageElement.style.color = "red";
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          messageElement.textContent = "Error subscribing.";
+          messageElement.style.color = "red";
+        });
+      });
+    });
+
+    function showToast(message) {
+      const toastElement = document.getElementById("subscribe-toast");
+      const toastBody = toastElement.querySelector(".toast-body");
+      toastBody.textContent = message;
+      const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+      toast.show();
     }
 
     function getCookie(name) {

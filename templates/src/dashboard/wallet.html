@@ -14,6 +14,9 @@
   <!-- Start::Page Styles (used by this page) -->
   <link href="{% static 'assets/css/pages/wallet-v1.css' %}" rel="stylesheet" type="text/css" />
   <!-- End::Page Styles -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
   {% endblock %}
 </head>
 {% block content %}
@@ -44,7 +47,7 @@
           </div>
           {% endfor %}
           
-          End::Standard Card        <!-- Start::Standard Card -->
+         <!-- Start::Standard Card -->
           <!--
           <div class="standard-card standard-card--type-6-v2">
             <div class="container">
@@ -109,7 +112,7 @@
             <div class="advance-card-left">
               <div class="advance-card__title">
                 <img src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="" class="advance-card__title-image">
-                <h6 class="advance-card__title-text">BTC</h6>
+                <h6 class="advance-card__title-text">MPESA</h6>
               </div>
               <div class="advance-card__balance-wrapper">
                 <div class="advance-card__balance">
@@ -133,7 +136,7 @@
               </div>
               <div class="advance-card__buttons">
                 <button class="btn btn-primary advance-card__button btn-sm btn-pill">Withdraw</button>
-                <button class="btn btn-secondary advance-card__button btn-sm">Deposit</button>
+                <button class="btn btn-secondary advance-card__button btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Deposit</button>
               </div>
             </div>
           
@@ -182,7 +185,41 @@
               </div>
             </div>
           </div>
-          <!-- End::Advance Card -->        <!-- Start::Table Section -->
+          <!-- End::Advance Card -->      
+
+          <!--modal start-->
+          <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Open modal for @getbootstrap</button> -->
+
+          <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content complete-card complete-card--type-3">
+                    <div class="modal-header">
+                        <!-- <h3 class="modal-title fs-5">DEPOSIT BY MPESA</h3> -->
+                        <button type="button" class="btn-close" style="background-color: white;" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="mpesa-form" method="post" action="{% url 'wallet' %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="phone-number" class="col-form-label fd-md my-1" style="color: white;">Phone Number</label>
+                                <input type="text" class="form-control" id="phone-number" name="phone">
+                            </div>
+                            <div class="mb-3">
+                                <label for="amount" class="col-form-label fd-md my-1" style="color: white;">Amount:</label>
+                                <input type="number" class="form-control" id="amount" name="amount">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <input type="submit" class="btn btn-primary" value="Send Payment">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+          <!--modal end-->
+
+             <!-- Start::Table Section -->
           <div class="table-wrapper table--type-1">
             <div class="table-container">
               <table class="table table-content">
@@ -311,121 +348,6 @@
                       <p class="fb-regular table__market text-bearish">0.40%</p>
                     </td>
                   </tr>
-                  <tr>
-                    <td class="table__assets">
-                      <div class="table__assets-crypto">
-                        <img src="{% static 'assets/media/images/icons/logo-xrp.svg' %}" alt="" class="table__assets-crypto-icon">
-                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">XRP</p>
-                      </div>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__assets-name">XRP</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__order">USD 0.5657</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__available">USD 0.5657</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__total">USD 0.5657</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__market text-bullish">2.42%</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="table__assets">
-                      <div class="table__assets-crypto">
-                        <img src="{% static 'assets/media/images/icons/logo-act.svg' %}" alt="" class="table__assets-crypto-icon">
-                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">ACT</p>
-                      </div>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__assets-name">Achain</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__order">USD 40,355.12</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__available">USD 40,355.12</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__total">USD 40,355.12</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__market text-bullish">0.05%</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="table__assets">
-                      <div class="table__assets-crypto">
-                        <img src="{% static 'assets/media/images/icons/logo-ogn.svg' %}" alt="" class="table__assets-crypto-icon">
-                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">OGN</p>
-                      </div>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__assets-name">Origin Protocol</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__order">USD 3,152.93</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__available">USD 3,152.93</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__total">USD 3,152.93</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__market text-bearish">0.22%</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="table__assets">
-                      <div class="table__assets-crypto">
-                        <img src="{% static 'assets/media/images/icons/logo-itc.svg' %}" alt="" class="table__assets-crypto-icon">
-                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">ITC</p>
-                      </div>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__assets-name">IoT Chain</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__order">USD 21,222.20</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__available">USD 21,222.20</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__total">USD 21,222.20</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__market text-bullish">0.23%</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="table__assets">
-                      <div class="table__assets-crypto">
-                        <img src="{% static 'assets/media/images/icons/logo-xrp.svg' %}" alt="" class="table__assets-crypto-icon">
-                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">XRP</p>
-                      </div>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__assets-name">XRP</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__order">USD 0.5657</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__available">USD 0.5657</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__total">USD 0.5657</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__market text-bullish">2.42%</p>
-                    </td>
-                  </tr>
                 </tbody>
               </table>
             </div>
@@ -434,7 +356,101 @@
       </div>
     </div>
   </div>
+ <script>
+//  const exampleModal = document.getElementById('exampleModal')
+//   if (exampleModal) {
+//     exampleModal.addEventListener('show.bs.modal', event => {
+//       // Button that triggered the modal
+//       const button = event.relatedTarget
+//       // Extract info from data-bs-* attributes
+//       const recipient = button.getAttribute('data-bs-whatever')
+//       // If necessary, you could initiate an Ajax request here
+//       // and then do the updating in a callback.
+  
+//       // Update the modal's content.
+//       const modalTitle = exampleModal.querySelector('.modal-title')
+//       const modalBodyInput = exampleModal.querySelector('.modal-body input')
+  
+//       modalTitle.textContent = `New message to ${recipient}`
+//       modalBodyInput.value = recipient
+//     })
+//   } 
 
+// document.getElementById("mpesa-form").addEventListener("submit", async function (event) {
+//     event.preventDefault(); // Prevent default form submission
+
+//     let phoneNumber = document.getElementById("phone-number").value;
+//     let amount = document.getElementById("amount").value;
+
+//     let csrftoken = document.querySelector("[name=csrfmiddlewaretoken]").value; // Get CSRF token
+
+//     let formData = {
+//         phone: phoneNumber,
+//         amount: amount
+//     };
+
+//     try {
+//         let response = await fetch("{% url 'wallet' %}", {
+//             method: "POST",
+//             headers: {
+//                 "Content-Type": "application/json",
+//                 "X-CSRFToken": csrftoken,
+//             },
+//             body: JSON.stringify(formData)
+//         });
+
+//         let data = await response.json();
+        
+//         if (response.ok) {
+//             alert(data.message);  // Show success message
+//         } else {
+//             alert("Error: " + data.error);  // Show error message
+//         }
+
+//     } catch (error) {
+//         console.error("Error:", error);
+//         alert("Something went wrong!");
+//     }
+// });
+document.getElementById("mpesa-form").addEventListener("submit", async function (event) {
+    event.preventDefault(); // Prevent default form submission
+
+    let phoneNumber = document.getElementById("phone-number").value;
+    let amount = document.getElementById("amount").value;
+    let csrftoken = document.querySelector("[name=csrfmiddlewaretoken]").value; // Get CSRF token
+
+    let formData = {
+        phone: phoneNumber,
+        amount: amount
+    };
+
+    try {
+        let response = await fetch("{% url 'wallet' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify(formData)  // Send JSON
+        });
+
+        let data = await response.json();
+        
+        if (response.ok) {
+            alert(data.message);  // Show success message
+        } else {
+            alert("Error: " + data.error);  // Show error message
+        }
+
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Something went wrong!");
+    }
+});
+
+
+ </script>
+    
   {% block js %}
   <!-- Start::Global Bundle Scripts (used by all pages) -->
   <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>

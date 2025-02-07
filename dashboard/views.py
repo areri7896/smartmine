@@ -5,7 +5,10 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from allauth.socialaccount.forms import SignupForm
 from django import forms
+from django.http import HttpResponse
+from django.contrib import messages
 from django.core.mail import send_mail
+from django_daraja.mpesa.core import MpesaClient
 
 import os
 import pandas as pd
@@ -24,6 +27,8 @@ load_dotenv()
 api_key = os.environ['BINANCE_API_KEY']
 api_secret = os.environ['BINANCE_SECRET_KEY']
 client = Client(api_key, api_secret, testnet=True)
+client.API_URL = 'https://api.binance.com'  # Ensure correct URL
+client.ping()
 # tickers = client.get_all_tickers()
 # df = pd.DataFrame(tickers)
 # df.head()
@@ -38,6 +43,7 @@ client = Client(api_key, api_secret, testnet=True)
 # df = pd.DataFrame.from_records(response)
 # # print(response)
 # df.head()
+
 
 #checking server status
 client.ping() #empty response no errors
@@ -122,14 +128,18 @@ def asset_balance(request):
     return render(request, 'src/dashboard/wallet.html', context)
 
 
-@login_required
+from django.http import JsonResponse
+
 def wallet(request):
     api_key = os.environ['BINANCE_API_KEY']
     api_secret = os.environ['BINANCE_SECRET_KEY']
     client = Client(api_key, api_secret)
+    client.ping()  # Empty response no errors
+    res = client.get_server_time()
+
     account_info = client.get_account()
     balances = account_info['balances']
-    # print(balances)
+
     reference_assets = ['BTC', 'ETH', 'XRP', 'USDT', 'ACT', 'OGN', 'ITC']
     extracted_data = []
     for entry in balances:
@@ -140,7 +150,6 @@ def wallet(request):
             extracted_data.append({'asset': asset, 'free': free, 'locked': locked})
 
     TotalBalance = 0
-
     for i in balances:
         if float(i['free']) > 0:
             try:
@@ -150,12 +159,108 @@ def wallet(request):
             except Exception as e:
                 print(f"Error fetching price for {i['asset']}USDT: {e}")
 
-    # print("Total Balance:", TotalBalance, "asset:" ,asset, "free:", free)
-    # print("Extracted Data:", extracted_data)
+    context = {
+        'total_balance': TotalBalance,
+        'asset': asset,
+        'free': free,
+        'locked': locked,
+        'extracted_data': extracted_data
+    }
 
-    context = {'total_balance': TotalBalance, 'asset':asset, 'free':free, 'locked':locked, 'extracted_data': extracted_data}
-    # Pass the total balance to the template
+    if request.method == 'POST':
+        try:
+            # Try retrieving data from request body (in case of JSON)
+            data = json.loads(request.body.decode('utf-8'))
+            phone_number = data.get('phone')  
+            amnt = data.get('amount')
+            amount = int(amnt)
+        except json.JSONDecodeError:
+            # Fallback to form data (if request is not JSON)
+            phone_number = request.POST.get('phone')  
+            amnt = request.POST.get('amount')
+            amount = int(amnt)
+        print("Received phone:", phone_number)
+        print("Received amount:", amount)
+        if phone_number.startswith("0"):  
+            phone_number = "254" + phone_number[1:]
+        # try:
+        cl = MpesaClient()
+        account_reference = 'reference'
+        transaction_desc = 'Description'
+        callback_url = 'https://api.darajambili.com/express-payment'
+        response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
+        print("STK Push Response Code:", response.status_code)
+        print("STK Push Response Text:", response.text)  # Log full response for debugging
+
+        if response.status_code == 200:
+            return JsonResponse({'success': True, 'message': f"Payment of {amount} initiated."})
+        else:
+            return JsonResponse({'error': f"MPesa STK Push failed: {response.text}"}, status=400)
+
+        # # except Exception as e:
+        # return JsonResponse({'error': str(e)}, status=500)
+        # return JsonResponse({'error': 'Invalid request method'}, status=405)
+
     return render(request, 'src/dashboard/wallet.html', context)
+
+
+@csrf_exempt
+def handle_mpesa_response(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            result_code = data.get('ResultCode', '')
+
+            # Handle different response scenarios
+            if result_code == '0':
+                message = "Transaction successful ✅"
+                status = "SUCCESS"
+            elif result_code == '1032':
+                message = "Transaction canceled by user ❌"
+                status = "CANCELED"
+            elif result_code == '1037':
+                message = "STK Push timed out ⏳"
+                status = "TIMEOUT"
+            else:
+                message = f"Unknown response: {data.get('ResultDesc', 'No description')}"
+                status = "UNKNOWN"
+
+            # Process response (e.g., update database, notify user)
+            return JsonResponse({'status': status, 'message': message})
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+# def mpay(request):
+#     if request.method == 'POST':
+#         phone_number = request.POST.get('phone')  # Get the phone number from the POST request
+#         amount = request.POST.get('amount')  # Get the amount from the POST request
+#         print(phone_number, amount)
+#         if not phone_number or not amount:
+#             messages.error(request, 'Phone number and amount are required.')
+#             return redirect('wallet')  # Ensure this template exists
+
+#         try:
+#             # Initialize MpesaClient and initiate the STK Push
+#             cl = MpesaClient()
+#             account_reference = 'reference'
+#             transaction_desc = 'Description'
+#             callback_url = 'https://api.darajambili.com/express-payment'
+
+#             # Call the Mpesa API for payment (STK Push)
+#             response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
+
+#             # Display a success message to the user
+#             messages.success(request, f"Payment of {amount} has been initiated. Please check your phone!")
+#             return HttpResponse(f"Payment Response: {response}")
+#         except Exception as e:
+#             messages.error(request, f"An error occurred: {str(e)}")
+#             return redirect('wallet')  # Return to the form in case of error
+#     else:
+#         # If it's a GET request, simply display the payment form
+#         return redirect('wallet')
 
 
 

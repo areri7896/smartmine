@@ -24,6 +24,7 @@ urlpatterns = [
     path('', include('smartmine.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('accounts/', include('allauth.urls')),
+    # path('payment/', include('payment.urls')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:

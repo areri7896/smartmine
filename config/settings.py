@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "channels", 
 
 
     #third party apps
@@ -166,6 +167,18 @@ AUTHENTICATION_BACKENDS = [
 
 ]
 
+ASGI_APPLICATION = "config.asgi.application"
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -253,7 +266,7 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 MPESA_CONSUMER_KEY = config('MPESA_CONSUMER_KEY')
 MPESA_CONSUMER_SECRET = config('MPESA_CONSUMER_SECRET')
 MPESA_SHORTCODE = config('MPESA_SHORTCODE')
-MPESA_EXPRESS_SHORTCODE = config('MPESA_EXPRESS_SHORTCODE', default='174379')
+MPESA_EXPRESS_SHORTCODE = config('MPESA_EXPRESS_SHORTCODE', default='1743790')
 MPESA_PASSKEY = config('MPESA_PASSKEY')
 MPESA_ENVIRONMENT = 'sandbox'  # or 'production'
 MPESA_SHORTCODE_TYPE = config('MPESA_SHORTCODE_TYPE')

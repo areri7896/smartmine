@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,  get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -18,6 +18,8 @@ import json
 import datetime
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from .models import InvestmentPlan, Investment
+from datetime import datetime, timedelta
 
 from .functions import *
 
@@ -44,6 +46,31 @@ client.ping()
 # # print(response)
 # df.head()
 
+def investment_plans(request):
+    plans = InvestmentPlan.objects.all()
+    investments = Investment.objects.filter(user=request.user)
+    context = {'investments': investments,
+    'plans': plans}
+    return render(request, 'src/dashboard/market.html', context)
+
+def invest(request, plan_id):
+    plan = get_object_or_404(InvestmentPlan, id=plan_id)
+    
+    if request.method == 'POST':
+        end_date = datetime.now() + timedelta(days=plan.cycle_days)
+        investment = Investment.objects.create(
+            user=request.user,
+            plan=plan,
+            end_date=end_date,
+            status="active"
+        )
+        return redirect('investment_success')
+
+    return render(request, 'src/dashboard/market.html', {'pl': plan})
+
+# def my_investments(request):
+#     investments = Investment.objects.filter(user=request.user)
+#     return render(request, 'src/dashboard/market.html', {'investments': investments})
 
 #checking server status
 client.ping() #empty response no errors
@@ -140,7 +167,7 @@ def wallet(request):
     account_info = client.get_account()
     balances = account_info['balances']
 
-    reference_assets = ['BTC', 'ETH', 'XRP', 'USDT', 'ACT', 'OGN', 'ITC']
+    reference_assets = ['BTC', 'ETH', 'XRP', 'USDT']
     extracted_data = []
     for entry in balances:
         if entry['asset'] in reference_assets:
@@ -179,8 +206,8 @@ def wallet(request):
             phone_number = request.POST.get('phone')  
             amnt = request.POST.get('amount')
             amount = int(amnt)
-        print("Received phone:", phone_number)
-        print("Received amount:", amount)
+        # print("Received phone:", phone_number)
+        # print("Received amount:", amount)
         if phone_number.startswith("0"):  
             phone_number = "254" + phone_number[1:]
         # try:
@@ -192,8 +219,31 @@ def wallet(request):
         print("STK Push Response Code:", response.status_code)
         print("STK Push Response Text:", response.text)  # Log full response for debugging
 
+        # if response:
+        #     data = json.loads(request.body)
+        #     result_code = data.get('ResultCode', '')
+
+        #     # Handle different response scenarios
+        #     if result_code == '0':
+        #         message = "Transaction successful ✅"
+        #         status = "SUCCESS"
+        #     elif result_code == '1032':
+        #         message = "Transaction canceled by user ❌"
+        #         status = "CANCELED"
+        #     elif result_code == '1037':
+        #         message = "STK Push timed out ⏳"
+        #         status = "TIMEOUT"
+        #     else:
+        #         message = f"Unknown response: {data.get('ResultDesc', 'No description')}"
+        #         status = "UNKNOWN"
+
+        #     # Process response (e.g., update database, notify user)
+        #     return JsonResponse({'status': status, 'message': message})
+        # else:
+        #     return JsonResponse({'error': f"MPesa STK Push failed: {response.text}"}, status=400)
+        
         if response.status_code == 200:
-            return JsonResponse({'success': True, 'message': f"Payment of {amount} initiated."})
+            return JsonResponse({'success': True, 'message': f"deposit of {amount} initiated."})
         else:
             return JsonResponse({'error': f"MPesa STK Push failed: {response.text}"}, status=400)
 
@@ -232,37 +282,7 @@ def handle_mpesa_response(request):
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
-
-# def mpay(request):
-#     if request.method == 'POST':
-#         phone_number = request.POST.get('phone')  # Get the phone number from the POST request
-#         amount = request.POST.get('amount')  # Get the amount from the POST request
-#         print(phone_number, amount)
-#         if not phone_number or not amount:
-#             messages.error(request, 'Phone number and amount are required.')
-#             return redirect('wallet')  # Ensure this template exists
-
-#         try:
-#             # Initialize MpesaClient and initiate the STK Push
-#             cl = MpesaClient()
-#             account_reference = 'reference'
-#             transaction_desc = 'Description'
-#             callback_url = 'https://api.darajambili.com/express-payment'
-
-#             # Call the Mpesa API for payment (STK Push)
-#             response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
-
-#             # Display a success message to the user
-#             messages.success(request, f"Payment of {amount} has been initiated. Please check your phone!")
-#             return HttpResponse(f"Payment Response: {response}")
-#         except Exception as e:
-#             messages.error(request, f"An error occurred: {str(e)}")
-#             return redirect('wallet')  # Return to the form in case of error
-#     else:
-#         # If it's a GET request, simply display the payment form
-#         return redirect('wallet')
-
-
+  
 
 def exchange(request):
     exchange_info = client.get_exchange_info()
@@ -293,14 +313,17 @@ def avg_price(request):
 
 @login_required
 def market(request):
-    api_key = os.environ['BINANCE_API_KEY']
-    api_secret = os.environ['BINANCE_SECRET_KEY']
-    client = Client(api_key, api_secret, testnet=True)
-    tickers = client.get_all_tickers()
-    df = pd.DataFrame(tickers)
-    # df.head()
-    context = {'tickers':tickers, 'df':df}
-    return render(request, 'src/dashboard/market.html', context)
+    plans = InvestmentPlan.objects.all()
+    return render(request, 'src/dashboard/market.html', {'plans': plans})
+    # api_key = os.environ['BINANCE_API_KEY']
+    # api_secret = os.environ['BINANCE_SECRET_KEY']
+    # client = Client(api_key, api_secret, testnet=True)
+    # tickers = client.get_all_tickers()
+    # df = pd.DataFrame(tickers)
+    # # df.head()
+    # context = {'tickers':tickers, 'df':df}
+
+    # return render(request, 'src/dashboard/market.html', context)
 
 @login_required
 def profile(request):

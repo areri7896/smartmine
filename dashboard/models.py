@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+from datetime import timedelta
 
 # Create your models here.
 class Kline(models.Model):
@@ -22,3 +24,51 @@ class MpesaCallback(models.Model):
 
     def __str__(self):
         return f"{self.merchant_request_id} - {self.result_desc}"
+
+# class InvestmentPlan(models.Model):
+#     user = 
+#     name = models.Charfield(max_length = 50)
+#     daily_interest_rate = models.DecimalField(max_digits=5, decimal_places=2)
+#     available_balance = models.DecimalField(max_digits=5, decimal_places=2)
+#     purchase_limit = models.CharField(max_length = 100, default="no restrictions")
+#     purchase_quantity = models.IntegerField(default=1)
+#     rate = 
+#     cycle_days = 
+#     price = 
+
+
+class InvestmentPlan(models.Model):
+    PLAN_CHOICES = [
+        ("AMATUER", "AMATUER"),
+        ("BEGINNER", "BEGINNER"),
+        ("INTERMIDIATE", "INTERMIDIATE"),
+        ("LEGENDARY", "LEGENDARY"),
+        ("PRO", "PRO"),
+    ]
+
+    name = models.CharField(max_length=50, choices=PLAN_CHOICES, unique=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(max_length = 100, null=True)
+    daily_interest_rate = models.DecimalField(max_digits=5, decimal_places=2)  # Stored as 2.30 for 2.3%
+    cycle_days = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.name} - {self.price} USDT"
+
+class Investment(models.Model):
+    STATUS_CHOICES = [
+        ("active", "Active"),
+        ("completed", "Completed"),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    plan = models.ForeignKey(InvestmentPlan, on_delete=models.CASCADE)
+    start_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
+
+    def calculate_earnings(self):
+        return self.plan.price * (self.plan.daily_interest_rate / 100) * self.plan.cycle_days
+
+    def __str__(self):
+        return f"{self.user.username} - {self.plan.name}"

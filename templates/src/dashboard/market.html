@@ -1,1887 +1,421 @@
-{% extends 'src/dashboard/basic.html' %} {% load static %}
 
-<title>{% block title %}Market{% endblock %}</title>
+{% extends 'src/Dashboard/basic.html' %}
+{% load static %}
+  <title>{% block title %}Wallet {% endblock %}</title>
+  {% block css_page %}
+  <link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
 
-{% block css_links %}
-<link
-  href="{% static 'assets/media/images/icons/logo.svg' %}"
-  rel="shortcut icon"
-  type="image/x-icon"
-/>
+  <!-- Start::Global Styles (used by all pages) -->
+  <link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Global Styles -->
+  <!-- Start::Plugins (used by this page) -->
+  <link href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Plugins -->
+  <!-- Start::Page Styles (used by this page) -->
+  <link href="{% static 'assets/css/pages/wallet-v1.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Page Styles -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- Start::Global Styles (used by all pages) -->
-<link
-  href="{% static 'assets/css/styles.bundle.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
-<!-- End::Global Styles -->
-<!-- Start::Plugins (used by this page) -->
-<link
-  href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
-<!-- End::Plugins -->
-<!-- Start::Page Styles (used by this page) -->
-<link
-  href="{% static 'assets/css/pages/market-v1.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
-<!-- End::Page Styles -->
-{% endblock %} {% block content %}
-<div class="market market--v1">
-  <div class="container container--dashboard">
-    <div class="market-group">
-      <div class="market-update">
-        <div class="market-update__heading">
-          <p class="fb-regular market-update__subtitle">In the past 24 hours</p>
-          <p class="fd-md fd-md--bold">
-            Market is up <span class="text-bullish">6.73%</span>
-          </p>
-        </div>
-        <!-- Start::Standard Card -->
-        <div class="standard-card standard-card--type-1">
-          <div class="container">
-            <p class="standard-card__title">Top gainer (24h)</p>
-            <div class="standard-card__content">
-              <img
-                src="{% static 'assets/media/images/icons/BNB.svg' %}"
-                alt=""
-                class="standard-card__content-image"
-              />
-              <div class="standard-card__content-desc">
-                <p class="standard-card__content-desc-price">USD 567.34</p>
-                <p class="standard-card__content-desc-currency">Binance Coin</p>
-                <p class="standard-card__content-desc-token">BNB</p>
-              </div>
-              <div class="standard-card__content-graph">
-                <div class="standard-card__content-percentage">
-                  <img
-                    class="standard-card__content-arrow"
-                    src="{% static 'assets/media/images/icons/green-arrow-up.svg' %}"
-                    alt=""
-                  />
-                  <p class="standard-card__content-value">110.34%</p>
+  {% endblock %}
+</head>
+{% block content %}
+
+  <div class="wallet wallet--v1">
+    <div class="container container--dashboard">
+      <div class="wallet-group">
+        <div class="wallet-group--left">
+          <!-- Start::Standard Card -->
+          {% for plan in plans %}
+          <div class="standard-card standard-card--type-6-v1">
+            <div class="container">
+              <div class="standard-card__content">
+                <div class="standard-card__content-head">
+                  <div class="standard-card__content-currency">
+                    <!-- <img src="{% static 'assets/media/images/icons/Bitcoin.svg' %}" alt="" class="standard-card__content-currency-icon"> -->
+                    <p class="standard-card__content-currency-name">{{ plan.name }}</p>
+                  </div>
+                  <p class="standard-card__content-percentage text-bullish">{{ plan.daily_interest_rate }}%</p>
                 </div>
+                <div class="standard-card__content-head">
+                <p class="standard-card__content-price-1">  {{ plan.cycle_days }} Days</p>
+                <p class="standard-card__content-price-2">${{ plan.price }} USD</p>
+              </div>
+                <!-- <div class="standard-card__content-chart-wrapper">
+                  <!-- <div id="standard-card__content-chart-7" class="standard-card__content-chart-render"></div> -->
+                <!-- </div> --> 
+                <a class="btn btn-secondary advance-card__button btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap"href="{% url 'invest' plan.id %}">Invest Now</a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+          
+         <!-- Start::Standard Card -->
+          <!--
+          <div class="standard-card standard-card--type-6-v2">
+            <div class="container">
+              <div class="standard-card__content">
+                <div class="standard-card__content-head">
+                  <div class="standard-card__content-currency">
+                    <img src="{% static 'assets/media/images/icons/ETH.svg' %}" alt="" class="standard-card__content-currency-icon">
+                    <p class="standard-card__content-currency-name">ETH</p>
+                  </div>
+                  <p class="standard-card__content-percentage text-bearish">0.12%</p>
+                </div>
+                <p class="standard-card__content-price-1">0.3454364</p>
+                <p class="standard-card__content-price-2">2,345.21 USD</p>
                 <div class="standard-card__content-chart-wrapper">
-                  <div
-                    id="standard-card__content-chart-1"
-                    class="standard-card__content-chart-render"
-                  ></div>
+                  <div id="standard-card__content-chart-8" class="standard-card__content-chart-render"></div>
+                </div>
+              </div>
+            </div>
+          </div>-->
+          <!-- End::Standard Card -->        <!-- Start::Standard Card -->
+          <!--<div class="standard-card standard-card--type-6-v2">
+            <div class="container">
+              <div class="standard-card__content">
+                <div class="standard-card__content-head">
+                  <div class="standard-card__content-currency">
+                    <img src="{% static 'assets/media/images/icons/USDT.svg' %}" alt="" class="standard-card__content-currency-icon">
+                    <p class="standard-card__content-currency-name">USDT</p>
+                  </div>
+                  <p class="standard-card__content-percentage text-bullish">0.56%</p>
+                </div>
+                <p class="standard-card__content-price-1">0.3454364</p>
+                <p class="standard-card__content-price-2">2,345.21 USD</p>
+                <div class="standard-card__content-chart-wrapper">
+                  <div id="standard-card__content-chart-8-1" class="standard-card__content-chart-render"></div>
+                </div>
+              </div>
+            </div>
+          </div>-->
+          <!-- End::Standard Card -->
+          <!-- Start::Standard Card -->
+           <!--
+          <div class="standard-card standard-card--type-6-v3">
+            <div class="container">
+              <div class="standard-card__content">
+                <button class="standard-card__content-button-wrapper">
+                  <div class="standard-card__content-button">
+                    <img src="{% static 'assets/media/images/icons/plus-icon.svg' %}" alt="" class="standard-card__content-button-icon">
+                    <div class="standard-card__content-button-ellipse--inner"></div>
+                    <div class="standard-card__content-button-ellipse--mid"></div>
+                  </div>
+                  <p class="fb-regular fb-regular--bold standard-card__content-button-text">
+                    Add New Wallet
+                  </p>
+                </button>
+              </div>
+            </div>
+          </div> -->
+          <!-- End::Standard Card -->      </div>
+        <div class="wallet-group--right">
+          <!-- Start::Advance Card -->
+          <div class="advance-card advance-card--type-3-v3">
+            <div class="advance-card-left">
+              <div class="advance-card__title">
+                <img src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="" class="advance-card__title-image">
+                <h6 class="advance-card__title-text">MPESA</h6>
+              </div>
+              <div class="advance-card__balance-wrapper">
+                <div class="advance-card__balance">
+                  <p class="advance-card__balance-title">Total Balance</p>
+                  <p class="advance-card__balance-crypto-value">0.2133214214</p>
+                  <p class="advance-card__balance-currency-value">
+                    3,230.98
+                    <span class="advance-card__balance-currency"> USD</span>
+                  </p>
+                </div>
+          
+                <div class="advance-card__balance-chart">
+                  <div class="advance-card__balance-chart-wrapper">
+                    <div id="advance-card__card-line-7" class="advance-card__balance-chart-render"></div>
+                  </div>
+                  <div class="advance-card__balance-chart-percent">
+                    <img src="{% static 'assets/media/images/icons/arrow-bearish.svg' %}" alt="" class="advance-card__balance-chart-percent-image">
+                    <p class="advance-card__balance-chart-percent-value text-bearish">2.36%</p>
+                  </div>
+                </div>
+              </div>
+              <div class="advance-card__buttons">
+                <button class="btn btn-primary advance-card__button btn-sm btn-pill">Withdraw</button>
+                <!-- <button class="btn btn-secondary advance-card__button btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Deposit</button> -->
+              </div>
+            </div>
+          
+            <div class="advance-card-separator"></div>
+          
+            <div class="advance-card-right">
+              <div class="advance-card__card">
+                <div class="advance-card__card-content">
+                  <div class="advance-card__card-desc">
+                    <p class="advance-card__card-desc-title">Exchange Balance</p>
+                    <div class="advance-card__card-desc-value">
+                      <p class="advance-card__card-desc-value-crypto">0.213435345</p>
+                      <p class="advance-card__card-desc-value-currency">3,897.98 USD</p>
+                    </div>
+                  </div>
+                  <div class="advance-card__card-data">
+                    <div class="advance-card__card-chart-wrapper">
+                      <div id="advance-card__card-line-3" class="advance-card__card-chart-render"></div>
+                    </div>
+                    <p class="advance-card__card-percent">+0.55%</p>
+                  </div>
+                </div>
+                <div class="advance-card__card-progress">
+                  <div class="advance-card__card-progress-bar progress-bar--purple"></div>
+                </div>
+              </div>
+              <div class="advance-card__card">
+                <div class="advance-card__card-content">
+                  <div class="advance-card__card-desc">
+                    <p class="advance-card__card-desc-title">Assets Balance</p>
+                    <div class="advance-card__card-desc-value">
+                      <p class="advance-card__card-desc-value-crypto">0.213435345</p>
+                      <p class="advance-card__card-desc-value-currency">3,897.98 USD</p>
+                    </div>
+                  </div>
+                  <div class="advance-card__card-data">
+                    <div class="advance-card__card-chart-wrapper">
+                      <div id="advance-card__card-line-4" class="advance-card__card-chart-render"></div>
+                    </div>
+                    <p class="advance-card__card-percent">+0.75%</p>
+                  </div>
+                </div>
+                <div class="advance-card__card-progress">
+                  <div class="advance-card__card-progress-bar progress-bar--green"></div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <!-- End::Standard Card -->
-        <!-- Start::Standard Card -->
-        <div class="standard-card standard-card--type-2">
-          <div class="container">
-            <p class="standard-card__title">New listing</p>
-            <div class="standard-card__content">
-              <img
-                src="{% static 'assets/media/images/icons/ITC.svg' %}"
-                alt=""
-                class="standard-card__content-image"
-              />
-              <div class="standard-card__content-desc">
-                <p class="standard-card__content-desc-price">USD 34.02</p>
-                <p class="standard-card__content-desc-currency">IoT Chain</p>
-                <p class="standard-card__content-desc-token">ITC</p>
-              </div>
-              <div class="standard-card__content-graph">
-                <p class="standard-card__content-date">Added Apr, 13</p>
-                <div class="standard-card__content-chart-wrapper">
-                  <div
-                    id="standard-card__content-chart-2"
-                    class="standard-card__content-chart-render"
-                  ></div>
+          <!-- End::Advance Card -->      
+
+          <!--modal start-->
+          <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Open modal for @getbootstrap</button> -->
+
+          <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content complete-card complete-card--type-3">
+                    <div class="modal-header">
+                        <!-- <h3 class="modal-title fs-5">DEPOSIT BY MPESA</h3> -->
+                        <button type="button" class="btn-close" style="background-color: white;" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="mpesa-form" method="post" action="{% url 'wallet' %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="phone-number" class="col-form-label fd-md my-1" style="color: white;">Phone Number</label>
+                                <input type="text" class="form-control" id="phone-number" name="phone">
+                            </div>
+                            <div class="mb-3">
+                                <label for="amount" class="col-form-label fd-md my-1" style="color: white;">Amount:</label>
+                                <input type="number" class="form-control" id="amount" name="amount">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <input type="submit" class="btn btn-primary" value="Send Payment">
+                            </div>
+                        </form>
+                    </div>
                 </div>
-              </div>
+            </div>
+        </div>
+          <!--modal end-->
+
+             <!-- Start::Table Section -->
+          <div class="table-wrapper table--type-1">
+            <div class="table-container">
+              <table class="table table-content">
+                <thead>
+                  <tr>
+                    <th class="fb-regular table__head" colspan="2">Assets</th>
+                    <th class="fb-regular table__head">On Orders</th>
+                    <th class="fb-regular table__head">Available Balance</th>
+                    <th class="fb-regular table__head">Total Balance</th>
+                    <th class="fb-regular table__head">24h Market</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="table__assets">
+                      <div class="table__assets-crypto">
+                        <img src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="" class="table__assets-crypto-icon">
+                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">BTC</p>
+                      </div>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__assets-name">Bitcoin</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__order">USD 53,260.20</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__available">USD 53,260.20</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__total">USD 53,260.20</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__market text-bullish">0.25%</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="table__assets">
+                      <div class="table__assets-crypto">
+                        <img src="{% static 'assets/media/images/icons/logo-eth.svg' %}" alt="" class="table__assets-crypto-icon">
+                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">ETH</p>
+                      </div>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__assets-name">Ethereum</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__order">USD 1,643.80</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__available">USD 1,643.80</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__total">USD 1,643.80</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__market text-bearish">4.51%</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="table__assets">
+                      <div class="table__assets-crypto">
+                        <img src="{% static 'assets/media/images/icons/logo-bnb.svg' %}" alt="" class="table__assets-crypto-icon">
+                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">BNB</p>
+                      </div>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__assets-name">Binance Coin</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__order">USD 247.72</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__available">USD 247.72</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__total">USD 247.72</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__market text-bullish">2.43%</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="table__assets">
+                      <div class="table__assets-crypto">
+                        <img src="{% static 'assets/media/images/icons/logo-xrp.svg' %}" alt="" class="table__assets-crypto-icon">
+                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">XRP</p>
+                      </div>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__assets-name">XRP</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__order">USD 0.5657</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__available">USD 0.5657</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__total">USD 0.5657</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__market text-bullish">2.42%</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="table__assets">
+                      <div class="table__assets-crypto">
+                        <img src="{% static 'assets/media/images/icons/logo-usdt.svg' %}" alt="" class="table__assets-crypto-icon">
+                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">USDT</p>
+                      </div>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__assets-name">Tether</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__order">USD 0.9999</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__available">USD 0.9999</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__total">USD 0.9999</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__market text-bearish">0.40%</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
+          <!-- End::Table Section -->  
         </div>
-        <!-- End::Standard Card -->
-        <!-- Start::Standard Card -->
-        <div class="standard-card standard-card--type-1">
-          <div class="container">
-            <p class="standard-card__title">Highest volume (24h)</p>
-            <div class="standard-card__content">
-              <img
-                src="{% static 'assets/media/images/icons/logo-btc.svg' %}"
-                alt=""
-                class="standard-card__content-image"
-              />
-              <div class="standard-card__content-desc">
-                <p class="standard-card__content-desc-price">USD 236,213.22</p>
-                <p class="standard-card__content-desc-currency">Bitcoin</p>
-                <p class="standard-card__content-desc-token">BTC</p>
-              </div>
-              <div class="standard-card__content-graph">
-                <div class="standard-card__content-percentage">
-                  <img
-                    class="standard-card__content-arrow"
-                    src="{% static 'assets/media/images/icons/green-arrow-up.svg' %}"
-                    alt=""
-                  />
-                  <p class="standard-card__content-value">0.53%</p>
-                </div>
-                <div class="standard-card__content-chart-wrapper">
-                  <div
-                    id="standard-card__content-chart-1-2"
-                    class="standard-card__content-chart-render"
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End::Standard Card -->
-        <!-- Start::Standard Card -->
-        <div class="standard-card standard-card--type-1">
-          <div class="container">
-            <p class="standard-card__title">Most visited</p>
-            <div class="standard-card__content">
-              <img
-                src="{% static 'assets/media/images/icons/logo-ogn.svg' %}"
-                alt=""
-                class="standard-card__content-image"
-              />
-              <div class="standard-card__content-desc">
-                <p class="standard-card__content-desc-price">USD 123.34</p>
-                <p class="standard-card__content-desc-currency">
-                  Orogin Protocol
-                </p>
-                <p class="standard-card__content-desc-token">OGN</p>
-              </div>
-              <div class="standard-card__content-graph">
-                <div class="standard-card__content-percentage">
-                  <img
-                    class="standard-card__content-arrow"
-                    src="{% static 'assets/media/images/icons/green-arrow-up.svg' %}"
-                    alt=""
-                  />
-                  <p class="standard-card__content-value">2.23%</p>
-                </div>
-                <div class="standard-card__content-chart-wrapper">
-                  <div
-                    id="standard-card__content-chart-1-3"
-                    class="standard-card__content-chart-render"
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End::Standard Card -->
       </div>
-      <div class="market-table">
-        <!-- Start::Table Section -->
-        <div class="table-wrapper table--type-2">
-          <div class="table__title">
-            <h6 class="table__title-text">Market Table</h6>
-            <nav class="navbar">
-              <div class="table__title-tabs" id="pills-tab" role="tablist">
-                <li class="nav-item">
-                  <p
-                    class="fb-regular fb-regular--bold table__title-tab active"
-                    id="pills-market-table-all-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#pills-market-table-all"
-                    role="tab"
-                    aria-controls="pills-market-table-all"
-                    aria-selected="true"
-                  >
-                    All Assets
-                  </p>
-                </li>
-                <li class="nav-item">
-                  <p
-                    class="fb-regular fb-regular--bold table__title-tab"
-                    id="pills-market-table-gainers-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#pills-market-table-gainers"
-                    role="tab"
-                    aria-controls="pills-market-table-gainers"
-                    aria-selected="false"
-                  >
-                    Gainers
-                  </p>
-                </li>
-                <li class="nav-item">
-                  <p
-                    class="fb-regular fb-regular--bold table__title-tab"
-                    id="pills-market-table-losers-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#pills-market-table-losers"
-                    role="tab"
-                    aria-controls="pills-market-table-losers"
-                    aria-selected="false"
-                  >
-                    Losers
-                  </p>
-                </li>
-                <li class="nav-item">
-                  <p
-                    class="fb-regular fb-regular--bold table__title-tab"
-                    id="pills-market-table-tradeble-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#pills-market-table-tradeble"
-                    role="tab"
-                    aria-controls="pills-market-table-tradeble"
-                    aria-selected="false"
-                  >
-                    Tradeble
-                  </p>
-                </li>
-              </div>
-            </nav>
-            <div class="dropdown table__dropdown">
-              <button
-                class="btn btn-secondary dropdown-toggle"
-                type="button"
-                id="dropdownMenuButton1"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                All Assets
-                <img
-                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
-                  alt=""
-                />
-              </button>
-              <ul
-                class="dropdown-menu"
-                aria-labelledby="dropdownMenuButton1"
-                id="pills-tab"
-                role="tablist"
-              >
-                <li>
-                  <a
-                    class="dropdown-item active"
-                    href="#"
-                    id="pills-market-table-all-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#pills-market-table-all"
-                    role="tab"
-                    aria-controls="pills-market-table-all"
-                    aria-selected="true"
-                    >All Assets</a
-                  >
-                </li>
-                <li>
-                  <a
-                    class="dropdown-item"
-                    href="#"
-                    id="pills-market-table-gainers-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#pills-market-table-gainers"
-                    role="tab"
-                    aria-controls="pills-market-table-gainers"
-                    aria-selected="false"
-                    >Gainers</a
-                  >
-                </li>
-                <li>
-                  <a
-                    class="dropdown-item"
-                    href="#"
-                    id="pills-market-table-losers-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#pills-market-table-losers"
-                    role="tab"
-                    aria-controls="pills-market-table-losers"
-                    aria-selected="false"
-                    >Losers</a
-                  >
-                </li>
-                <li>
-                  <a
-                    class="dropdown-item"
-                    href="#"
-                    id="pills-market-table-tradeble-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#pills-market-table-tradeble"
-                    role="tab"
-                    aria-controls="pills-market-table-tradeble"
-                    aria-selected="false"
-                    >Tradeble</a
-                  >
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="tab-content">
-            <div
-              class="tab-pane fade show active"
-              id="pills-market-table-all"
-              role="tabpanel"
-              aria-labelledby="pills-market-table-all-tab"
-            >
-              <div class="table-container">
-                <table class="table table-content">
-                  <thead>
-                    <tr>
-                      <th class="fb-regular table__head" colspan="2">Assets</th>
-                      <th class="fb-regular table__head">Last Price</th>
-                      <th class="fb-regular table__head">Market Cap</th>
-                      <th class="fb-regular table__head">Change</th>
-                      <th class="fb-regular table__head">Chart</th>
-                      <th class="fb-regular table__head">Trade</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-btc.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            BTC
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Bitcoin</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.25%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-1"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-eth.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            ETH
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Ethereum</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.25%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-2"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-bnb.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            BNB
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">
-                          Binance Coin
-                        </p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 247.72</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 247.72</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bearish">
-                          2.43%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-3"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-xrp.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            XRP
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">XRP</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.5657</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.5657</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          2.42%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-4"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-usdt.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            USDT
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Tether</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.9999</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.9999</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bearish">
-                          0.40%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-5"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-act.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            ACT
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Achain</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 40,355.12</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 40,355.12</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.05%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-6"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-ogn.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            OGN
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">
-                          Origin Protocol
-                        </p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 3,152.93</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 3,152.93</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bearish">
-                          0.22%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-7"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-itc.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            ITC
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">IoT Chain</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 21,222.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 21,222.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.23%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-8"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div
-              class="tab-pane fade"
-              id="pills-market-table-gainers"
-              role="tabpanel"
-              aria-labelledby="pills-market-table-gainers-tab"
-            >
-              <div class="table-container">
-                <table class="table table-content">
-                  <thead>
-                    <tr>
-                      <th class="fb-regular table__head" colspan="2">Assets</th>
-                      <th class="fb-regular table__head">Last Price</th>
-                      <th class="fb-regular table__head">Market Cap</th>
-                      <th class="fb-regular table__head">Change</th>
-                      <th class="fb-regular table__head">Chart</th>
-                      <th class="fb-regular table__head">Trade</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-btc.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            BTC
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Bitcoin</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.25%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-1"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-eth.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            ETH
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Ethereum</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.25%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-2"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-bnb.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            BNB
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">
-                          Binance Coin
-                        </p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 247.72</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 247.72</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bearish">
-                          2.43%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-3"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-xrp.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            XRP
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">XRP</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.5657</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.5657</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          2.42%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-4"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-usdt.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            USDT
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Tether</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.9999</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.9999</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bearish">
-                          0.40%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-5"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-act.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            ACT
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Achain</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 40,355.12</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 40,355.12</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.05%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-6"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-ogn.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            OGN
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">
-                          Origin Protocol
-                        </p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 3,152.93</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 3,152.93</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bearish">
-                          0.22%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-7"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-itc.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            ITC
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">IoT Chain</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 21,222.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 21,222.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.23%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-8"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div
-              class="tab-pane fade"
-              id="pills-market-table-losers"
-              role="tabpanel"
-              aria-labelledby="pills-market-table-losers-tab"
-            >
-              <div class="table-container">
-                <table class="table table-content">
-                  <thead>
-                    <tr>
-                      <th class="fb-regular table__head" colspan="2">Assets</th>
-                      <th class="fb-regular table__head">Last Price</th>
-                      <th class="fb-regular table__head">Market Cap</th>
-                      <th class="fb-regular table__head">Change</th>
-                      <th class="fb-regular table__head">Chart</th>
-                      <th class="fb-regular table__head">Trade</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-btc.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            BTC
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Bitcoin</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.25%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-1"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-eth.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            ETH
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Ethereum</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.25%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-2"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-bnb.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            BNB
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">
-                          Binance Coin
-                        </p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 247.72</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 247.72</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bearish">
-                          2.43%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-3"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-xrp.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            XRP
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">XRP</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.5657</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.5657</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          2.42%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-4"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-usdt.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            USDT
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Tether</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.9999</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.9999</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bearish">
-                          0.40%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-5"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-act.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            ACT
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Achain</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 40,355.12</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 40,355.12</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.05%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-6"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-ogn.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            OGN
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">
-                          Origin Protocol
-                        </p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 3,152.93</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 3,152.93</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bearish">
-                          0.22%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-7"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-itc.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            ITC
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">IoT Chain</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 21,222.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 21,222.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.23%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-8"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <div
-              class="tab-pane fade"
-              id="pills-market-table-tradeble"
-              role="tabpanel"
-              aria-labelledby="pills-market-table-tradeble-tab"
-            >
-              <div class="table-container">
-                <table class="table table-content">
-                  <thead>
-                    <tr>
-                      <th class="fb-regular table__head" colspan="2">Assets</th>
-                      <th class="fb-regular table__head">Last Price</th>
-                      <th class="fb-regular table__head">Market Cap</th>
-                      <th class="fb-regular table__head">Change</th>
-                      <th class="fb-regular table__head">Chart</th>
-                      <th class="fb-regular table__head">Trade</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-btc.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            BTC
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Bitcoin</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.25%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-1"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-eth.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            ETH
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Ethereum</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 53,260.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.25%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-2"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-bnb.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            BNB
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">
-                          Binance Coin
-                        </p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 247.72</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 247.72</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bearish">
-                          2.43%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-3"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-xrp.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            XRP
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">XRP</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.5657</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.5657</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          2.42%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-4"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-usdt.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            USDT
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Tether</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.9999</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 0.9999</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bearish">
-                          0.40%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-5"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-act.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            ACT
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">Achain</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 40,355.12</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 40,355.12</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.05%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-6"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-ogn.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            OGN
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">
-                          Origin Protocol
-                        </p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 3,152.93</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 3,152.93</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bearish">
-                          0.22%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-7"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="table__assets">
-                        <div class="table__assets-crypto">
-                          <img
-                            src="{% static 'assets/media/images/icons/logo-itc.svg' %}"
-                            alt=""
-                            class="table__assets-crypto-icon"
-                          />
-                          <p
-                            class="fb-regular fb-regular--bold table__assets-crypto-abbr"
-                          >
-                            ITC
-                          </p>
-                        </div>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__assets-name">IoT Chain</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 21,222.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular">USD 21,222.20</p>
-                      </td>
-                      <td>
-                        <p class="fb-regular table__market text-bullish">
-                          0.23%
-                        </p>
-                      </td>
-                      <td class="table__chart">
-                        <div class="table__chart-wrapper">
-                          <div
-                            id="table__chart-8"
-                            class="table__chart-render"
-                          ></div>
-                        </div>
-                      </td>
-                      <td>
-                        <button
-                          class="btn btn-primary btn-sm btn-pill table__btn"
-                        >
-                          Buy
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-          <div class="table__vignette"></div>
-        </div>
-        <!-- End::Table Section -->
+      </div>
       </div>
     </div>
   </div>
-</div>
+ <script>
 
-{% block js%}
-<!-- Start::Global Bundle Scripts (used by all pages) -->
-<script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
-<script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
-<!-- End::Global Bundle Scripts -->
-<!-- Start::Plugins (used by this page) -->
-<script src="{% static 'assets/plugins/apexcharts/apexcharts.min.js' %}"></script>
-<!-- End::Plugins -->
-<!-- Start::Page Scripts (used by this page) -->
-<script src="{% static 'assets/js/custom/chart.js' %}"></script>
-<script src="{% static 'assets/js/pages/market-page-v1.js' %}"></script>
-<script src="{% static 'assets/js/custom/navbar.js' %}"></script>
-<!-- End::Page Scripts -->
-{% endblock %} {% endblock %}
+document.getElementById("mpesa-form").addEventListener("submit", async function (event) {
+    event.preventDefault(); // Prevent default form submission
+
+    let phoneNumber = document.getElementById("phone-number").value;
+    let amount = document.getElementById("amount").value;
+    let csrftoken = document.querySelector("[name=csrfmiddlewaretoken]").value; // Get CSRF token
+
+    let formData = {
+        phone: phoneNumber,
+        amount: amount
+    };
+
+    try {
+        let response = await fetch("{% url 'wallet' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify(formData)  // Send JSON
+        });
+
+        let data = await response.json();
+        
+        if (response.ok) {
+            alert(data.message);  // Show success message
+        } else {
+            alert("Error: " + data.error);  // Show error message
+        }
+
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Something went wrong!");
+    }
+});
+
+
+ </script>
+    
+  {% block js %}
+  <!-- Start::Global Bundle Scripts (used by all pages) -->
+  <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+  <script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
+  <!-- End::Global Bundle Scripts -->
+  <!-- Start::Plugins (used by this page) -->
+  <script src="{% static 'assets/plugins/apexcharts/apexcharts.min.js' %}"></script>
+  <script src="{% static 'assets/plugins/slick/slick.min.js' %}"></script>
+  <!-- End::Plugins -->
+  <!-- Start::Page Scripts (used by this page) -->
+  <script src="{% static 'assets/js/custom/chart.js' %}"></script>
+  <script src="{% static 'assets/js/pages/wallet-page-v1.js' %}"></script>
+  <script src="{% static 'assets/js/custom/navbar.js' %}"></script>
+  <!-- End::Page Scripts -->
+  {% endblock %}
+  {% endblock %}

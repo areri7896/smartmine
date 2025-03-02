@@ -17,7 +17,7 @@
 <!-- End::Global Styles -->
 <!-- Start::Plugins (used by this page) -->
 <link
-  href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}"
+  href="{% static 'assets/plugins/apexcharts/apexcharts.c ss' %}"
   rel="stylesheet"
   type="text/css"
 />
@@ -99,7 +99,6 @@
                 </div>
               </div>
             </div>
-            {{ df }}
             <div class="standard-card__item standard-card__item--2">
               <div class="standard-card__item-left">
                 <p class="fb-regular standard-card__item-title">24h Change</p>
@@ -493,13 +492,13 @@
                 <thead>
                   <tr>
                     <th class="fb-regular table__head">Time</th>
-                    <th class="fb-regular table__head">Price (ETH)</th>
+                    <th class="fb-regular table__head">Price (BTC)</th>
                     <th class="fb-regular table__head">Amount (BTC)</th>
                     <th class="fb-regular table__head">Total (ETH)</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
+                <tbody id="trade-table-body">
+                  <!-- <tr>
                     <td>
                       <p class="fb-regular">12:34:44</p>
                     </td>
@@ -638,7 +637,7 @@
                     <td>
                       <p class="fb-regular">24324.320214535</p>
                     </td>
-                  </tr>
+                  </tr> -->
                 </tbody>
               </table>
             </div>
@@ -1293,6 +1292,40 @@
     </div>
   </div>
 </div>
+<!-- <script>
+  const ws = new WebSocket("ws://localhost:8000/ws/trades/");
+
+  ws.onopen = () => {
+    console.log("Connected to WebSocket");
+  };
+
+  ws.onmessage = (event) => {
+    const trade = JSON.parse(event.data);
+
+    // Format time from timestamp
+    const time = new Date(trade.time).toLocaleTimeString();
+
+    // Create a new table row
+    const row = `
+        <tr>
+            <td><p class="fb-regular">${time}</p></td>
+            <td><p class="fb-regular ${trade.side}">${trade.price}</p></td>
+            <td><p class="fb-regular">${trade.amount}</p></td>
+            <td><p class="fb-regular">${trade.total}</p></td>
+        </tr>`;
+
+    // Insert new row at the beginning of the table
+    document.querySelector("tbody").insertAdjacentHTML("afterbegin", row);
+  };
+
+  ws.onerror = (error) => {
+    console.error("WebSocket Error: ", error);
+  };
+
+  ws.onclose = () => {
+    console.log("WebSocket Disconnected");
+  };
+</script> -->
 
 {% block js %}
 

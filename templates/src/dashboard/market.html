@@ -21,388 +21,93 @@
 </head>
 {% block content %}
 
-  <div class="wallet wallet--v1">
-    <div class="container container--dashboard">
+
+<div class="wallet wallet--v1">
+  <div class="container container--dashboard">
       <div class="wallet-group">
         <div class="wallet-group--left">
-          <!-- Start::Standard Card -->
-          {% for plan in plans %}
-          <div class="standard-card standard-card--type-6-v1">
-            <div class="container">
-              <div class="standard-card__content">
-                <div class="standard-card__content-head">
-                  <div class="standard-card__content-currency">
-                    <!-- <img src="{% static 'assets/media/images/icons/Bitcoin.svg' %}" alt="" class="standard-card__content-currency-icon"> -->
-                    <p class="standard-card__content-currency-name">{{ plan.name }}</p>
-                  </div>
-                  <p class="standard-card__content-percentage text-bullish">{{ plan.daily_interest_rate }}%</p>
-                </div>
-                <div class="standard-card__content-head">
-                <p class="standard-card__content-price-1">  {{ plan.cycle_days }} Days</p>
-                <p class="standard-card__content-price-2">${{ plan.price }} USD</p>
-              </div>
-                <!-- <div class="standard-card__content-chart-wrapper">
-                  <!-- <div id="standard-card__content-chart-7" class="standard-card__content-chart-render"></div> -->
-                <!-- </div> --> 
-                <a class="btn btn-secondary advance-card__button btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap"href="{% url 'invest' plan.id %}">Invest Now</a>
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-          
-         <!-- Start::Standard Card -->
-          <!--
-          <div class="standard-card standard-card--type-6-v2">
-            <div class="container">
-              <div class="standard-card__content">
-                <div class="standard-card__content-head">
-                  <div class="standard-card__content-currency">
-                    <img src="{% static 'assets/media/images/icons/ETH.svg' %}" alt="" class="standard-card__content-currency-icon">
-                    <p class="standard-card__content-currency-name">ETH</p>
-                  </div>
-                  <p class="standard-card__content-percentage text-bearish">0.12%</p>
-                </div>
-                <p class="standard-card__content-price-1">0.3454364</p>
-                <p class="standard-card__content-price-2">2,345.21 USD</p>
-                <div class="standard-card__content-chart-wrapper">
-                  <div id="standard-card__content-chart-8" class="standard-card__content-chart-render"></div>
-                </div>
-              </div>
-            </div>
-          </div>-->
-          <!-- End::Standard Card -->        <!-- Start::Standard Card -->
-          <!--<div class="standard-card standard-card--type-6-v2">
-            <div class="container">
-              <div class="standard-card__content">
-                <div class="standard-card__content-head">
-                  <div class="standard-card__content-currency">
-                    <img src="{% static 'assets/media/images/icons/USDT.svg' %}" alt="" class="standard-card__content-currency-icon">
-                    <p class="standard-card__content-currency-name">USDT</p>
-                  </div>
-                  <p class="standard-card__content-percentage text-bullish">0.56%</p>
-                </div>
-                <p class="standard-card__content-price-1">0.3454364</p>
-                <p class="standard-card__content-price-2">2,345.21 USD</p>
-                <div class="standard-card__content-chart-wrapper">
-                  <div id="standard-card__content-chart-8-1" class="standard-card__content-chart-render"></div>
-                </div>
-              </div>
-            </div>
-          </div>-->
-          <!-- End::Standard Card -->
-          <!-- Start::Standard Card -->
-           <!--
-          <div class="standard-card standard-card--type-6-v3">
-            <div class="container">
-              <div class="standard-card__content">
-                <button class="standard-card__content-button-wrapper">
-                  <div class="standard-card__content-button">
-                    <img src="{% static 'assets/media/images/icons/plus-icon.svg' %}" alt="" class="standard-card__content-button-icon">
-                    <div class="standard-card__content-button-ellipse--inner"></div>
-                    <div class="standard-card__content-button-ellipse--mid"></div>
-                  </div>
-                  <p class="fb-regular fb-regular--bold standard-card__content-button-text">
-                    Add New Wallet
-                  </p>
-                </button>
-              </div>
-            </div>
-          </div> -->
-          <!-- End::Standard Card -->      </div>
-        <div class="wallet-group--right">
-          <!-- Start::Advance Card -->
-          <div class="advance-card advance-card--type-3-v3">
-            <div class="advance-card-left">
-              <div class="advance-card__title">
-                <img src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="" class="advance-card__title-image">
-                <h6 class="advance-card__title-text">MPESA</h6>
-              </div>
-              <div class="advance-card__balance-wrapper">
-                <div class="advance-card__balance">
-                  <p class="advance-card__balance-title">Total Balance</p>
-                  <p class="advance-card__balance-crypto-value">0.2133214214</p>
-                  <p class="advance-card__balance-currency-value">
-                    3,230.98
-                    <span class="advance-card__balance-currency"> USD</span>
-                  </p>
-                </div>
-          
-                <div class="advance-card__balance-chart">
-                  <div class="advance-card__balance-chart-wrapper">
-                    <div id="advance-card__card-line-7" class="advance-card__balance-chart-render"></div>
-                  </div>
-                  <div class="advance-card__balance-chart-percent">
-                    <img src="{% static 'assets/media/images/icons/arrow-bearish.svg' %}" alt="" class="advance-card__balance-chart-percent-image">
-                    <p class="advance-card__balance-chart-percent-value text-bearish">2.36%</p>
-                  </div>
-                </div>
-              </div>
-              <div class="advance-card__buttons">
-                <button class="btn btn-primary advance-card__button btn-sm btn-pill">Withdraw</button>
-                <!-- <button class="btn btn-secondary advance-card__button btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Deposit</button> -->
-              </div>
-            </div>
-          
-            <div class="advance-card-separator"></div>
-          
-            <div class="advance-card-right">
-              <div class="advance-card__card">
-                <div class="advance-card__card-content">
-                  <div class="advance-card__card-desc">
-                    <p class="advance-card__card-desc-title">Exchange Balance</p>
-                    <div class="advance-card__card-desc-value">
-                      <p class="advance-card__card-desc-value-crypto">0.213435345</p>
-                      <p class="advance-card__card-desc-value-currency">3,897.98 USD</p>
-                    </div>
-                  </div>
-                  <div class="advance-card__card-data">
-                    <div class="advance-card__card-chart-wrapper">
-                      <div id="advance-card__card-line-3" class="advance-card__card-chart-render"></div>
-                    </div>
-                    <p class="advance-card__card-percent">+0.55%</p>
-                  </div>
-                </div>
-                <div class="advance-card__card-progress">
-                  <div class="advance-card__card-progress-bar progress-bar--purple"></div>
-                </div>
-              </div>
-              <div class="advance-card__card">
-                <div class="advance-card__card-content">
-                  <div class="advance-card__card-desc">
-                    <p class="advance-card__card-desc-title">Assets Balance</p>
-                    <div class="advance-card__card-desc-value">
-                      <p class="advance-card__card-desc-value-crypto">0.213435345</p>
-                      <p class="advance-card__card-desc-value-currency">3,897.98 USD</p>
-                    </div>
-                  </div>
-                  <div class="advance-card__card-data">
-                    <div class="advance-card__card-chart-wrapper">
-                      <div id="advance-card__card-line-4" class="advance-card__card-chart-render"></div>
-                    </div>
-                    <p class="advance-card__card-percent">+0.75%</p>
-                  </div>
-                </div>
-                <div class="advance-card__card-progress">
-                  <div class="advance-card__card-progress-bar progress-bar--green"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- End::Advance Card -->      
+              {% for plan in plans %}
+              <div class="standard-card standard-card--type-6-v1">
+                  <div class="container">
+                      <div class="standard-card__content">
+                          <div class="standard-card__content-head">
+                              <div class="standard-card__content-currency">
+                                  <p class="standard-card__content-currency-name">{{ plan.name }}</p>
+                              </div>
+                              <p class="standard-card__content-percentage text-bullish">
+                                  {{ plan.daily_interest_rate }}%
+                              </p>
+                          </div>
+                          <div class="standard-card__content-head">
+                              <p class="standard-card__content-price-1">{{ plan.cycle_days }} Days</p>
+                              <p class="standard-card__content-price-2">${{ plan.price }} USD</p>
+                          </div>
 
-          <!--modal start-->
-          <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Open modal for @getbootstrap</button> -->
-
-          <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content complete-card complete-card--type-3">
-                    <div class="modal-header">
-                        <!-- <h3 class="modal-title fs-5">DEPOSIT BY MPESA</h3> -->
-                        <button type="button" class="btn-close" style="background-color: white;" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="mpesa-form" method="post" action="{% url 'wallet' %}">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label for="phone-number" class="col-form-label fd-md my-1" style="color: white;">Phone Number</label>
-                                <input type="text" class="form-control" id="phone-number" name="phone">
-                            </div>
-                            <div class="mb-3">
-                                <label for="amount" class="col-form-label fd-md my-1" style="color: white;">Amount:</label>
-                                <input type="number" class="form-control" id="amount" name="amount">
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <input type="submit" class="btn btn-primary" value="Send Payment">
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+                          <!-- Button to open confirmation modal -->
+                          <a class="btn btn-secondary btn-sm invest-button"
+                          href= "{% url 'invest' plan.id %}">
+                           Invest Now
+                          </a>
+                      </div>
+                  </div>
+              </div>
+              {% endfor %}
         </div>
-          <!--modal end-->
 
-             <!-- Start::Table Section -->
-          <div class="table-wrapper table--type-1">
-            <div class="table-container">
-              <table class="table table-content">
-                <thead>
-                  <tr>
-                    <th class="fb-regular table__head" colspan="2">Assets</th>
-                    <th class="fb-regular table__head">On Orders</th>
-                    <th class="fb-regular table__head">Available Balance</th>
-                    <th class="fb-regular table__head">Total Balance</th>
-                    <th class="fb-regular table__head">24h Market</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="table__assets">
-                      <div class="table__assets-crypto">
-                        <img src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="" class="table__assets-crypto-icon">
-                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">BTC</p>
-                      </div>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__assets-name">Bitcoin</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__order">USD 53,260.20</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__available">USD 53,260.20</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__total">USD 53,260.20</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__market text-bullish">0.25%</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="table__assets">
-                      <div class="table__assets-crypto">
-                        <img src="{% static 'assets/media/images/icons/logo-eth.svg' %}" alt="" class="table__assets-crypto-icon">
-                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">ETH</p>
-                      </div>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__assets-name">Ethereum</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__order">USD 1,643.80</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__available">USD 1,643.80</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__total">USD 1,643.80</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__market text-bearish">4.51%</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="table__assets">
-                      <div class="table__assets-crypto">
-                        <img src="{% static 'assets/media/images/icons/logo-bnb.svg' %}" alt="" class="table__assets-crypto-icon">
-                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">BNB</p>
-                      </div>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__assets-name">Binance Coin</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__order">USD 247.72</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__available">USD 247.72</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__total">USD 247.72</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__market text-bullish">2.43%</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="table__assets">
-                      <div class="table__assets-crypto">
-                        <img src="{% static 'assets/media/images/icons/logo-xrp.svg' %}" alt="" class="table__assets-crypto-icon">
-                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">XRP</p>
-                      </div>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__assets-name">XRP</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__order">USD 0.5657</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__available">USD 0.5657</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__total">USD 0.5657</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__market text-bullish">2.42%</p>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td class="table__assets">
-                      <div class="table__assets-crypto">
-                        <img src="{% static 'assets/media/images/icons/logo-usdt.svg' %}" alt="" class="table__assets-crypto-icon">
-                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">USDT</p>
-                      </div>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__assets-name">Tether</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__order">USD 0.9999</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__available">USD 0.9999</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__total">USD 0.9999</p>
-                    </td>
-                    <td>
-                      <p class="fb-regular table__market text-bearish">0.40%</p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+    <div class="wallet-group--right">
+      
+      <!-- Start::Table Section -->
+      <div class="table-wrapper table--type-1">
+               {% if investments %}
+              <div class="table-container">
+                <h6 class="component__title mb-3 text-center">My Investments</h6>
+                <table class="table table-content">
+                  <thead>
+                    <tr>
+                      <th class="fb-regular table__head">Plan</th>
+                      <th class="fb-regular table__head">Start Date</th>
+                      <th class="fb-regular table__head">End Date</th>
+                      <th class="fb-regular table__head">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for investment in investments %}
+                      <tr>
+                        <td>
+                          <p class="fb-regular table__assets-crypto-abbr">{{ investment.plan.name }}</p>
+                        </td>
+                        <td>
+                          <p class="fb-regular table__order">{{ investment.start_date|date:"Y-m-d H:i" }}</p>
+                        </td>
+                        <td>
+                          <p class="fb-regular table__available">{{ investment.end_date|date:"Y-m-d H:i" }}</p>
+                        </td>
+                        <td>
+                          <p class="fb-regular table__status {% if investment.status == 'active' %}text-success{% else %}text-danger{% endif %}">
+                            {{ investment.status }}
+                          </p>
+                        </td>
+                      </tr>
+                    {% empty %}
+                      <tr>
+                        <td colspan="4" class="text-center">You have not invested yet! <span class="text-danger"> Please Invest </span></td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-          <!-- End::Table Section -->  
-        </div>
-      </div>
-      </div>
-      </div>
+            
+            {% else %}
+  <p class="standard-card__content-currency-name mb-3 text-center">You have not invested yet! <span class="text-danger"> Please Invest </span></p>
+{% endif %}
+            <!-- End::Table Section --> 
     </div>
+
   </div>
- <script>
-
-document.getElementById("mpesa-form").addEventListener("submit", async function (event) {
-    event.preventDefault(); // Prevent default form submission
-
-    let phoneNumber = document.getElementById("phone-number").value;
-    let amount = document.getElementById("amount").value;
-    let csrftoken = document.querySelector("[name=csrfmiddlewaretoken]").value; // Get CSRF token
-
-    let formData = {
-        phone: phoneNumber,
-        amount: amount
-    };
-
-    try {
-        let response = await fetch("{% url 'wallet' %}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrftoken,
-            },
-            body: JSON.stringify(formData)  // Send JSON
-        });
-
-        let data = await response.json();
-        
-        if (response.ok) {
-            alert(data.message);  // Show success message
-        } else {
-            alert("Error: " + data.error);  // Show error message
-        }
-
-    } catch (error) {
-        console.error("Error:", error);
-        alert("Something went wrong!");
-    }
-});
-
-
- </script>
+  
     
+</div>
   {% block js %}
   <!-- Start::Global Bundle Scripts (used by all pages) -->
   <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>

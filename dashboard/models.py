@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import timedelta
+from django.db import models
+from django.contrib.auth.models import User
+
 
 # Create your models here.
 class Kline(models.Model):
@@ -72,3 +75,33 @@ class Investment(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.plan.name}"
+
+
+
+class Wallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    balance = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"{self.user.username} - Balance: {self.balance}"
+
+    def deposit(self, amount):
+        """Increase wallet balance by the deposit amount."""
+        self.balance += amount
+        self.save()
+
+
+class DepositTransaction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    phone_number = models.CharField(max_length=15)
+    transaction_id = models.CharField(max_length=50, unique=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Failed', 'Failed')],
+        default='Pending'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.amount} ({self.status})"

@@ -46,66 +46,7 @@
             </div>
           </div>
           {% endfor %}
-          
-         <!-- Start::Standard Card -->
-          <!--
-          <div class="standard-card standard-card--type-6-v2">
-            <div class="container">
-              <div class="standard-card__content">
-                <div class="standard-card__content-head">
-                  <div class="standard-card__content-currency">
-                    <img src="{% static 'assets/media/images/icons/ETH.svg' %}" alt="" class="standard-card__content-currency-icon">
-                    <p class="standard-card__content-currency-name">ETH</p>
-                  </div>
-                  <p class="standard-card__content-percentage text-bearish">0.12%</p>
-                </div>
-                <p class="standard-card__content-price-1">0.3454364</p>
-                <p class="standard-card__content-price-2">2,345.21 USD</p>
-                <div class="standard-card__content-chart-wrapper">
-                  <div id="standard-card__content-chart-8" class="standard-card__content-chart-render"></div>
-                </div>
-              </div>
-            </div>
-          </div>-->
-          <!-- End::Standard Card -->        <!-- Start::Standard Card -->
-          <!--<div class="standard-card standard-card--type-6-v2">
-            <div class="container">
-              <div class="standard-card__content">
-                <div class="standard-card__content-head">
-                  <div class="standard-card__content-currency">
-                    <img src="{% static 'assets/media/images/icons/USDT.svg' %}" alt="" class="standard-card__content-currency-icon">
-                    <p class="standard-card__content-currency-name">USDT</p>
-                  </div>
-                  <p class="standard-card__content-percentage text-bullish">0.56%</p>
-                </div>
-                <p class="standard-card__content-price-1">0.3454364</p>
-                <p class="standard-card__content-price-2">2,345.21 USD</p>
-                <div class="standard-card__content-chart-wrapper">
-                  <div id="standard-card__content-chart-8-1" class="standard-card__content-chart-render"></div>
-                </div>
-              </div>
-            </div>
-          </div>-->
-          <!-- End::Standard Card -->
-          <!-- Start::Standard Card -->
-           <!--
-          <div class="standard-card standard-card--type-6-v3">
-            <div class="container">
-              <div class="standard-card__content">
-                <button class="standard-card__content-button-wrapper">
-                  <div class="standard-card__content-button">
-                    <img src="{% static 'assets/media/images/icons/plus-icon.svg' %}" alt="" class="standard-card__content-button-icon">
-                    <div class="standard-card__content-button-ellipse--inner"></div>
-                    <div class="standard-card__content-button-ellipse--mid"></div>
-                  </div>
-                  <p class="fb-regular fb-regular--bold standard-card__content-button-text">
-                    Add New Wallet
-                  </p>
-                </button>
-              </div>
-            </div>
-          </div> -->
-          <!-- End::Standard Card -->      </div>
+  </div>
         <div class="wallet-group--right">
           <!-- Start::Advance Card -->
           <div class="advance-card advance-card--type-3-v3">
@@ -357,61 +298,7 @@
     </div>
   </div>
  <script>
-//  const exampleModal = document.getElementById('exampleModal')
-//   if (exampleModal) {
-//     exampleModal.addEventListener('show.bs.modal', event => {
-//       // Button that triggered the modal
-//       const button = event.relatedTarget
-//       // Extract info from data-bs-* attributes
-//       const recipient = button.getAttribute('data-bs-whatever')
-//       // If necessary, you could initiate an Ajax request here
-//       // and then do the updating in a callback.
-  
-//       // Update the modal's content.
-//       const modalTitle = exampleModal.querySelector('.modal-title')
-//       const modalBodyInput = exampleModal.querySelector('.modal-body input')
-  
-//       modalTitle.textContent = `New message to ${recipient}`
-//       modalBodyInput.value = recipient
-//     })
-//   } 
 
-// document.getElementById("mpesa-form").addEventListener("submit", async function (event) {
-//     event.preventDefault(); // Prevent default form submission
-
-//     let phoneNumber = document.getElementById("phone-number").value;
-//     let amount = document.getElementById("amount").value;
-
-//     let csrftoken = document.querySelector("[name=csrfmiddlewaretoken]").value; // Get CSRF token
-
-//     let formData = {
-//         phone: phoneNumber,
-//         amount: amount
-//     };
-
-//     try {
-//         let response = await fetch("{% url 'wallet' %}", {
-//             method: "POST",
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 "X-CSRFToken": csrftoken,
-//             },
-//             body: JSON.stringify(formData)
-//         });
-
-//         let data = await response.json();
-        
-//         if (response.ok) {
-//             alert(data.message);  // Show success message
-//         } else {
-//             alert("Error: " + data.error);  // Show error message
-//         }
-
-//     } catch (error) {
-//         console.error("Error:", error);
-//         alert("Something went wrong!");
-//     }
-// });
 document.getElementById("mpesa-form").addEventListener("submit", async function (event) {
     event.preventDefault(); // Prevent default form submission
 

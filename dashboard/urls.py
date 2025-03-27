@@ -12,11 +12,12 @@ urlpatterns = [
     path('market/', dashboard_views.market, name='market'),
     # path('signup/', dashboard_views.signup, name='signup'),
     path('wallet/', dashboard_views.wallet, name='wallet'),
-    # path('mpay/', dashboard_views.mpay, name='mpay'),
     path('dt', dashboard_views.mkt_data, name='data'),
+    path('api/mpesa/callback/', dashboard_views.mpesa_callback, name='mpesa_callback'),
     path('plans/', dashboard_views.investment_plans, name='investment_plans'),
     path('invest/<int:plan_id>/', dashboard_views.invest, name='invest'),
-    # path('my-investments/', dashboard_views.my_investments, name='my_investments'),
+    # path('initiate-investment/', dashboard_views.initiate_investment, name='initiate_investment'),
+    path('invest/confirm/<int:plan_id>/', dashboard_views.confirm_investment, name='confirm_investment'),
 
     path('api/tickers/', dashboard_views.get_ticker_data, name='get_ticker_data'),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

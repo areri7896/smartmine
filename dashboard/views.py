@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.core.mail import send_mail
 from django_daraja.mpesa.core import MpesaClient
+from binance.exceptions import BinanceAPIException
 
 import os
 import pandas as pd
@@ -20,8 +21,23 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import InvestmentPlan, Investment
 from datetime import datetime, timedelta
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from datetime import datetime, timedelta
+from .models import InvestmentPlan, Investment
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import Investment, InvestmentPlan, DepositTransaction
+from datetime import datetime, timedelta
 
 from .functions import *
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Wallet, DepositTransaction
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -47,15 +63,23 @@ client.ping()
 # df.head()
 
 def investment_plans(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     plans = InvestmentPlan.objects.all()
-    investments = Investment.objects.filter(user=request.user)
-    context = {'investments': investments,
-    'plans': plans}
+    investments = Investment.objects.filter(user=request.user).select_related("plan")
+
+    print("Investments being passed to template:", investments)  # Debugging
+
+    context = {
+        'investments': investments,
+        'plans': plans
+    }
     return render(request, 'src/dashboard/market.html', context)
 
 def invest(request, plan_id):
     plan = get_object_or_404(InvestmentPlan, id=plan_id)
-    
+    print("Plan Retrieved:", plan)  # Debugging line
+
     if request.method == 'POST':
         end_date = datetime.now() + timedelta(days=plan.cycle_days)
         investment = Investment.objects.create(
@@ -64,9 +88,10 @@ def invest(request, plan_id):
             end_date=end_date,
             status="active"
         )
-        return redirect('investment_success')
+        return redirect('market/')
 
-    return render(request, 'src/dashboard/market.html', {'pl': plan})
+    return render(request, 'src/dashboard/invest.html', {'pl': plan})
+
 
 # def my_investments(request):
 #     investments = Investment.objects.filter(user=request.user)
@@ -142,6 +167,8 @@ def dashboard(request):
     return render(request, 'src/dashboard/dashboard.html', context)
 
 
+# def get_absolute_url(self):
+#     return reverse('book_edit', kwargs={'pk': self.pk}) 
 
 def account(request):
     info = client.get_account()
@@ -155,133 +182,197 @@ def asset_balance(request):
     return render(request, 'src/dashboard/wallet.html', context)
 
 
-from django.http import JsonResponse
+# from django.http import JsonResponse
+
+# import os
+# import json
+# import time
+# from binance.client import Client
+
+# from django.http import JsonResponse
+# from django.shortcuts import render
+# from mpesa import MpesaClient  # Ensure this import is correct for your M-Pesa client
 
 def wallet(request):
-    api_key = os.environ['BINANCE_API_KEY']
-    api_secret = os.environ['BINANCE_SECRET_KEY']
-    client = Client(api_key, api_secret)
-    client.ping()  # Empty response no errors
-    res = client.get_server_time()
+    try:
+        # Fetch Binance API keys from environment variables
+        api_key = os.environ.get('BINANCE_API_KEY')
+        api_secret = os.environ.get('BINANCE_SECRET_KEY')
+        
+        if not api_key or not api_secret:
+            raise ValueError("Binance API key or secret not found in environment variables.")
 
-    account_info = client.get_account()
-    balances = account_info['balances']
+        # Initialize Binance client
+        client = Client(api_key, api_secret)
 
-    reference_assets = ['BTC', 'ETH', 'XRP', 'USDT']
-    extracted_data = []
-    for entry in balances:
-        if entry['asset'] in reference_assets:
+        # Synchronize time with Binance server
+        server_time = client.get_server_time()
+        time_offset = server_time['serverTime'] - int(time.time() * 1000)
+        client.time_offset = time_offset
+
+        # Test the connection
+        client.ping()
+
+        # Fetch account information
+        account_info = client.get_account()
+        balances = account_info['balances']
+
+        # Define reference assets and extract relevant data
+        reference_assets = ['BTC', 'ETH', 'XRP', 'USDT']
+        extracted_data = []
+        total_balance = 0
+
+        for entry in balances:
             asset = entry['asset']
             free = float(entry['free'])
             locked = float(entry['locked'])
-            extracted_data.append({'asset': asset, 'free': free, 'locked': locked})
 
-    TotalBalance = 0
-    for i in balances:
-        if float(i['free']) > 0:
+            if asset in reference_assets:
+                extracted_data.append({'asset': asset, 'free': free, 'locked': locked})
+
+            if free > 0:
+                try:
+                    symbol = f"{asset}USDT"
+                    avg_price_info = client.get_avg_price(symbol=symbol)
+                    price = float(avg_price_info['price'])
+                    total_balance += free * price
+                except BinanceAPIException as e:
+                    print(f"Error fetching price for {symbol}: {e}")
+
+        # Prepare context for rendering the template
+        context = {
+            'total_balance': total_balance,
+            'extracted_data': extracted_data
+        }
+
+        # Handle POST request for M-Pesa STK Push
+        if request.method == 'POST':
             try:
-                avg_price_info = client.get_avg_price(symbol=i['asset'] + 'USDT')
-                price = float(avg_price_info['price'])
-                TotalBalance += float(i['free']) * price
-            except Exception as e:
-                print(f"Error fetching price for {i['asset']}USDT: {e}")
+                # Try retrieving data from request body (in case of JSON)
+                data = json.loads(request.body.decode('utf-8'))
+                phone_number = data.get('phone')
+                amount = int(data.get('amount'))
+            except json.JSONDecodeError:
+                # Fallback to form data (if request is not JSON)
+                phone_number = request.POST.get('phone')
+                amount = int(request.POST.get('amount'))
 
-    context = {
-        'total_balance': TotalBalance,
-        'asset': asset,
-        'free': free,
-        'locked': locked,
-        'extracted_data': extracted_data
-    }
+            # Format phone number if it starts with "0"
+            if phone_number.startswith("0"):
+                phone_number = "254" + phone_number[1:]
 
-    if request.method == 'POST':
-        try:
-            # Try retrieving data from request body (in case of JSON)
-            data = json.loads(request.body.decode('utf-8'))
-            phone_number = data.get('phone')  
-            amnt = data.get('amount')
-            amount = int(amnt)
-        except json.JSONDecodeError:
-            # Fallback to form data (if request is not JSON)
-            phone_number = request.POST.get('phone')  
-            amnt = request.POST.get('amount')
-            amount = int(amnt)
-        # print("Received phone:", phone_number)
-        # print("Received amount:", amount)
-        if phone_number.startswith("0"):  
-            phone_number = "254" + phone_number[1:]
-        # try:
-        cl = MpesaClient()
-        account_reference = 'reference'
-        transaction_desc = 'Description'
-        callback_url = 'https://api.darajambili.com/express-payment'
-        response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
-        print("STK Push Response Code:", response.status_code)
-        print("STK Push Response Text:", response.text)  # Log full response for debugging
+            transaction = DepositTransaction.objects.create(
+                user=request.user,
+                amount=amount,
+                phone_number=phone_number,
+                transaction_id=f"TXN{int(time.time())}",  # Temporary transaction ID
+                status='Pending'
+            )
 
-        # if response:
-        #     data = json.loads(request.body)
-        #     result_code = data.get('ResultCode', '')
+            # Initialize M-Pesa client and initiate STK Push
+            cl = MpesaClient()
+            account_reference = 'reference'
+            transaction_desc = 'Description'
+            callback_url = 'https://a71c-129-222-187-145.ngrok-free.app/api/mpesa/callback/'
+            response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
 
-        #     # Handle different response scenarios
-        #     if result_code == '0':
-        #         message = "Transaction successful ✅"
-        #         status = "SUCCESS"
-        #     elif result_code == '1032':
-        #         message = "Transaction canceled by user ❌"
-        #         status = "CANCELED"
-        #     elif result_code == '1037':
-        #         message = "STK Push timed out ⏳"
-        #         status = "TIMEOUT"
-        #     else:
-        #         message = f"Unknown response: {data.get('ResultDesc', 'No description')}"
-        #         status = "UNKNOWN"
+            # Log the response for debugging
+            print("STK Push Response Code:", response.status_code)
+            print("STK Push Response Text:", response.text)
 
-        #     # Process response (e.g., update database, notify user)
-        #     return JsonResponse({'status': status, 'message': message})
-        # else:
-        #     return JsonResponse({'error': f"MPesa STK Push failed: {response.text}"}, status=400)
-        
-        if response.status_code == 200:
-            return JsonResponse({'success': True, 'message': f"deposit of {amount} initiated."})
-        else:
-            return JsonResponse({'error': f"MPesa STK Push failed: {response.text}"}, status=400)
+            # Return JSON response based on STK Push result
+            if response.status_code == 200:
+                return JsonResponse({'success': True, 'message': f"Deposit of {amount} initiated."})
+            else:
+                return JsonResponse({'error': f"MPesa STK Push failed: {response.text}"}, status=400)
 
-        # # except Exception as e:
-        # return JsonResponse({'error': str(e)}, status=500)
-        # return JsonResponse({'error': 'Invalid request method'}, status=405)
+        # Render the wallet template with context
+        return render(request, 'src/dashboard/wallet.html', context)
 
-    return render(request, 'src/dashboard/wallet.html', context)
+    except BinanceAPIException as e:
+        print(f"Binance API Error: {e}")
+        return JsonResponse({'error': f"Binance API Error: {e}"}, status=500)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return JsonResponse({'error': str(e)}, status=500)
 
 
 @csrf_exempt
-def handle_mpesa_response(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            result_code = data.get('ResultCode', '')
+def mpesa_callback(request):
+    """
+    Validate M-Pesa payment and update wallet balance.
+    """
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        
+        # Extract transaction details
+        body = data.get('Body', {}).get('stkCallback', {})
+        result_code = body.get('ResultCode')
+        metadata = body.get('CallbackMetadata', {}).get('Item', [])
+        transaction_id = None
+        amount = None
+        phone_number = None
 
-            # Handle different response scenarios
-            if result_code == '0':
-                message = "Transaction successful ✅"
-                status = "SUCCESS"
-            elif result_code == '1032':
-                message = "Transaction canceled by user ❌"
-                status = "CANCELED"
-            elif result_code == '1037':
-                message = "STK Push timed out ⏳"
-                status = "TIMEOUT"
-            else:
-                message = f"Unknown response: {data.get('ResultDesc', 'No description')}"
-                status = "UNKNOWN"
+        for item in metadata:
+            if item['Name'] == 'MpesaReceiptNumber':
+                transaction_id = item['Value']
+            elif item['Name'] == 'Amount':
+                amount = float(item['Value'])
+            elif item['Name'] == 'PhoneNumber':
+                phone_number = str(item['Value'])
 
-            # Process response (e.g., update database, notify user)
-            return JsonResponse({'status': status, 'message': message})
+        if result_code == 0:  # Successful transaction
+            try:
+                transaction = DepositTransaction.objects.get(
+                    phone_number=phone_number, 
+                    status='Pending'
+                )
+                transaction.transaction_id = transaction_id
+                transaction.status = 'Completed'
+                transaction.save()
 
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+                # Update wallet balance
+                wallet, _ = Wallet.objects.get_or_create(user=transaction.user)
+                wallet.deposit(amount)
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+                return JsonResponse({'success': True, 'message': 'Deposit validated successfully.'})
+            except DepositTransaction.DoesNotExist:
+                return JsonResponse({'error': 'Transaction not found.'}, status=400)
+        else:
+            return JsonResponse({'error': 'M-Pesa transaction failed.'}, status=400)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# @csrf_exempt
+# def handle_mpesa_response(request):
+#     if request.method == 'POST':
+#         try:
+#             data = json.loads(request.body)
+#             result_code = data.get('ResultCode', '')
+
+#             # Handle different response scenarios
+#             if result_code == '0':
+#                 message = "Transaction successful ✅"
+#                 status = "SUCCESS"
+#             elif result_code == '1032':
+#                 message = "Transaction canceled by user ❌"
+#                 status = "CANCELED"
+#             elif result_code == '1037':
+#                 message = "STK Push timed out ⏳"
+#                 status = "TIMEOUT"
+#             else:
+#                 message = f"Unknown response: {data.get('ResultDesc', 'No description')}"
+#                 status = "UNKNOWN"
+
+#             # Process response (e.g., update database, notify user)
+#             return JsonResponse({'status': status, 'message': message})
+
+#         except json.JSONDecodeError:
+#             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+#     return JsonResponse({'error': 'Invalid request method'}, status=405)
   
 
 def exchange(request):
@@ -307,6 +398,69 @@ def recent_trades(request):
     df.head()
     return render(request, )
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from datetime import datetime, timedelta
+from .models import InvestmentPlan, Investment
+
+@login_required
+# def confirm_investment(request, plan_id):
+#     # Fetch the selected investment plan
+#     plan = get_object_or_404(InvestmentPlan, id=plan_id)
+
+#     if request.method == 'POST':
+#         try:
+#             # Calculate investment start and end date
+#             start_date = datetime.now()
+#             end_date = start_date + timedelta(days=plan.cycle_days)
+
+#             # Create the investment entry
+#             investment = Investment.objects.create(
+#                 user=request.user,
+#                 plan=plan,
+#                 start_date=start_date,
+#                 end_date=end_date,
+#                 status="active"
+#             )
+
+#             # Redirect or return success response
+#             return JsonResponse({'success': True, 'message': 'Investment confirmed!', 'investment_id': investment.id})
+
+#         except Exception as e:
+#             return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+#     # Render the confirmation page with plan details
+#     return render(request, 'src/dashboard/invest.html', {'plan': plan})
+
+
+
+def confirm_investment(request, plan_id):
+    plan = get_object_or_404(InvestmentPlan, id=plan_id)
+
+    if request.method == 'POST':
+        try:
+            # Calculate investment start and end date
+            start_date = datetime.now()
+            end_date = start_date + timedelta(days=plan.cycle_days)
+
+            # Create investment record
+            investment = Investment.objects.create(
+                user=request.user,
+                plan=plan,
+                start_date=start_date,
+                end_date=end_date,
+                status="active"
+            )
+
+            return JsonResponse({'success': True, 'message': 'Investment confirmed!', 'investment_id': investment.id})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+
+
 def avg_price(request):
     avg_price = client.get_avg_price()
     return avg_price
@@ -314,7 +468,8 @@ def avg_price(request):
 @login_required
 def market(request):
     plans = InvestmentPlan.objects.all()
-    return render(request, 'src/dashboard/market.html', {'plans': plans})
+    investments = Investment.objects.filter(user=request.user).select_related("plan")
+    return render(request, 'src/dashboard/market.html', {'plans': plans, 'investments':investments})
     # api_key = os.environ['BINANCE_API_KEY']
     # api_secret = os.environ['BINANCE_SECRET_KEY']
     # client = Client(api_key, api_secret, testnet=True)

@@ -453,7 +453,7 @@ def confirm_investment(request, plan_id):
                 status="active"
             )
 
-            return JsonResponse({'success': True, 'message': 'Investment confirmed!', 'investment_id': investment.id})
+            return JsonResponse({'success': True, 'message': 'Investment confirmed!'})
 
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=400)

@@ -14,6 +14,8 @@ from pathlib import Path
 from decouple import config
 import django.core.mail.backends.smtp
 import pandas as pd
+import django_heroku
+import dj_database_url
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -88,6 +90,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -224,6 +227,8 @@ STATICFILES_DIRS = [
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -272,3 +277,5 @@ MPESA_ENVIRONMENT = 'sandbox'  # or 'production'
 MPESA_SHORTCODE_TYPE = config('MPESA_SHORTCODE_TYPE')
 MPESA_INITIATOR_USERNAME = config('MPESA_INITIATOR_USERNAME')
 MPESA_INITIATOR_SECURITY_CREDENTIAL = config('MPESA_INITIATOR_SECURITY_CREDENTIAL')
+
+django_heroku.settings(locals())

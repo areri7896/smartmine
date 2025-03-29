@@ -37,7 +37,8 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = ['2qd-talented-lyell.circumeo-apps.net',
     'localhost',
     'https://2qd-talented-lyell.circumeo-apps.net',
-    '127.0.0.1',]
+    '127.0.0.1',
+    '*',]
 
 
 CSRF_TRUSTED_ORIGINS = [

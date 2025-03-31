@@ -118,7 +118,7 @@ def get_crypto_price(request, symbol):
         api_secret = os.environ.get('BINANCE_SECRET_KEY')
         
         if not api_key or not api_secret:
-            return JsonResponse({"error": "Missing API keys"}, status=500)
+            return JsonResponse({"error": "Missing connections"}, status=500)
 
         client = Client(api_key, api_secret, testnet=True)
 
@@ -145,18 +145,18 @@ def subscribe(request):
         try:
             validate_email(email)
         except ValidationError:
-            return JsonResponse({"error": "Invalid email format"}, status=400)
+            return JsonResponse({"error": "Invalid email format, renter the email and try again"}, status=400)
 
         # Check if email already exists
         if Subscriber.objects.filter(email=email).exists():
-            return JsonResponse({"error": "Email already subscribed"}, status=400)
+            return JsonResponse({"error": "You are already subscribed! Thank you for you interest"}, status=400)
 
         # Save email to database
         Subscriber.objects.create(email=email)
 
         # Send confirmation email
         subject = "Thank You for Subscribing! To Smartmine"
-        message = f"Hello,\n\nThank you for subscribing to our updates. You'll now receive the latest news about our exchange and products.\n\nBest Regards,\nYour Company Team"
+        message = f"Greetings,\n\nThank you for subscribing to Smartmine updates. You'll now receive the latest news about our exchange, products and services.\n\nBest Regards,\nSmartmine Company Team"
         send_mail(subject, message, "your-email@gmail.com", [email])
 
         return JsonResponse({"success": "Subscribed successfully!"})

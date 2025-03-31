@@ -65,7 +65,7 @@
       <div class="footer__item footer-item-updates">
         <h6 class="footer__item-title">Submit for updates.</h6>
         <p class="fb-md footer-item-updates__desc">
-          Subscribe to get updates and notifications on our exchange and products.
+          Subscribe to get updates and notifications on our Exchange, Products and Services.
         </p>
         <div class="mini-form-sm__box">
           <form class="mini-form" id="subscribe-form">
@@ -209,7 +209,7 @@ document.getElementById("subscribe-form").addEventListener("submit", function (e
         const messageElement = this.querySelector("#subscribe-message");
 
         if (!email) {
-          messageElement.textContent = "Please enter a valid email.";
+          messageElement.textContent = "Please enter a valid Email.";
           messageElement.style.color = "red";
           return;
         }
@@ -226,9 +226,9 @@ document.getElementById("subscribe-form").addEventListener("submit", function (e
         .then(data => {
           if (data.success) {
             emailInput.value = ""; // Clear input field
-            messageElement.textContent = "Subscribed successfully! 🎉";
+            messageElement.textContent = "Subscribed Successfully! 🎉";
             messageElement.style.color = "green";
-            showToast("Subscribed successfully!");
+            showToast("Subscribed Successfully!");
           } else {
             messageElement.textContent = data.error;
             messageElement.style.color = "red";
@@ -236,7 +236,7 @@ document.getElementById("subscribe-form").addEventListener("submit", function (e
         })
         .catch(error => {
           console.error("Error:", error);
-          messageElement.textContent = "Error subscribing.";
+          messageElement.textContent = "Error Subscribing.";
           messageElement.style.color = "red";
         });
       });

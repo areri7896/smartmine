@@ -273,7 +273,7 @@ def wallet(request):
             cl = MpesaClient()
             account_reference = 'reference'
             transaction_desc = 'Description'
-            callback_url = 'https://a71c-129-222-187-145.ngrok-free.app/api/mpesa/callback/'
+            callback_url = 'https://smartmine-3d9e499f723e.herokuapp.com/api/mpesa/callback/'
             response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
 
             # Log the response for debugging

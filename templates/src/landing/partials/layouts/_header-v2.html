@@ -5,9 +5,21 @@
   <div class="container">
     <a class="navbar-brand" href="{% url 'home' %}">
       <!-- <img class="navbar-brand__icon" src="" alt="C" /> -->
-      <img class="navbar-brand__text" src="{% static 'assets/media/images/icons/Smr.png' %}" alt="SmartMine" />
+      <img
+        class="navbar-brand__text"
+        src="{% static 'assets/media/images/icons/Smr.jpg' %}"
+        alt="SmartMine"
+      />
     </a>
-    <button class="navbar-toggler ml-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <button
+      class="navbar-toggler ml-auto"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
       <img src="{% static 'assets/media/images/icons/menu.svg' %}" alt="MENU" />
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
@@ -25,13 +37,17 @@
           <li class="nav-item">
             <a class="nav-link {% if current == 'company' %}active{% endif %}" href="#">Company</a>
           </li> -->
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link {% if current == 'blog' %}active{% endif %}" href="#">Blog</a>
-          </li>
+          </li> -->
         </ul>
         <div class="navbar-buttons">
-          <a href="{% url 'account_login' %}" class="btn btn-secondary btn-sm">Sign in</a>
-          <a href="{% url 'account_signup' %}" class="btn btn-primary btn-sm">Get Started</a>
+          <a href="{% url 'account_login' %}" class="btn btn-secondary btn-sm"
+            >Sign in</a
+          >
+          <a href="{% url 'account_signup' %}" class="btn btn-primary btn-sm"
+            >Get Started</a
+          >
         </div>
       </div>
     </div>

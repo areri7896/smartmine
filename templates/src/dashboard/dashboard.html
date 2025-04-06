@@ -18,10 +18,12 @@
   <link href="{% static 'assets/css/pages/dashboard-v1.css' %}" rel="stylesheet" type="text/css" />
   <!-- End::Page Styles -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
 {% endblock %}
 <body class="">
   {% block content %}
- 
+ <!-- base.html or any template -->
+
 <div class="dashboard dashboard--v1">
     <div class="container container--dashboard">
       <div class="dashboard__group">
@@ -250,85 +252,7 @@
             <div class="standard-card__vignette"></div>
           </div>
         </div>
-        <!-- End::Standard Card -->      
-         <!-- Section::Exchange Section -->
-        <!-- Start::Advance Card -->
-        <!-- <div class="advance-card advance-card--type-1-v1">
-          <div class="advance-card__title">
-            <h6 class="advance-card__title-text">Exchange</h6>
-            <img src="{% static 'assets/media/images/icons/exchange-white.svg' %}" alt="" class="advance-card__title-icon">
-          </div>
-          <div class="advance-card__price">
-            <div class="advance-card__price-crypto">
-              <p class="advance-card__price-crypto-value">1</p>
-              <p class="advance-card__price-crypto-name">BTC</p>
-            </div>
-            <img src="{% static 'assets/media/images/icons/arrow-right-white.svg' %}" alt="" class="advance-card__price-arrow">
-            <div class="advance-card__price-currency">
-              <p class="advance-card__price-currency-value">53,260.20</p>
-              <p class="advance-card__price-currency-name">USD</p>
-            </div>
-          </div>
-          <div class="advance-card__forms-currency">
-            <div class="advance-card__forms-currency--get">
-              <p class="advance-card__forms-currency__title">Get</p>
-              <div class="forms-currency forms-currency--advance-card">
-                <div class="forms-group forms-group--value">
-                  <input type="number" min="0" value="5000" class="form-control forms-currency__value">
-                </div>
-                <div class="forms-currency__line"></div>
-                <div class="forms-group forms-group--currency js-forms-group--currency" id="custom-select-currency-1">
-                  <div class="forms-group__items selected" data-selected="usd">
-                    <img class="fg-items__icon" src="{% static 'assets/media/images/icons/usd.svg' %}" alt="">
-                  </div>
-                  <img class="forms-currency__icon-arrow-down" src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="">
-                  <div class="forms-group__dropdown js-forms-group__dropdown">
-                    <div class="forms-group__items active" data-selected="usd">
-                      <img class="fg-items__icon" src="{% static 'assets/media/images/icons/usd.svg' %}" alt="">
-                    </div>
-                    <div class="forms-group__items" data-selected="btc">
-                      <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="">
-                    </div>
-                    <div class="forms-group__items" data-selected="eth">
-                      <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-eth.svg' %}" alt="">
-                    </div>
-                    <div class="forms-group__items" data-selected="bnb">
-                      <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-bnb.svg' %}" alt="">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="advance-card__forms-currency--pay">
-              <p class="advance-card__forms-currency__title">Pay</p>
-              <div class="forms-currency forms-currency--advance-card">
-                <div class="forms-group forms-group--value">
-                  <input type="number" min="0" value="5000" class="form-control forms-currency__value">
-                </div>
-                <div class="forms-currency__line"></div>
-                <div class="forms-group forms-group--currency js-forms-group--currency" id="custom-select-currency-2">
-                  <div class="forms-group__items selected" data-selected="usd">
-                    <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="">
-                  </div>
-                  <img class="forms-currency__icon-arrow-down" src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="">
-                  <div class="forms-group__dropdown js-forms-group__dropdown">
-                    <div class="forms-group__items active" data-selected="btc">
-                      <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="">
-                    </div>
-                    <div class="forms-group__items" data-selected="eth">
-                      <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-eth.svg' %}" alt="">
-                    </div>
-                    <div class="forms-group__items" data-selected="bnb">
-                      <img class="fg-items__icon" src="{% static 'assets/media/images/icons/logo-bnb.svg' %}" alt="">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <button class="advance-card__button btn btn-primary btn-pill">Exchange</button>
-        </div> -->
-        <!-- End::Advance Card -->     
+       
           <!-- Section::Overall Growth Section -->
         <!-- Start::Complete Card -->
         <div class="complete-card complete-card--type-2-v1">
@@ -463,77 +387,7 @@
               </div>
             </div>
             {% endfor %}
-<!--
-            <div class="standard-card standard-card--type-3-v1 assets__item">
-              <div class="container">
-                <div class="standard-card__content">
-                  <div class="standard-card__content-graph">
-                    <img src="{% static 'assets/media/images/icons/ETH.svg' %}" alt="" class="standard-card__content-image">
-                    <div class="standard-card__content-chart-wrapper">
-                      <div id="standard-card__content-chart-5" class="standard-card__content-chart-render"></div>
-                    </div>
-                  </div>
-                  <div class="standard-card__content-percentage">
-                    <img class="standard-card__content-arrow" src="{% static 'assets/media/images/icons/red-arrow-down.svg' %}" alt="">
-                    <p class="standard-card__content-value text-bearish">1.53%</p>
-                  </div>
-                  <div class="standard-card__content-desc">
-                    <p class="standard-card__content-desc-currency">Ethereum</p>
-                    <div class="standard-card__content-desc-prices">
-                      <p class="standard-card__content-desc-price">USD 1,643.80</p>
-                      <p class="standard-card__content-desc-token">ETH</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>       
-            <div class="standard-card standard-card--type-3-v1 assets__item">
-              <div class="container">
-                <div class="standard-card__content">
-                  <div class="standard-card__content-graph">
-                    <img src="{% static 'assets/media/images/icons/logo-usdt.svg' %}" alt="" class="standard-card__content-image">
-                    <div class="standard-card__content-chart-wrapper">
-                      <div id="standard-card__content-chart-3-2" class="standard-card__content-chart-render"></div>
-                    </div>
-                  </div>
-                  <div class="standard-card__content-percentage">
-                    <img class="standard-card__content-arrow" src="{% static 'assets/media/images/icons/green-arrow-up.svg' %}" alt="">
-                    <p class="standard-card__content-value text-bullish">1.12%</p>
-                  </div>
-                  <div class="standard-card__content-desc">
-                    <p class="standard-card__content-desc-currency">Tether</p>
-                    <div class="standard-card__content-desc-prices">
-                      <p class="standard-card__content-desc-price">USD 0.9999</p>
-                      <p class="standard-card__content-desc-token">USDT</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="standard-card standard-card--type-3-v1 assets__item">
-              <div class="container">
-                <div class="standard-card__content">
-                  <div class="standard-card__content-graph">
-                    <img src="{% static 'assets/media/images/icons/logo-bnb.svg' %}" alt="" class="standard-card__content-image">
-                    <div class="standard-card__content-chart-wrapper">
-                      <div id="standard-card__content-chart-5-2" class="standard-card__content-chart-render"></div>
-                    </div>
-                  </div>
-                  <div class="standard-card__content-percentage">
-                    <img class="standard-card__content-arrow" src="{% static 'assets/media/images/icons/red-arrow-down.svg' %}" alt="">
-                    <p class="standard-card__content-value text-bearish">1.53%</p>
-                  </div>
-                  <div class="standard-card__content-desc">
-                    <p class="standard-card__content-desc-currency">Binance Coin</p>
-                    <div class="standard-card__content-desc-prices">
-                      <p class="standard-card__content-desc-price">USD 247.43</p>
-                      <p class="standard-card__content-desc-token">BNB</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>     
-            -->
+
           </div>
           <div class="slick__pagination">
             <div class="assets-carousel__arrows">
@@ -553,6 +407,32 @@
     </div>
   </div>
 <div class="container"> <canvas id="tickerChart" width="800" height="400"></canvas></div>
+
+
+{% if messages %}
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div id="liveToast" class="toast bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">Alert</strong>
+      <small class="text-muted">Just now</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body bg-primary" id="toastMessage">
+      {% for message in messages %}
+        {{ message }}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const toastEl = document.getElementById('liveToast');
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+  });
+</script>
+{% endif %}
 
   <script>
     async function fetchData() {
@@ -602,6 +482,8 @@
 
   {% block jsx %}{% endblock %}
   {% block js %}
+  <!-- Bootstrap JS (place before closing </body>) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Start::Global Bundle Scripts (used by all pages) -->
     <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
     <script src="{% static 'assets/js/custom/sidebar.js' %}"></script>

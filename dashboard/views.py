@@ -39,6 +39,16 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Wallet, DepositTransaction
 
+from django.shortcuts import redirect
+from django.contrib import messages
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from datetime import datetime, timedelta
+from .models import InvestmentPlan, Investment
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -101,9 +111,9 @@ def invest(request, plan_id):
 client.ping() #empty response no errors
 res= client.get_server_time()
 ts=res['serverTime']/1000
-your_dt = datetime.datetime.fromtimestamp(ts)
-fmt = your_dt.strftime("%Y-%n-%d %H:%M:%S")
-print(fmt)
+# your_dt = datetime.datetime.fromtimestamp(ts)
+# fmt = your_dt.strftime("%Y-%n-%d %H:%M:%S")
+# print(fmt)
 
 
 # getting all tickers
@@ -334,15 +344,31 @@ def mpesa_callback(request):
                 # Update wallet balance
                 wallet, _ = Wallet.objects.get_or_create(user=transaction.user)
                 wallet.deposit(amount)
-
-                return JsonResponse({'success': True, 'message': 'Deposit validated successfully.'})
+                messages.success(request, 'Deposit validated successfully.!')
+                # return JsonResponse({'success': True, 'message': 'Deposit validated successfully.'})
+                return redirect('wallet')
             except DepositTransaction.DoesNotExist:
-                return JsonResponse({'error': 'Transaction not found.'}, status=400)
+                messages.success(request, 'Transaction not found.!')
+                # return JsonResponse({'error': 'Transaction not found.'}, status=400)
+                return redirect('market')
         else:
-            return JsonResponse({'error': 'M-Pesa transaction failed.'}, status=400)
+            messages.success(request, 'M-Pesa transaction failed..!')
+            return redirect('market')
+            # return JsonResponse({'error': 'M-Pesa transaction failed.'}, status=400)
 
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        messages.success(request, 'There was an error. Please try again.!')
+        return redirect('market')
+        # return JsonResponse({'error': str(e)}, status=500)
+    
+        #         messages.success(request, 'Deposit validated successfully.!')
+        #     # return JsonResponse({'success': True, 'message': 'Investment confirmed!'})
+        #     return redirect('market')
+
+        # except Exception as e:
+        #     messages.error(request, 'OOPS!! there was an errorPlease try again!')
+        #     # return JsonResponse({'success': False, 'error': str(e)}, status=400)
+        #     return redirect('market')
 
 
 # @csrf_exempt
@@ -376,10 +402,16 @@ def mpesa_callback(request):
   
 
 def exchange(request):
-    exchange_info = client.get_exchange_info()
-    exchange_info.keys()
-    df =pd.DataFrame(exchange_info['symbols'])
-    return df
+    api_key = os.environ['BINANCE_API_KEY']
+    api_secret = os.environ['BINANCE_SECRET_KEY']
+    client = Client(api_key, api_secret, testnet=False)
+    tickers = client.get_all_tickers()
+    df = pd.DataFrame(tickers)
+    df.head()
+    combined_tickers = [(ticker['symbol'], ticker['price']) for ticker in tickers]
+    context = {'tks': combined_tickers, 'df':df, 'tickers': tickers}
+
+    return render(request, 'src/dashboard/exchange.html', context)
 
 
 def mkt_data(request):
@@ -398,11 +430,6 @@ def recent_trades(request):
     df.head()
     return render(request, )
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from datetime import datetime, timedelta
-from .models import InvestmentPlan, Investment
 
 @login_required
 # def confirm_investment(request, plan_id):
@@ -452,11 +479,14 @@ def confirm_investment(request, plan_id):
                 end_date=end_date,
                 status="active"
             )
-
-            return JsonResponse({'success': True, 'message': 'Investment confirmed!'})
+            messages.success(request, 'Your investment was successful!')
+            # return JsonResponse({'success': True, 'message': 'Investment confirmed!'})
+            return redirect('market')
 
         except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+            messages.error(request, 'OOPS!! there was an errorPlease try again!')
+            # return JsonResponse({'success': False, 'error': str(e)}, status=400)
+            return redirect('market')
 
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 

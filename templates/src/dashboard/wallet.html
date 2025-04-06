@@ -21,6 +21,8 @@
 </head>
 {% block content %}
 
+<!-- base.html or any template -->
+
   <div class="wallet wallet--v1">
     <div class="container container--dashboard">
       <div class="wallet-group">
@@ -297,6 +299,32 @@
       </div>
     </div>
   </div>
+
+  {% if messages %}
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div id="liveToast" class="toast bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">Alert</strong>
+      <small class="text-muted">Just now</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body bg-primary" id="toastMessage">
+      {% for message in messages %}
+        {{ message }}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const toastEl = document.getElementById('liveToast');
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+  });
+</script>
+{% endif %}
+
  <script>
 
 document.getElementById("mpesa-form").addEventListener("submit", async function (event) {
@@ -340,6 +368,9 @@ document.getElementById("mpesa-form").addEventListener("submit", async function 
     
   {% block js %}
   <!-- Start::Global Bundle Scripts (used by all pages) -->
+   <!-- Bootstrap JS (place before closing </body>) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
   <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
   <script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
   <!-- End::Global Bundle Scripts -->

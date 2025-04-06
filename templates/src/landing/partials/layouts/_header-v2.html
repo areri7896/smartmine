@@ -7,7 +7,7 @@
       <!-- <img class="navbar-brand__icon" src="" alt="C" /> -->
       <img
         class="navbar-brand__text"
-        src="{% static 'assets/media/images/icons/Smr.jpg' %}"
+        src="{% static 'assets/media/images/icons/smrs.png' %}"
         alt="SmartMine"
       />
     </a>
@@ -53,4 +53,39 @@
     </div>
   </div>
 </nav>
+
+{% if messages %}
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div
+    id="liveToast"
+    class="toast bg-primary"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+  >
+    <div class="toast-header">
+      <strong class="me-auto">Alert</strong>
+      <small class="text-muted">Just now</small>
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+    <div class="toast-body bg-primary" id="toastMessage">
+      {% for message in messages %} {{ message }} {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const toastEl = document.getElementById("liveToast");
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+  });
+</script>
+{% endif %}
+
 <!-- End::Navbar V2 -->

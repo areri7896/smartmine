@@ -124,7 +124,7 @@ def get_crypto_price(request, symbol):
 
         # Fetch tickers from Binance API
         tickers = client.get_all_tickers()
-        assets = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT']  # Fixed ETHUSDT typo
+        assets = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT'] 
         extracted_data = {entry['symbol']: float(entry['price']) for entry in tickers if entry['symbol'] in assets}
 
         if symbol in extracted_data:

@@ -47,7 +47,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from datetime import datetime, timedelta
-from .models import InvestmentPlan, Investment
+from .models import InvestmentPlan, Investment, MpesaResponse
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -89,16 +89,20 @@ def investment_plans(request):
 def invest(request, plan_id):
     plan = get_object_or_404(InvestmentPlan, id=plan_id)
     print("Plan Retrieved:", plan)  # Debugging line
-
-    if request.method == 'POST':
-        end_date = datetime.now() + timedelta(days=plan.cycle_days)
-        investment = Investment.objects.create(
-            user=request.user,
-            plan=plan,
-            end_date=end_date,
-            status="active"
-        )
-        return redirect('market/')
+    wc = Wallet.objects.filter(user=request.user).first()
+    if wc and wc.balance >= 0:
+        if request.method == 'POST':
+            end_date = datetime.now() + timedelta(days=plan.cycle_days)
+            investment = Investment.objects.create(
+                user=request.user,
+                plan=plan,
+                end_date=end_date,
+                status="active"
+            )
+            return redirect('market/')
+    else:
+        messages.error(request, 'Your account balance is low, please deposit!')
+        return redirect('wallet')
 
     return render(request, 'src/dashboard/invest.html', {'pl': plan})
 
@@ -249,11 +253,16 @@ def wallet(request):
                 except BinanceAPIException as e:
                     print(f"Error fetching price for {symbol}: {e}")
 
+
+        wallet_bal = Wallet.objects.filter(user=request.user).first()
+        #convert it to dollars
         # Prepare context for rendering the template
         context = {
             'total_balance': total_balance,
-            'extracted_data': extracted_data
+            'extracted_data': extracted_data,
+            'bal': wallet_bal
         }
+
 
         # Handle POST request for M-Pesa STK Push
         if request.method == 'POST':
@@ -289,12 +298,27 @@ def wallet(request):
             # Log the response for debugging
             print("STK Push Response Code:", response.status_code)
             print("STK Push Response Text:", response.text)
+            response_data = json.loads(request.body)
+
+            # Save the response to the database
+            mpesa_response = MpesaResponse(
+                merchant_request_id=response_data.get('MerchantRequestID'),
+                checkout_request_id=response_data.get('CheckoutRequestID'),
+                response_code=response_data.get('ResponseCode'),
+                response_description=response_data.get('ResponseDescription'),
+                customer_message=response_data.get('CustomerMessage')
+            )
+            mpesa_response.save()
 
             # Return JSON response based on STK Push result
             if response.status_code == 200:
-                return JsonResponse({'success': True, 'message': f"Deposit of {amount} initiated."})
+                messages.success(request, 'Your investment was successful!')
+                return JsonResponse({'success': True, 'message': f"Deposit of {amount} has been initiated. Please check your phone and enter your pin to complete the transaction"})
+                return redirect('wallet')
             else:
+                messages.success(request, 'There was an error in your deposit!')
                 return JsonResponse({'error': f"MPesa STK Push failed: {response.text}"}, status=400)
+                return redirect('wallet')
 
         # Render the wallet template with context
         return render(request, 'src/dashboard/wallet.html', context)
@@ -302,9 +326,11 @@ def wallet(request):
     except BinanceAPIException as e:
         print(f"Binance API Error: {e}")
         return JsonResponse({'error': f"Binance API Error: {e}"}, status=500)
+        return redirect('wallet')
     except Exception as e:
         print(f"An error occurred: {e}")
         return JsonResponse({'error': str(e)}, status=500)
+        return redirect('wallet')
 
 
 @csrf_exempt

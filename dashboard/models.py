@@ -105,3 +105,14 @@ class DepositTransaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.amount} ({self.status})"
+
+
+class MpesaResponse(models.Model):
+    merchant_request_id = models.CharField(max_length=255)
+    checkout_request_id = models.CharField(max_length=255)
+    response_code = models.CharField(max_length=10)
+    response_description = models.TextField()
+    customer_message = models.TextField()
+
+    def __str__(self):
+        return self.merchant_request_id

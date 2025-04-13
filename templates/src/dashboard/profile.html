@@ -2,34 +2,20 @@
 
 <title>{%block title %}update profile{% endblock %}</title>
 {%block css_links %}
-<link
-  href="{% static 'assets/media/images/icons/logo.svg' %}"
-  rel="shortcut icon"
-  type="image/x-icon"
-/>
+<link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
 
 <!-- Start::Global Styles (used by all pages) -->
-<link
-  href="{% static 'assets/css/styles.bundle.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
+<link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
 <!-- End::Global Styles -->
 <!-- Start::Plugins (used by this page) -->
-<link
-  href="{% static 'assets/plugins/datepicker/css/bootstrap-datepicker.min.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
+<link href="{% static 'assets/plugins/datepicker/css/bootstrap-datepicker.min.css' %}" rel="stylesheet"
+  type="text/css" />
 <!-- End::Plugins -->
 <!-- Start::Page Styles (used by this page) -->
-<link
-  href="{% static 'assets/css/pages/profile-v1.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
+<link href="{% static 'assets/css/pages/profile-v1.css' %}" rel="stylesheet" type="text/css" />
 <!-- End::Page Styles -->
 {% endblock %}
+
 <body class="">
   {% block content %}
 
@@ -37,12 +23,10 @@
     <div class="container container--dashboard">
       <div class="profile__title">
         <div class="profile__title-icon-wrapper">
-          <img
-            src="{% static 'assets/media/images/icons/profile-pict.svg' %}"
-            alt=""
-            class="profile__title-icon"
-          />
+          {% if user.is_authenticated %}
+          <img src="{{ user.profile.profile_pic.url }}" alt="" class="profile__title-icon" />
         </div>
+        {% endif %}
         <div class="profile__title-text">
           <h3 class="profile__title-text-1">Update your Profile</h3>
           <p class="fd-md profile__title-text-2">Setup your profile</p>
@@ -53,254 +37,122 @@
         <div class="profile__content">
           <div class="profile__contact-info">
             <div class="contact-info__photo-profile">
+              {% if user.is_authenticated %}
               <div class="photo-profile__group">
-                <img
-                  src="{% static 'assets/media/images/64x64.png' %}"
-                  alt=""
-                  class="photo-profile__group-photo"
-                />
-                <div class="photo-profile__group-text">
-                  <p class="fd-sm fd-sm--bold photo-profile__group-text-name">
-                    John Doe
+                <img src="{{ user.profile.profile_pic.url }}" alt="" class="photo-profile__group-photo" />
+                <div class="photo-profile__group-text"
+                  style="display: flex; justify-content: space-between; gap: 10px; text-transform: uppercase;">
+                  <p class="fd-sm fd-sm--bold photo-profile__group-text-name" style="margin: auto;">
+                    {{ user.profile.first_name }}
                   </p>
-                  <p class="fb-sm photo-profile__group-text-email">
-                    johndoe123@gmail.com
+                  <p class="fd-sm fd-sm--bold photo-profile__group-text-name">
+                    {{ user.profile.last_name }}
                   </p>
                 </div>
+                <p class="fb-sm photo-profile__group-text-email">
+                  {{ user.email }}
+                </p>
               </div>
-              <div class="photo-profile__cta">
+              <!-- <div class="photo-profile__cta">
                 <button class="btn btn-primary btn-sm btn-pill">
                   Change Photo Profile
                 </button>
                 <button class="btn btn-secondary btn-sm">Delete</button>
-              </div>
+              </div> -->
+              {% endif %}
             </div>
-            <div class="contact-info__name">
-              <div class="contact-info__name-form">
-                <p
-                  class="fb-regular fb-regular--bold contact-info__name-form-text"
-                >
-                  Username
-                </p>
-                <div
-                  class="d-block mini-form-sm__box contact-info__name-form-input"
-                >
-                  <form class="mini-form">
-                    <input
-                      type="text"
-                      class="form-control form-control-sm mini-form__input"
-                      placeholder="John Doe"
-                      autocomplete="off"
-                    />
-                  </form>
-                </div>
-              </div>
-              <div class="contact-info__name-form">
-                <p
-                  class="fb-regular fb-regular--bold contact-info__name-form-text"
-                >
-                  Email
-                </p>
-                <div
-                  class="d-block mini-form-sm__box contact-info__name-form-input"
-                >
-                  <form class="mini-form">
-                    <input
-                      type="email"
-                      class="form-control form-control-sm mini-form__input"
-                      placeholder="johndoe123@gmail.com"
-                      autocomplete="off"
-                    />
-                  </form>
-                </div>
-              </div>
-            </div>
-            <div class="contact-info__crypto">
-              <p class="fb-regular fb-regular--bold contact-info__crypto-text">
-                Crypto addresses
-              </p>
-              <div class="contact-info__crypto-group">
-                <div class="contact-info__crypto-group-coins">
-                  <img
-                    src="{% static 'assets/media/images/crypto-coins-1.png' %}"
-                    alt=""
-                    class="contact-info__crypto-group-coin"
-                  />
-                  <img
-                    src="{% static 'assets/media/images/crypto-coins-2.png' %}"
-                    alt=""
-                    class="contact-info__crypto-group-coin"
-                  />
-                  <img
-                    src="{% static 'assets/media/images/crypto-coins-3.png' %}"
-                    alt=""
-                    class="contact-info__crypto-group-coin"
-                  />
-                  <img
-                    src="{% static 'assets/media/images/crypto-coins-4.png' %}"
-                    alt=""
-                    class="contact-info__crypto-group-coin"
-                  />
-                </div>
-                <img
-                  src="{% static 'assets/media/images/icons/arrow-right-grey.svg' %}"
-                  alt=""
-                  class="contact-info__crypto-group-arrow"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="profile__personal-info">
-            <div class="personal-info__name-form">
-              <p
-                class="fb-regular fb-regular--bold personal-info__name-form-text"
-              >
-                First name
-              </p>
-              <div
-                class="d-block mini-form-sm__box personal-info__name-form-input"
-              >
-                <form class="mini-form">
-                  <input
-                    type="text"
-                    class="form-control form-control-sm mini-form__input"
-                    placeholder="John"
-                    autocomplete="off"
-                  />
-                </form>
-              </div>
-            </div>
-            <div class="personal-info__name-form">
-              <p
-                class="fb-regular fb-regular--bold personal-info__name-form-text"
-              >
-                Last name
-              </p>
-              <div
-                class="d-block mini-form-sm__box personal-info__name-form-input"
-              >
-                <form class="mini-form">
-                  <input
-                    type="text"
-                    class="form-control form-control-sm mini-form__input"
-                    placeholder="Doe"
-                    autocomplete="off"
-                  />
-                </form>
-              </div>
-            </div>
-            <div
-              class="personal-info__name-form personal-info__name-form--date"
-            >
-              <p
-                class="fb-regular fb-regular--bold personal-info__name-form-text"
-              >
-                Date of birth
-              </p>
-              <div
-                class="d-block mini-form-sm__box personal-info__name-form-input"
-              >
-                <form class="mini-form">
-                  <input
-                    type="text"
-                    id="datepicker-1"
-                    class="form-control form-control-sm mini-form__input"
-                    placeholder="10 / 21 / 2022"
-                    autocomplete="off"
-                  />
-                </form>
-                <img
-                  class="personal-info__name-form-input-icon"
-                  src="{% static 'assets/media/images/icons/calendar.svg' %}"
-                  alt=""
-                />
-              </div>
-            </div>
-            <div
-              class="personal-info__name-form personal-info__name-form--country"
-            >
-              <p
-                class="fb-regular fb-regular--bold personal-info__name-form-text"
-              >
-                Country of residence
-              </p>
-              <div class="d-block">
-                <div
-                  class="forms-group forms-select js-forms-select"
-                  id="custom-select-form-1"
-                >
-                  <div
-                    class="forms-group__items selected"
-                    data-selected="indonesia"
-                  >
-                    <p class="fb-regular fg-items__value">Indonesia</p>
+            <form action="" enctype="multipart/form-data" method="POST" class="contact-info__form"
+              url="{% url 'profile' %}">
+              {%csrf_token%}
+
+              <div class="contact-info__name w-100">
+                <div class="contact-info__name-form">
+                  <div class="personal-info__name-form personal-info__name-form--country" style="width: 90%;">
+                    <p class="fb-regular fb-regular--bold contact-info__name-form-text">
+                      {{ user_form.username.label }}
+                    </p>
+                    <div class="d-block mini-form-sm__box contact-info__name-form-input w-100">
+                      {{ user_form.username }}
+                    </div>
                   </div>
-                  <img
-                    class="forms-select__arrow-down"
-                    src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
-                    alt=""
-                  />
-                  <div class="forms-group__dropdown js-forms-group__dropdown">
-                    <div
-                      class="forms-group__items active"
-                      data-selected="indonesia"
-                    >
-                      <p class="fb-regular fg-items__value">Indonesia</p>
-                    </div>
-                    <div class="forms-group__items" data-selected="usa">
-                      <p class="fb-regular fg-items__value">USA</p>
-                    </div>
-                    <div class="forms-group__items" data-selected="japan">
-                      <p class="fb-regular fg-items__value">Japan</p>
+                  <div class="personal-info__name-form personal-info__name-form--country">
+                    <p class="fb-regular fb-regular--bold personal-info__name-form-text w-100">
+                      {{ user_form.profile_pic.label }}:
+                    </p>
+                    <div class="d-block mini-form-sm__box contact-info__name-form-input w-100">
+                      {{ user_form.profile_pic }}
                     </div>
                   </div>
                 </div>
+                <!-- <div class="contact-info__name-form">
+                <p class="fb-regular fb-regular--bold contact-info__name-form-text">
+                  {{user_form.email.label}}
+                </p>
+                <div class="d-block mini-form-sm__box contact-info__name-form-input">
+                  {{ user_form.email }}
+                </div>
+              </div> -->
               </div>
+          </div>
+        </div>
+        <div class="profile__personal-info"
+          style="display: flex; justify-content: space-between; margin: 20px 0; gap: 10px;">
+          <div class="personal-info__name-form" style="width: 90%;">
+            <p class="fb-regular fb-regular--bold personal-info__name-form-text">
+              {{user_form.first_name.label}}
+            </p>
+            <div class="d-block mini-form-sm__box personal-info__name-form-input">
+
+              {{ user_form.first_name }}
             </div>
           </div>
-          <div class="profile__delete-account">
-            <div class="delete-account__group">
-              <p
-                class="fb-regular fb-regular--bold delete-account__group-title"
-              >
-                Delete account
-              </p>
-              <p class="fb-regular delete-account__group-desc">
-                Closing your account can’t be undone. Please make sure your
-                account balance is $0.00 before you begin.
-              </p>
+          <div class="personal-info__name-form" style="width: 90%;">
+            <p class="fb-regular fb-regular--bold personal-info__name-form-text">
+              {{ user_form.last_name.label }}
+            </p>
+            <div class="d-block mini-form-sm__box personal-info__name-form-input">
+              {{ user_form.last_name }}
             </div>
-            <button class="btn btn-primary btn-sm btn-pill delete-account__btn">
-              Delete Account Now
-            </button>
           </div>
-          <button class="btn btn-primary btn-lg btn-pill profile__save-btn">
+        </div>
+        <div class="" style="display: flex; justify-content: space-between; gap: 10px;">
+          <div class="personal-info__name-form personal-info__name-form--date w-100">
+            <p class="fb-regular fb-regular--bold personal-info__name-form-text">
+              {{ user_form.dob.label }}
+            </p>
+            <div class="d-block mini-form-sm__box personal-info__name-form-input">
+              {{ user_form.dob }}
+            </div>
+          </div>
+          <div class="personal-info__name-form personal-info__name-form--country w-100">
+            <p class="fb-regular fb-regular--bold personal-info__name-form-text">
+              {{ user_form.country.label }}
+            </p>
+            <div class="d-block mini-form-sm__box contact-info__name-form-input">
+              {{ user_form.country }}
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-lg btn-pill profile__save-btn " style="height: 20%; width: 20%;">
             Save Changes
           </button>
         </div>
       </div>
+      <div>
+      </div>
     </div>
+    </form>
+  </div>
   </div>
   {% if messages %}
   <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div
-      id="liveToast"
-      class="toast"
-      role="alert"
-      aria-live="assertive"
-      aria-atomic="true"
-    >
-      <div class="toast-header">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header " style="background-color: #27f7db;">
         <strong class="me-auto">Alert</strong>
         <small class="text-muted">Just now</small>
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="toast"
-          aria-label="Close"
-        ></button>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
-      <div class="toast-body" id="toastMessage">
+      <div class="toast-body" style="background-color: #246CF9;" id="toastMessage">
         {% for message in messages %} {{ message }} {% endfor %}
       </div>
     </div>

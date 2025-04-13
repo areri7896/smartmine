@@ -6,6 +6,7 @@
     <a class="navbar-brand" href="{% url 'home' %}">
       <!-- <img class="navbar-brand__icon" src="" alt="C" /> -->
       <img
+        style="width: 200%; height: 150%"
         class="navbar-brand__text"
         src="{% static 'assets/media/images/icons/smrs.png' %}"
         alt="SmartMine"
@@ -64,7 +65,7 @@
     aria-atomic="true"
   >
     <div class="toast-header">
-      <strong class="me-auto">Alert</strong>
+      <strong class="me-auto" style="background-color: #fa2256">Alert</strong>
       <small class="text-muted">Just now</small>
       <button
         type="button"
@@ -73,7 +74,7 @@
         aria-label="Close"
       ></button>
     </div>
-    <div class="toast-body bg-primary" id="toastMessage">
+    <div class="toast-body" style="background-color: #246cf9" id="toastMessage">
       {% for message in messages %} {{ message }} {% endfor %}
     </div>
   </div>

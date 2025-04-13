@@ -156,7 +156,7 @@
           <div class="navbar-profile-menu">
             <p class="navbar-profile-menu__text">{{ request.user.username }}</p>
             <img
-              src="{% static 'assets/media/images/38x38.png' %}"
+              src="{{ request.user.profile.profile_pic.url }}"
               alt="profile-photo-icon"
               class="navbar-profile-menu__image"
             />

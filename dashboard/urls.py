@@ -21,3 +21,6 @@ urlpatterns = [
 
     path('api/tickers/', dashboard_views.get_ticker_data, name='get_ticker_data'),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

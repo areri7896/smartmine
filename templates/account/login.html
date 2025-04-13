@@ -1,60 +1,104 @@
-{% extends 'src/dashboard/base.html' %}
-{% load static %}
-{% load i18n %}
-{% load socialaccount %}
-{% load allauth account %}
-{% load widget_tweaks %}
-
+{% extends 'src/dashboard/base.html' %} {% load static %} {% load i18n %} {%
+load socialaccount %} {% load allauth account %} {% load widget_tweaks %}
 
 <title>{% block title %}Sign In{% endblock %}</title>
 
 {% block css_links %}
-  <link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+<link
+  href="{% static 'assets/media/images/icons/logo.svg' %}"
+  rel="shortcut icon"
+  type="image/x-icon"
+/>
 
-  <!-- Start::Global Styles (used by all pages) -->
-  <link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
-  <!-- End::Global Styles -->
+<!-- Start::Global Styles (used by all pages) -->
+<link
+  href="{% static 'assets/css/styles.bundle.css' %}"
+  rel="stylesheet"
+  type="text/css"
+/>
+<!-- End::Global Styles -->
 
-  <!-- Start::Page Styles (used by this page) -->
-  <link href="{% static 'assets/css/pages/sign-in.css' %}" rel="stylesheet" type="text/css" />
-  <!-- End::Page Styles -->
-{% endblock %}
-
-{% block content %}
+<!-- Start::Page Styles (used by this page) -->
+<link
+  href="{% static 'assets/css/pages/sign-in.css' %}"
+  rel="stylesheet"
+  type="text/css"
+/>
+<!-- End::Page Styles -->
+{% endblock %} {% block content %}
 <div class="sign-in">
   <div class="sign-in-card">
     <div class="sign-in__heading">
-      <img src="{% static 'assets/media/images/icons/smr.png' %}" alt="" class="logo">
+      <img
+        src="{% static 'assets/media/images/icons/smr.png' %}"
+        alt=""
+        class="logo"
+      />
       <p class="fb-sm sign-in__title">Welcome! Login to SmartMine</p>
     </div>
+
     {% if messages %}
-    {% for message in messages %}
-        <div {% if message.tags %} class="toast align-items-center text-bg-primary border-0 alert alert-{{ message.tags }}" {% endif %} role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="d-flex">
-            <div class="toast-body">
-             {{ message }}
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+      <div
+        id="liveToast"
+        class="toast bg-primary"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header">
+          <strong class="me-auto" style="background-color: #fa2256"
+            >Alert</strong
+          >
+          <small class="text-muted">Just now</small>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          ></button>
         </div>
-
-    {% endfor %}
-    {% endif %}
-      <a href="{% provider_login_url 'google' %}" class="btn btn-google-signin">
-        <img src="{% static 'assets/media/images/icons/google.svg' %}" alt="" class="logo">
-        <p class="fb-lg">Log in with Google</p>
-      </a>
-      <div class="sign-in__break-or">
-        <div class="line"></div>
-        <p class="fb-lg">Or</p>
-        <div class="line"></div>
+        <div
+          class="toast-body"
+          style="background-color: #246cf9"
+          id="toastMessage"
+        >
+          {% for message in messages %} {{ message }} {% endfor %}
+        </div>
       </div>
+    </div>
 
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const toastEl = document.getElementById("liveToast");
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+      });
+    </script>
+    {% endif %}
+    <a href="{% provider_login_url 'google' %}" class="btn btn-google-signin">
+      <img
+        src="{% static 'assets/media/images/icons/google.svg' %}"
+        alt=""
+        class="logo"
+      />
+      <p class="fb-lg">Log in with Google</p>
+    </a>
+    <div class="sign-in__break-or">
+      <div class="line"></div>
+      <p class="fb-lg">Or</p>
+      <div class="line"></div>
+    </div>
 
-    <form method="post" action="{% url 'account_login' %}" class="sign-in__forms">
+    <form
+      method="post"
+      action="{% url 'account_login' %}"
+      class="sign-in__forms"
+    >
       {% csrf_token %}
       <div class="forms-group">
-        {% render_field form.login class="form-control" placeholder="Enter your Username or email address"%}
+        {% render_field form.login class="form-control" placeholder="Enter your
+        Username or email address"%}
         <!-- <input type="text" class="form-control" id="email" name="username" placeholder="Enter your email address"> -->
       </div>
       <div class="forms-group">
@@ -62,17 +106,35 @@
         {% render_field form.password class="form-control" %}
         <!-- <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password"> -->
       </div>
-      
-      <div class="remember-forgot-password"> 
+
+      <div class="remember-forgot-password">
         <div class="form-check">
-          <input type="checkbox" class="form-check-input" id="rememberPassword" name="remember">
-          <label class="form-check-label fb-sm" for="rememberPassword">Remember password</label>
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="rememberPassword"
+            name="remember"
+          />
+          <label class="form-check-label fb-sm" for="rememberPassword"
+            >Remember password</label
+          >
         </div>
-        <a href="{% url 'account_reset_password' %}" class="forgot-password fb-sm">Forgot password</a>
+        <a
+          href="{% url 'account_reset_password' %}"
+          class="forgot-password fb-sm"
+          >Forgot password</a
+        >
       </div>
-      <input type="submit" class="btn btn-primary btn-pill btn-submit" value="Sign In Now">
+      <input
+        type="submit"
+        class="btn btn-primary btn-pill btn-submit"
+        value="Sign In Now"
+      />
       <p class="fb-sm sign-up-info">
-        Don't have an account? <a href="{% url 'account_signup' %}" class="sign-up-link">Sign up for free</a>
+        Don't have an account?
+        <a href="{% url 'account_signup' %}" class="sign-up-link"
+          >Sign up for free</a
+        >
       </p>
     </form>
   </div>
@@ -88,5 +150,4 @@
 <!-- Start::Page Scripts (used by this page) -->
 <script src="{% static 'assets/js/pages/sign-in-page.js' %}"></script>
 <!-- End::Page Scripts -->
-{% endblock %}
-{% endblock %}
+{% endblock %} {% endblock %}

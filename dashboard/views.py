@@ -1,12 +1,11 @@
 from django.shortcuts import render, redirect,  get_object_or_404, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from allauth.socialaccount.forms import SignupForm
+from .forms import ProfileUpdateForm
 from django import forms
 from django.http import HttpResponse
-from django.contrib import messages
 from django.core.mail import send_mail
 from django_daraja.mpesa.core import MpesaClient
 from binance.exceptions import BinanceAPIException
@@ -17,45 +16,22 @@ from binance.client import Client
 import requests
 import json
 import datetime
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import InvestmentPlan, Investment
-from datetime import datetime, timedelta
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from datetime import datetime, timedelta
-from .models import InvestmentPlan, Investment
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from .models import Investment, InvestmentPlan, DepositTransaction
-from datetime import datetime, timedelta
-
 from .functions import *
-import json
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .models import Wallet, DepositTransaction
-
-from django.shortcuts import redirect
-from django.contrib import messages
-
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from datetime import datetime, timedelta
-from .models import InvestmentPlan, Investment, MpesaResponse
+from .models import InvestmentPlan, Investment, MpesaResponse, DepositTransaction, Wallet, Profile
 
 from dotenv import load_dotenv
+from django.utils.timezone import now
+
 load_dotenv()
 
 api_key = os.environ['BINANCE_API_KEY']
 api_secret = os.environ['BINANCE_SECRET_KEY']
 client = Client(api_key, api_secret, testnet=True)
-client.API_URL = 'https://api.binance.com'  # Ensure correct URL
+client.API_URL = 'https://api.binance.com'  
 client.ping()
 # tickers = client.get_all_tickers()
 # df = pd.DataFrame(tickers)
@@ -78,7 +54,7 @@ def investment_plans(request):
     plans = InvestmentPlan.objects.all()
     investments = Investment.objects.filter(user=request.user).select_related("plan")
 
-    print("Investments being passed to template:", investments)  # Debugging
+    # print("Investments being passed to template:", investments)
 
     context = {
         'investments': investments,
@@ -88,18 +64,24 @@ def investment_plans(request):
 
 def invest(request, plan_id):
     plan = get_object_or_404(InvestmentPlan, id=plan_id)
-    print("Plan Retrieved:", plan)  # Debugging line
     wc = Wallet.objects.filter(user=request.user).first()
+    # print ('wallet balance:', wc.balance)
+    # print ('plan price:', plan.price)
     if wc and wc.balance >= 0:
-        if request.method == 'POST':
-            end_date = datetime.now() + timedelta(days=plan.cycle_days)
-            investment = Investment.objects.create(
-                user=request.user,
-                plan=plan,
-                end_date=end_date,
-                status="active"
-            )
-            return redirect('market/')
+        if plan.price >= wc.balance:
+        # if wc.balance >= plan.price:
+            if request.method == 'POST':
+                end_date = datetime.now() + timedelta(days=plan.cycle_days)
+                investment = Investment.objects.create(
+                    user=request.user,
+                    plan=plan,
+                    end_date=end_date,
+                    status="active"
+                )
+                return redirect('market/')
+            else:
+                messages.error(request, 'Your balance is sufficent!!, please deposit!')
+                return redirect('wallet')
     else:
         messages.error(request, 'Your account balance is low, please deposit!')
         return redirect('wallet')
@@ -196,17 +178,6 @@ def asset_balance(request):
     return render(request, 'src/dashboard/wallet.html', context)
 
 
-# from django.http import JsonResponse
-
-# import os
-# import json
-# import time
-# from binance.client import Client
-
-# from django.http import JsonResponse
-# from django.shortcuts import render
-# from mpesa import MpesaClient  # Ensure this import is correct for your M-Pesa client
-
 def wallet(request):
     try:
         # Fetch Binance API keys from environment variables
@@ -253,9 +224,10 @@ def wallet(request):
                 except BinanceAPIException as e:
                     print(f"Error fetching price for {symbol}: {e}")
 
-
+        # Fetch wallet balance
         wallet_bal = Wallet.objects.filter(user=request.user).first()
-        #convert it to dollars
+        wallet_bal = wallet_bal.balance if wallet_bal else 0
+
         # Prepare context for rendering the template
         context = {
             'total_balance': total_balance,
@@ -263,73 +235,92 @@ def wallet(request):
             'bal': wallet_bal
         }
 
-
         # Handle POST request for M-Pesa STK Push
         if request.method == 'POST':
             try:
                 # Try retrieving data from request body (in case of JSON)
-                data = json.loads(request.body.decode('utf-8'))
-                phone_number = data.get('phone')
-                amount = int(data.get('amount'))
-            except json.JSONDecodeError:
-                # Fallback to form data (if request is not JSON)
-                phone_number = request.POST.get('phone')
-                amount = int(request.POST.get('amount'))
+                try:
+                    data = json.loads(request.body.decode('utf-8'))
+                    phone_number = data.get('phone')
+                    amount = int(data.get('amount'))
+                except json.JSONDecodeError:
+                    # Fallback to form data (if request is not JSON)
+                    phone_number = request.POST.get('phone')
+                    amount = int(request.POST.get('amount'))
 
-            # Format phone number if it starts with "0"
-            if phone_number.startswith("0"):
-                phone_number = "254" + phone_number[1:]
+                # Format phone number if it starts with "0"
+                if phone_number.startswith("0"):
+                    phone_number = "254" + phone_number[1:]
 
-            transaction = DepositTransaction.objects.create(
-                user=request.user,
-                amount=amount,
-                phone_number=phone_number,
-                transaction_id=f"TXN{int(time.time())}",  # Temporary transaction ID
-                status='Pending'
-            )
+                # Create deposit transaction
+                DepositTransaction.objects.create(
+                    user=request.user,
+                    amount=amount,
+                    phone_number=phone_number,
+                    transaction_id=f"TXN{int(time.time())}",  # Temporary transaction ID
+                    status='Pending'
+                )
 
-            # Initialize M-Pesa client and initiate STK Push
-            cl = MpesaClient()
-            account_reference = 'reference'
-            transaction_desc = 'Description'
-            callback_url = 'https://smartmine-3d9e499f723e.herokuapp.com/api/mpesa/callback/'
-            response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
+                # Initialize M-Pesa client and initiate STK Push
+                cl = MpesaClient()
+                account_reference = 'reference'
+                transaction_desc = 'Description'
+                callback_url = 'https://smartmine-3d9e499f723e.herokuapp.com/api/mpesa/callback/'
+                response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
 
-            # Log the response for debugging
-            print("STK Push Response Code:", response.status_code)
-            print("STK Push Response Text:", response.text)
-            response_data = json.loads(request.body)
+                # Log the response for debugging
+                # print("STK Push Response Code:", response.status_code)
+                # print("STK Push Response Text:", response.text)
 
-            # Save the response to the database
-            mpesa_response = MpesaResponse(
-                merchant_request_id=response_data.get('MerchantRequestID'),
-                checkout_request_id=response_data.get('CheckoutRequestID'),
-                response_code=response_data.get('ResponseCode'),
-                response_description=response_data.get('ResponseDescription'),
-                customer_message=response_data.get('CustomerMessage')
-            )
-            mpesa_response.save()
+                # Decode response data
+                response_data = json.loads(response.text)
+                result_code = response_data.get('ResultCode', '')
 
-            # Return JSON response based on STK Push result
-            if response.status_code == 200:
-                messages.success(request, 'Your investment was successful!')
-                return JsonResponse({'success': True, 'message': f"Deposit of {amount} has been initiated. Please check your phone and enter your pin to complete the transaction"})
-                return redirect('wallet')
-            else:
-                messages.success(request, 'There was an error in your deposit!')
-                return JsonResponse({'error': f"MPesa STK Push failed: {response.text}"}, status=400)
-                return redirect('wallet')
+                # Handle different response scenarios
+                if result_code == '0':
+                    messages.success(request, "Transaction successful ✅")
+                elif result_code == '1032':
+                    messages.error(request, "Transaction canceled by user ❌")
+                elif result_code == '1037':
+                    messages.error(request, "STK Push timed out ⏳")
+                else:
+                    messages.error(request, f"Unknown response: {response_data.get('ResultDesc', 'No description')}")
 
-        # Render the wallet template with context
+                # Save the response to the database
+                MpesaResponse.objects.create(
+                    merchant_request_id=response_data.get('MerchantRequestID'),
+                    checkout_request_id=response_data.get('CheckoutRequestID'),
+                    response_code=response_data.get('ResponseCode'),
+                    response_description=response_data.get('ResponseDescription'),
+                    customer_message=response_data.get('CustomerMessage')
+                )
+
+                # Return JSON response based on STK Push result
+                if response.status_code == 200:
+                    return JsonResponse({
+                        'success': True,
+                        'message': f"Deposit of {amount} has been initiated. Please check your phone and enter your pin to complete the transaction"
+                    })
+                else:
+                    return JsonResponse({
+                        'error': f"MPesa STK Push failed: {response.text}"
+                    }, status=400)
+
+            except Exception as e:
+                print(f"An error occurred during STK Push: {e}")
+                messages.error(request, 'There was an error in your deposit!')
+                return JsonResponse({'error': str(e)}, status=400)
+
+        # Render the wallet page
         return render(request, 'src/dashboard/wallet.html', context)
 
     except BinanceAPIException as e:
         print(f"Binance API Error: {e}")
-        return JsonResponse({'error': f"Binance API Error: {e}"}, status=500)
+        messages.error(request, f"Binance API Error: {e}")
         return redirect('wallet')
     except Exception as e:
         print(f"An error occurred: {e}")
-        return JsonResponse({'error': str(e)}, status=500)
+        messages.error(request, f"An error occurred: {e}")
         return redirect('wallet')
 
 
@@ -339,9 +330,10 @@ def mpesa_callback(request):
     Validate M-Pesa payment and update wallet balance.
     """
     try:
+        # Parse the incoming JSON data
         data = json.loads(request.body.decode('utf-8'))
         
-        # Extract transaction details
+        # Extract transaction details from the callback
         body = data.get('Body', {}).get('stkCallback', {})
         result_code = body.get('ResultCode')
         metadata = body.get('CallbackMetadata', {}).get('Item', [])
@@ -349,6 +341,7 @@ def mpesa_callback(request):
         amount = None
         phone_number = None
 
+        # Extract metadata fields
         for item in metadata:
             if item['Name'] == 'MpesaReceiptNumber':
                 transaction_id = item['Value']
@@ -357,75 +350,40 @@ def mpesa_callback(request):
             elif item['Name'] == 'PhoneNumber':
                 phone_number = str(item['Value'])
 
+        # Check if the transaction was successful
         if result_code == 0:  # Successful transaction
             try:
+                # Retrieve the pending transaction
                 transaction = DepositTransaction.objects.get(
                     phone_number=phone_number, 
                     status='Pending'
                 )
+                # Update the transaction details
                 transaction.transaction_id = transaction_id
                 transaction.status = 'Completed'
                 transaction.save()
 
-                # Update wallet balance
+                # Update the wallet balance
                 wallet, _ = Wallet.objects.get_or_create(user=transaction.user)
-                wallet.deposit(amount)
-                messages.success(request, 'Deposit validated successfully.!')
-                # return JsonResponse({'success': True, 'message': 'Deposit validated successfully.'})
-                return redirect('wallet')
+                wallet.balance += amount
+                wallet.save()
+
+                # Return success response
+                return JsonResponse({'success': True, 'message': 'Deposit validated successfully.'}, status=200)
             except DepositTransaction.DoesNotExist:
-                messages.success(request, 'Transaction not found.!')
-                # return JsonResponse({'error': 'Transaction not found.'}, status=400)
-                return redirect('market')
+                # Handle case where the transaction is not found
+                return JsonResponse({'error': 'Transaction not found.'}, status=404)
         else:
-            messages.success(request, 'M-Pesa transaction failed..!')
-            return redirect('market')
-            # return JsonResponse({'error': 'M-Pesa transaction failed.'}, status=400)
+            # Handle failed transaction
+            return JsonResponse({'error': 'M-Pesa transaction failed.'}, status=400)
 
+    except json.JSONDecodeError:
+        # Handle JSON parsing errors
+        return JsonResponse({'error': 'Invalid JSON data received.'}, status=400)
     except Exception as e:
-        messages.success(request, 'There was an error. Please try again.!')
-        return redirect('market')
-        # return JsonResponse({'error': str(e)}, status=500)
-    
-        #         messages.success(request, 'Deposit validated successfully.!')
-        #     # return JsonResponse({'success': True, 'message': 'Investment confirmed!'})
-        #     return redirect('market')
+        # Handle any other exceptions
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
-        # except Exception as e:
-        #     messages.error(request, 'OOPS!! there was an errorPlease try again!')
-        #     # return JsonResponse({'success': False, 'error': str(e)}, status=400)
-        #     return redirect('market')
-
-
-# @csrf_exempt
-# def handle_mpesa_response(request):
-#     if request.method == 'POST':
-#         try:
-#             data = json.loads(request.body)
-#             result_code = data.get('ResultCode', '')
-
-#             # Handle different response scenarios
-#             if result_code == '0':
-#                 message = "Transaction successful ✅"
-#                 status = "SUCCESS"
-#             elif result_code == '1032':
-#                 message = "Transaction canceled by user ❌"
-#                 status = "CANCELED"
-#             elif result_code == '1037':
-#                 message = "STK Push timed out ⏳"
-#                 status = "TIMEOUT"
-#             else:
-#                 message = f"Unknown response: {data.get('ResultDesc', 'No description')}"
-#                 status = "UNKNOWN"
-
-#             # Process response (e.g., update database, notify user)
-#             return JsonResponse({'status': status, 'message': message})
-
-#         except json.JSONDecodeError:
-#             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
-
-#     return JsonResponse({'error': 'Invalid request method'}, status=405)
-  
 
 def exchange(request):
     api_key = os.environ['BINANCE_API_KEY']
@@ -458,43 +416,24 @@ def recent_trades(request):
 
 
 @login_required
-# def confirm_investment(request, plan_id):
-#     # Fetch the selected investment plan
-#     plan = get_object_or_404(InvestmentPlan, id=plan_id)
-
-#     if request.method == 'POST':
-#         try:
-#             # Calculate investment start and end date
-#             start_date = datetime.now()
-#             end_date = start_date + timedelta(days=plan.cycle_days)
-
-#             # Create the investment entry
-#             investment = Investment.objects.create(
-#                 user=request.user,
-#                 plan=plan,
-#                 start_date=start_date,
-#                 end_date=end_date,
-#                 status="active"
-#             )
-
-#             # Redirect or return success response
-#             return JsonResponse({'success': True, 'message': 'Investment confirmed!', 'investment_id': investment.id})
-
-#         except Exception as e:
-#             return JsonResponse({'success': False, 'error': str(e)}, status=400)
-
-#     # Render the confirmation page with plan details
-#     return render(request, 'src/dashboard/invest.html', {'plan': plan})
-
-
-
 def confirm_investment(request, plan_id):
+
     plan = get_object_or_404(InvestmentPlan, id=plan_id)
+    wallet = Wallet.objects.filter(user=request.user).first()
+
+    if not wallet:
+        messages.error(request, 'Wallet not found. Please create a wallet first.')
+        return redirect('wallet')
 
     if request.method == 'POST':
         try:
+            # Check if the user has sufficient balance
+            if wallet.balance <= plan.price:
+                messages.error(request, 'Insufficient balance. Please deposit funds to proceed.')
+                return redirect('wallet')
+
             # Calculate investment start and end date
-            start_date = datetime.now()
+            start_date = now()
             end_date = start_date + timedelta(days=plan.cycle_days)
 
             # Create investment record
@@ -505,17 +444,39 @@ def confirm_investment(request, plan_id):
                 end_date=end_date,
                 status="active"
             )
+
+            # Deduct plan price from wallet balance
+            wallet.balance -= plan.price
+            wallet.save()
+
             messages.success(request, 'Your investment was successful!')
-            # return JsonResponse({'success': True, 'message': 'Investment confirmed!'})
             return redirect('market')
 
         except Exception as e:
-            messages.error(request, 'OOPS!! there was an errorPlease try again!')
-            # return JsonResponse({'success': False, 'error': str(e)}, status=400)
+            print(f"Error during investment confirmation: {e}")  # Log the exception
+            messages.error(request, 'OOPS!! There was an error, Please try again!')
             return redirect('market')
 
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
+
+@login_required
+def update_investment_status():
+
+    investments = Investment.objects.filter(status="active", end_date__lte=now())
+    for investment in investments:
+        investment.status = "completed"
+        investment.save()
+
+from django.core.management.base import BaseCommand
+from dashboard.views import update_investment_status
+
+class Command(BaseCommand):
+    help = 'Update the status of expired investments'
+
+    def handle(self, *args, **kwargs):
+        update_investment_status()
+        self.stdout.write(self.style.SUCCESS('Successfully updated investment statuses.'))
 
 def avg_price(request):
     avg_price = client.get_avg_price()
@@ -536,9 +497,27 @@ def market(request):
 
     # return render(request, 'src/dashboard/market.html', context)
 
-@login_required
+
 def profile(request):
-    return render(request, 'src/dashboard/profile.html')
+    if request.user.is_authenticated:
+        # Get the Profile instance for the logged-in user
+        profile_instance = Profile.objects.get(user=request.user)
+        user_form = ProfileUpdateForm(request.POST or None, request.FILES or None, instance=profile_instance)
+
+        if request.method == 'POST':
+            if user_form.is_valid():
+                user_form.save()
+                messages.success(request, 'Congratulations! Your profile was updated successfully.')
+                return redirect('dashboard')
+
+        context = {
+            'user_form': user_form,
+        }
+        return render(request, 'src/dashboard/profile.html', context)
+    else:
+        messages.error(request, 'You need to log in to access your profile.')
+        return redirect('login')
+
 
 @login_required
 def exchange(request):

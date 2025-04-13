@@ -45,7 +45,7 @@
               <label class="form-check-label fb-sm" for="terms-condition">I agree to the Terms and Conditions and the Trading Risk Notice</label>
             </div>
           </div>
-          <input type="submmit" class="btn btn-primary btn-pill btn-submit" value="Sign Up Now"></input>
+          <input type="submit" class="btn btn-primary btn-pill btn-submit" value="Sign Up Now"></input>
           <p class="fb-sm sign-up-info">
             Already have an account? <a href="{% url 'account_login' %}" class="sign-up-link">Sign in now</a>
           </p>
@@ -78,7 +78,6 @@
 </script>
 {% endif %}
 
-    {% endblock %}
   {% block js %}
   <!-- Start::Global Bundle Scripts (used by all pages) -->
    <!-- Bootstrap JS (place before closing </body>) -->
@@ -91,6 +90,5 @@
   <script src="{% static 'assets/js/pages/sign-up-page.js' %}"></script>
   <!-- End::Page Scripts -->
   {% endblock %}
+  {% endblock %}
 </body>
-
-</html>

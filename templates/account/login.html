@@ -43,7 +43,7 @@ load socialaccount %} {% load allauth account %} {% load widget_tweaks %}
       });
     </script>
     {% endif %}
-    <a href="" class="btn btn-google-signin">
+    <a href="{% provider_login_url 'google' %}" class="btn btn-google-signin">
       <img src="{% static 'assets/media/images/icons/google.svg' %}" alt="" class="logo" />
       <p class="fb-lg">Log in with Google</p>
     </a>

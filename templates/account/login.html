@@ -4,65 +4,32 @@ load socialaccount %} {% load allauth account %} {% load widget_tweaks %}
 <title>{% block title %}Sign In{% endblock %}</title>
 
 {% block css_links %}
-<link
-  href="{% static 'assets/media/images/icons/logo.svg' %}"
-  rel="shortcut icon"
-  type="image/x-icon"
-/>
+<link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
 
 <!-- Start::Global Styles (used by all pages) -->
-<link
-  href="{% static 'assets/css/styles.bundle.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
+<link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
 <!-- End::Global Styles -->
 
 <!-- Start::Page Styles (used by this page) -->
-<link
-  href="{% static 'assets/css/pages/sign-in.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
+<link href="{% static 'assets/css/pages/sign-in.css' %}" rel="stylesheet" type="text/css" />
 <!-- End::Page Styles -->
 {% endblock %} {% block content %}
 <div class="sign-in">
   <div class="sign-in-card">
     <div class="sign-in__heading">
-      <img
-        src="{% static 'assets/media/images/icons/smr.png' %}"
-        alt=""
-        class="logo"
-      />
+      <img src="{% static 'assets/media/images/icons/smr.png' %}" alt="" class="logo" />
       <p class="fb-sm sign-in__title">Welcome! Login to SmartMine</p>
     </div>
 
     {% if messages %}
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-      <div
-        id="liveToast"
-        class="toast bg-primary"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
-        <div class="toast-header">
-          <strong class="me-auto" style="background-color: #fa2256"
-            >Alert</strong
-          >
+      <div id="liveToast" class="toast bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header" style="background-color: #fa2256">
+          <strong class="me-auto">Alert</strong>
           <small class="text-muted">Just now</small>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="toast"
-            aria-label="Close"
-          ></button>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
-        <div
-          class="toast-body"
-          style="background-color: #246cf9"
-          id="toastMessage"
-        >
+        <div class="toast-body" style="background-color: #246cf9" id="toastMessage">
           {% for message in messages %} {{ message }} {% endfor %}
         </div>
       </div>
@@ -76,12 +43,8 @@ load socialaccount %} {% load allauth account %} {% load widget_tweaks %}
       });
     </script>
     {% endif %}
-    <a href="{% provider_login_url 'google' %}" class="btn btn-google-signin">
-      <img
-        src="{% static 'assets/media/images/icons/google.svg' %}"
-        alt=""
-        class="logo"
-      />
+    <a href="" class="btn btn-google-signin">
+      <img src="{% static 'assets/media/images/icons/google.svg' %}" alt="" class="logo" />
       <p class="fb-lg">Log in with Google</p>
     </a>
     <div class="sign-in__break-or">
@@ -90,15 +53,10 @@ load socialaccount %} {% load allauth account %} {% load widget_tweaks %}
       <div class="line"></div>
     </div>
 
-    <form
-      method="post"
-      action="{% url 'account_login' %}"
-      class="sign-in__forms"
-    >
+    <form method="post" action="{% url 'account_login' %}" class="sign-in__forms">
       {% csrf_token %}
       <div class="forms-group">
-        {% render_field form.login class="form-control" placeholder="Enter your
-        Username or email address"%}
+        {% render_field form.login class="form-control" placeholder="Enter your Username or email address" %}
         <!-- <input type="text" class="form-control" id="email" name="username" placeholder="Enter your email address"> -->
       </div>
       <div class="forms-group">
@@ -109,32 +67,15 @@ load socialaccount %} {% load allauth account %} {% load widget_tweaks %}
 
       <div class="remember-forgot-password">
         <div class="form-check">
-          <input
-            type="checkbox"
-            class="form-check-input"
-            id="rememberPassword"
-            name="remember"
-          />
-          <label class="form-check-label fb-sm" for="rememberPassword"
-            >Remember password</label
-          >
+          <input type="checkbox" class="form-check-input" id="rememberPassword" name="remember" />
+          <label class="form-check-label fb-sm" for="rememberPassword">Remember password</label>
         </div>
-        <a
-          href="{% url 'account_reset_password' %}"
-          class="forgot-password fb-sm"
-          >Forgot password</a
-        >
+        <a href="{% url 'account_reset_password' %}" class="forgot-password fb-sm">Forgot password</a>
       </div>
-      <input
-        type="submit"
-        class="btn btn-primary btn-pill btn-submit"
-        value="Sign In Now"
-      />
+      <input type="submit" class="btn btn-primary btn-pill btn-submit" value="Sign In Now" />
       <p class="fb-sm sign-up-info">
         Don't have an account?
-        <a href="{% url 'account_signup' %}" class="sign-up-link"
-          >Sign up for free</a
-        >
+        <a href="{% url 'account_signup' %}" class="sign-up-link">Sign up for free</a>
       </p>
     </form>
   </div>

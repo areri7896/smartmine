@@ -4,36 +4,20 @@ load socialaccount %} {% load allauth account %} {% load widget_tweaks %}
 <title>{% block title %}Sign In{% endblock %}</title>
 
 {% block css_links %}
-<link
-  href="{% static 'assets/media/images/icons/logo.svg' %}"
-  rel="shortcut icon"
-  type="image/x-icon"
-/>
+<link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
 
 <!-- Start::Global Styles (used by all pages) -->
-<link
-  href="{% static 'assets/css/styles.bundle.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
+<link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
 <!-- End::Global Styles -->
 
 <!-- Start::Page Styles (used by this page) -->
-<link
-  href="{% static 'assets/css/pages/sign-in.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
+<link href="{% static 'assets/css/pages/sign-in.css' %}" rel="stylesheet" type="text/css" />
 <!-- End::Page Styles -->
 {% endblock %} {% block content %}
 <div class="sign-in">
   <div class="sign-in-card">
     <div class="sign-in__heading">
-      <img
-        src="{% static 'assets/media/images/icons/smr.png' %}"
-        alt=""
-        class="logo"
-      />
+      <img src="{% static 'assets/media/images/icons/smr.png' %}" alt="" class="logo" />
       <p class="fb-sm sign-in__title">
         Welcome! A verification email has been sent to your registered email
         address. Please check your inbox to verify and access your SmartMine
@@ -43,30 +27,13 @@ load socialaccount %} {% load allauth account %} {% load widget_tweaks %}
 
     {% if messages %}
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-      <div
-        id="liveToast"
-        class="toast bg-primary"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
+      <div id="liveToast" class="toast bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
-          <strong class="me-auto" style="background-color: #fa2256"
-            >Alert</strong
-          >
+          <strong class="me-auto" style="background-color: #fa2256">Alert</strong>
           <small class="text-muted">Just now</small>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="toast"
-            aria-label="Close"
-          ></button>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
-        <div
-          class="toast-body"
-          style="background-color: #246cf9"
-          id="toastMessage"
-        >
+        <div class="toast-body" style="background-color: #246cf9" id="toastMessage">
           {% for message in messages %} {{ message }} {% endfor %}
         </div>
       </div>

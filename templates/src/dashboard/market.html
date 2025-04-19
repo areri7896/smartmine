@@ -77,10 +77,10 @@
                           <p class="fb-regular table__assets-crypto-abbr">{{ investment.plan.name }}</p>
                         </td>
                         <td>
-                          <p class="fb-regular table__order">{{ investment.start_date|date:"Y-m-d H:i" }}</p>
+                          <p class="fb-regular table__order" style="width: 50%;">{{ investment.start_date|date:"Y-m-d H:i" }}</p>
                         </td>
                         <td>
-                          <p class="fb-regular table__available">{{ investment.end_date|date:"Y-m-d H:i" }}</p>
+                          <p class="fb-regular table__available" style="width: 50%;">{{ investment.end_date|date:"Y-m-d H:i" }}</p>
                         </td>
                         <td>
                           <p class="fb-regular table__status {% if investment.status == 'active' %}text-success{% else %}text-danger{% endif %}">

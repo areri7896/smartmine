@@ -54,6 +54,7 @@ CORS_ALLOWED_ORIGINS = [
 
 INSTALLED_APPS = [
     'django.contrib.sites',
+    'clearcache',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

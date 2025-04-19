@@ -1,4 +1,5 @@
 {% extends 'src/dashboard/basic.html' %} {% load static %}
+{% load socialaccount %}
 
 <title>{%block title %}update profile{% endblock %}</title>
 {%block css_links %}
@@ -49,10 +50,10 @@
                     {{ user.profile.last_name }}
                   </p>
                 </div>
-                <p class="fb-sm photo-profile__group-text-email">
-                  {{ user.email }}
-                </p>
               </div>
+              <p class="fb-sm photo-profile__group-text-email">
+                {{ user.email }}
+              </p>
               <!-- <div class="photo-profile__cta">
                 <button class="btn btn-primary btn-sm btn-pill">
                   Change Photo Profile

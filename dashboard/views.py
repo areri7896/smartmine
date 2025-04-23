@@ -356,6 +356,7 @@ def mpesa_callback(request):
                 # Retrieve the pending transaction
                 transaction = DepositTransaction.objects.get(
                     phone_number=phone_number, 
+                    transaction_id = transaction_id,
                     status='Pending'
                 )
                 # Update the transaction details
@@ -412,7 +413,9 @@ def recent_trades(request):
     recent_trade= client.get_recent_trades(symbol='BTCBUSD')
     df = pd.DataFrame(recent_trade)
     df.head()
-    return render(request, )
+    context = {'trades': recent_trade}
+    print('recent trade: ', context)
+    # return render(request, ,context)
 
 
 @login_required

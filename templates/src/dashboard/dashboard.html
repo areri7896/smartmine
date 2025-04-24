@@ -160,7 +160,7 @@
               </div>
               <div class="standard-card__content__list">
                 <div class="standard-card__content__list-currency">
-                  <img src="{% static 'assets/media/images/icons/logo-usdt.svg %}" alt=""
+                  <img src="{% static 'assets/media/images/icons/logo-usdt.svg' %}" alt=""
                     class="standard-card__content__list-currency-icon">
                   <p class="standard-card__content__list-currency-name">USDT</p>
                 </div>
@@ -455,28 +455,31 @@
                   </div>
                 </div>
               </div>
-              {% endfor %}
-
             </div>
           </div>
+          {% endfor %}
         </div>
       </div>
-      <div class="slick__pagination">
-        <div class="assets-carousel__arrows">
-          <a href="#" class="assets-carousel__prev">
-            <img src="{% static 'assets/media/images/icons/light-circle-arrow-left.svg' %}" alt="Previous">
-          </a>
-          <a href="#" class="assets-carousel__next">
-            <img src="{% static 'assets/media/images/icons/light-circle-arrow-right.svg' %}" alt="Next">
-          </a>
-        </div>
-        <div class="assets-carousel__pagination slick__pagination--dots">
-          <div class="assets-carousel__slick-slider-dots slick-slider-dots"></div>
-        </div>
-      </div>
+
+    </div>
+  </div>
+  <div class="slick__pagination">
+    <div class="assets-carousel__arrows">
+      <a href="#" class="assets-carousel__prev">
+        <img src="{% static 'assets/media/images/icons/light-circle-arrow-left.svg' %}" alt="Previous">
+      </a>
+      <a href="#" class="assets-carousel__next">
+        <img src="{% static 'assets/media/images/icons/light-circle-arrow-right.svg' %}" alt="Next">
+      </a>
+    </div>
+    <div class="assets-carousel__pagination slick__pagination--dots">
+      <div class="assets-carousel__slick-slider-dots slick-slider-dots"></div>
     </div>
   </div>
   </div>
+  </div>
+  </div>
+
 
 
   <!-- <div class="container"> <canvas id="tickerChart" width="800" height="400"></canvas></div> -->

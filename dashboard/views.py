@@ -9,6 +9,8 @@ from django.http import HttpResponse
 from django.core.mail import send_mail
 from django_daraja.mpesa.core import MpesaClient
 from binance.exceptions import BinanceAPIException
+from django.shortcuts import render
+from .utils.coingecko import get_token_data
 
 import os
 import pandas as pd
@@ -146,6 +148,13 @@ def get_ticker_data(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+
+def crypto_assets_view(request):
+    tickers = ['btc', 'eth', 'bnb', 'ada', 'doge']
+    tokens = get_token_data(tickers)
+    return render(request, 'your_template.html', {'tokens': tokens})
+
+
 @login_required
 def dashboard(request): 
     api_key = os.environ['BINANCE_API_KEY']
@@ -154,10 +163,13 @@ def dashboard(request):
     tickers = client.get_all_tickers()
     df = pd.DataFrame(tickers)
     df.head()
+
+    tics = ['btc', 'eth', 'bnb', 'ada', 'doge']
+    tokens = get_token_data(tics)
     # tick_symbol = [ticker['symbol'] for ticker in tickers]
     # tick_price = [ticker['price'] for ticker in tickers]
     combined_tickers = [(ticker['symbol'], ticker['price']) for ticker in tickers]
-    context = {'tks': combined_tickers, 'df':df, 'tickers': tickers}
+    context = {'tks': combined_tickers, 'df':df, 'tickers': tickers, 'tokens': tokens}
 
     # context = {'tick_symbol':tick_symbol, 'tick_price':tick_price}
     return render(request, 'src/dashboard/dashboard.html', context)

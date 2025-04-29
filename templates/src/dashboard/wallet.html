@@ -214,130 +214,37 @@
                 </tr>
               </thead>
               <tbody>
+                {% for item in crypto_data %}
                 <tr>
                   <td class="table__assets">
                     <div class="table__assets-crypto">
-                      <img src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt=""
+                      <img src="{{ item.logo }}" alt=""
                         class="table__assets-crypto-icon">
-                      <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">BTC</p>
+                      <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">{{ item.symbol }}</p>
                     </div>
                   </td>
                   <td>
-                    <p class="fb-regular table__assets-name">Bitcoin</p>
+                    <p class="fb-regular table__assets-name">{{ item.name }}</p>
                   </td>
                   <td>
-                    <p class="fb-regular table__order">USD 53,260.20</p>
+                    <p class="fb-regular table__order">USD {{ item.on_orders }}</p>
                   </td>
                   <td>
-                    <p class="fb-regular table__available">USD 53,260.20</p>
+                    <p class="fb-regular table__available">USD {{ item.available_balance }}</p>
                   </td>
                   <td>
-                    <p class="fb-regular table__total">USD 53,260.20</p>
+                    <p class="fb-regular table__total">USD {{ item.total_balance }}</p>
                   </td>
                   <td>
-                    <p class="fb-regular table__market text-bullish">0.25%</p>
+                    <p class="fb-regular table__market text-bullish">{{ item.market_change }}%</p>
                   </td>
                 </tr>
-                <tr>
-                  <td class="table__assets">
-                    <div class="table__assets-crypto">
-                      <img src="{% static 'assets/media/images/icons/logo-eth.svg' %}" alt=""
-                        class="table__assets-crypto-icon">
-                      <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">ETH</p>
-                    </div>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__assets-name">Ethereum</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__order">USD 1,643.80</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__available">USD 1,643.80</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__total">USD 1,643.80</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__market text-bearish">4.51%</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="table__assets">
-                    <div class="table__assets-crypto">
-                      <img src="{% static 'assets/media/images/icons/logo-bnb.svg' %}" alt=""
-                        class="table__assets-crypto-icon">
-                      <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">BNB</p>
-                    </div>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__assets-name">Binance Coin</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__order">USD 247.72</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__available">USD 247.72</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__total">USD 247.72</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__market text-bullish">2.43%</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="table__assets">
-                    <div class="table__assets-crypto">
-                      <img src="{% static 'assets/media/images/icons/logo-xrp.svg' %}" alt=""
-                        class="table__assets-crypto-icon">
-                      <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">XRP</p>
-                    </div>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__assets-name">XRP</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__order">USD 0.5657</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__available">USD 0.5657</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__total">USD 0.5657</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__market text-bullish">2.42%</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="table__assets">
-                    <div class="table__assets-crypto">
-                      <img src="{% static 'assets/media/images/icons/logo-usdt.svg' %}" alt=""
-                        class="table__assets-crypto-icon">
-                      <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">USDT</p>
-                    </div>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__assets-name">Tether</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__order">USD 0.9999</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__available">USD 0.9999</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__total">USD 0.9999</p>
-                  </td>
-                  <td>
-                    <p class="fb-regular table__market text-bearish">0.40%</p>
-                  </td>
-                </tr>
+
               </tbody>
             </table>
           </div>
         </div>
+        {% endfor %}
         <!-- End::Table Section -->
       </div>
     </div>

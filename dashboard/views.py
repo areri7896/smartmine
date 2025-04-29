@@ -309,16 +309,60 @@ def wallet(request):
 
                 # Return JSON response based on STK Push result
                 if response.status_code == 200:
-                    return JsonResponse({
-                        'success': True,
-                        'message': f"Deposit of {amount} has been initiated. Please check your phone and enter your pin to complete the transaction"
-                    })
+                    messages.success(request, 'Your deposit is was initiated successfully! Please check your phone and enter your pin to complete the transaction.')                    
+                    return redirect('wallet')
+                # elif response.status_code == 400:
+                #     messages.error(request, 'There was an error in your deposit!')
+                #     return JsonResponse({
+                #         'error': f"MPesa STK Push failed: {response.text}"
+                #     }, status=400)
+                # elif response.status_code == 500:
+                #     messages.error(request, 'There was an error in your deposit!')
+                #     return JsonResponse({
+                #         'error': f"MPesa STK Push failed: {response.text}"
+                #     }, status=500)
+                # elif response.status_code == 401:
+                #     messages.error(request, 'There was an error in your deposit!')
+                #     return JsonResponse({
+                #         'error': f"MPesa STK Push failed: {response.text}"
+                #     }, status=401)
+                # elif response.status_code == 403:
+                #     messages.error(request, 'There was an error in your deposit!')
+                #     return JsonResponse({
+                #         'error': f"MPesa STK Push failed: {response.text}"
+                #     }, status=403)
+                # elif response.status_code == 404:
+                #     messages.error(request, 'There was an error in your deposit!')
+                #     return JsonResponse({
+                #         'error': f"MPesa STK Push failed: {response.text}"
+                #     }, status=404)
+                # elif response.status_code == 409:
+                #     messages.error(request, 'There was an error in your deposit!')
+                #     return JsonResponse({
+                #         'error': f"MPesa STK Push failed: {response.text}"
+                #     }, status=409)
+                # elif response.status_code == 422:
+                #     messages.error(request, 'There was an error in your deposit!')
+                #     return JsonResponse({
+                #         'error': f"MPesa STK Push failed: {response.text}"
+                #     }, status=422)
+                # elif response.status_code == 429:
+                #     messages.error(request, 'There was an error in your deposit!')
+                #     return JsonResponse({
+                #         'error': f"MPesa STK Push failed: {response.text}"
+                #     }, status=429)
+                # elif response.status_code == 500:
+                #     messages.error(request, 'There was an error in your deposit!')
+                #     return JsonResponse({
+                #         'error': f"MPesa STK Push failed: {response.text}"
+                #     }, status=500)
                 else:
+                    messages.error(request, 'f"MPesa STK Push failed: {response.text}"')
                     return JsonResponse({
                         'error': f"MPesa STK Push failed: {response.text}"
                     }, status=400)
 
-            except Exception as e:
+            except Exception as e: 
                 print(f"An error occurred during STK Push: {e}")
                 messages.error(request, 'There was an error in your deposit!')
                 return JsonResponse({'error': str(e)}, status=400)
@@ -405,6 +449,9 @@ def exchange(request):
     tickers = client.get_all_tickers()
     df = pd.DataFrame(tickers)
     df.head()
+
+    tics = ['btc', 'eth', 'bnb', 'ada', 'doge']
+    tokens = get_token_data(tics)
     combined_tickers = [(ticker['symbol'], ticker['price']) for ticker in tickers]
     context = {'tks': combined_tickers, 'df':df, 'tickers': tickers}
 
@@ -429,6 +476,71 @@ def recent_trades(request):
     print('recent trade: ', context)
     # return render(request, ,context)
 
+import requests
+from django.shortcuts import render
+
+def fetch_crypto_data():
+    # Base URLs for APIs
+    binance_url = "https://api.binance.com/api/v3/ticker/24hr"
+    coingecko_url = "https://api.coingecko.com/api/v3/simple/price"
+    
+    # List of assets and their symbols
+    assets = ["BTC", "ETH", "BNB", "XRP", "USDT"]
+    asset_details = {
+        "BTC": "Bitcoin",
+        "ETH": "Ethereum",
+        "BNB": "Binance Coin",
+        "XRP": "XRP",
+        "USDT": "Tether"
+    }
+    
+    # Data structure for holding the response
+    crypto_data = []
+
+    # Query Binance data
+    try:
+        binance_response = requests.get(binance_url)
+        if binance_response.status_code == 200:
+            binance_data = binance_response.json()
+            for item in binance_data:
+                if item["symbol"][:-4] in assets:  # Match asset
+                    crypto_data.append({
+                        "symbol": item["symbol"][:-4],
+                        "name": asset_details[item["symbol"][:-4]],
+                        "on_orders": f"USD {float(item['askPrice']):,.2f}",
+                        "available_balance": f"USD {float(item['bidPrice']):,.2f}",
+                        "total_balance": f"USD {float(item['askPrice']) + float(item['bidPrice']):,.2f}",
+                        "market_change": f"{item['priceChangePercent']}%"
+                    })
+    except Exception as e:
+        print(f"Error fetching Binance data: {e}")
+
+    # Query CoinGecko data
+    try:
+        symbols = ",".join([asset.lower() for asset in assets])
+        coingecko_params = {"ids": symbols, "vs_currencies": "usd"}
+        coingecko_response = requests.get(coingecko_url, params=coingecko_params)
+        if coingecko_response.status_code == 200:
+            gecko_data = coingecko_response.json()
+            for asset in assets:
+                if asset.lower() in gecko_data:
+                    crypto_data.append({
+                        "symbol": asset,
+                        "name": asset_details[asset],
+                        "on_orders": "N/A",  # Example default value
+                        "available_balance": f"USD {gecko_data[asset.lower()]['usd']:.2f}",
+                        "total_balance": f"USD {gecko_data[asset.lower()]['usd']:.2f}",
+                        "market_change": "N/A"  # Example default value
+                    })
+    except Exception as e:
+        print(f"Error fetching CoinGecko data: {e}")
+
+    return crypto_data
+
+def crypto_view(request):
+    data = fetch_crypto_data()
+    print(data)
+    return render(request, 'src/dashboard/wallet.html', {'crypto_data': data})
 
 @login_required
 def confirm_investment(request, plan_id):
@@ -511,8 +623,19 @@ def market(request):
     # context = {'tickers':tickers, 'df':df}
 
     # return render(request, 'src/dashboard/market.html', context)
-
-
+'''
+def profile(request):
+    if request.method == 'POST':
+        form = ProfileUpdateForm(request.POST or None, request.FILES or None, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated!")
+        else:
+            messages.error(request, "Error updating profile.")
+    else:
+        form = ProfileUpdateForm(instance=request.user)
+    return render(request, 'src/dashboard/profile.html', {'user_form': form})
+'''
 def profile(request):
     if request.user.is_authenticated:
         # Get the Profile instance for the logged-in user
@@ -522,6 +645,7 @@ def profile(request):
         if request.method == 'POST':
             if user_form.is_valid():
                 user_form.save()
+                print('user_form:', user_form)
                 messages.success(request, 'Congratulations! Your profile was updated successfully.')
                 return redirect('dashboard')
 

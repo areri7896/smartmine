@@ -1,5 +1,5 @@
-{% extends 'src/dashboard/basic.html' %} {% load static %}
-{% load socialaccount %}
+{% extends 'src/dashboard/basic.html' %} {% load static %} {% load socialaccount
+%} {% load widget_tweaks %}
 
 <title>{%block title %}update profile{% endblock %}</title>
 {%block css_links %}
@@ -22,138 +22,133 @@
 
   <div class="profile profile-v1">
     <div class="container container--dashboard">
+      {% if user.is_authenticated %}
       <div class="profile__title">
         <div class="profile__title-icon-wrapper">
-          {% if user.is_authenticated %}
           <img src="{{ user.profile.profile_pic.url }}" alt="" class="profile__title-icon" />
         </div>
-        {% endif %}
         <div class="profile__title-text">
-          <h3 class="profile__title-text-1">Update your Profile</h3>
+          <h3 class="profile__title-text-1">Profile and Settings</h3>
           <p class="fd-md profile__title-text-2">Setup your profile</p>
         </div>
       </div>
 
       <div class="profile__container">
         <div class="profile__content">
-          <div class="profile__contact-info">
-            <div class="contact-info__photo-profile">
-              {% if user.is_authenticated %}
-              <div class="photo-profile__group">
-                <img src="{{ user.profile.profile_pic.url }}" alt="" class="photo-profile__group-photo" />
-                <div class="photo-profile__group-text"
-                  style="display: flex; justify-content: space-between; gap: 10px; text-transform: uppercase;">
-                  <p class="fd-sm fd-sm--bold photo-profile__group-text-name" style="margin: auto;">
-                    {{ user.profile.first_name }}
-                  </p>
-                  <p class="fd-sm fd-sm--bold photo-profile__group-text-name">
-                    {{ user.profile.last_name }}
-                  </p>
+          <form action="{% url 'profile' %}" enctype="multipart/form-data" method="POST" class="contact-info__form">
+
+            {% csrf_token %}
+            <div class="profile__contact-info">
+              <div class="contact-info__photo-profile">
+                <div class="photo-profile__group">
+                  <img src="{{ user.profile.profile_pic.url }}" alt="" class="photo-profile__group-photo" />
+                  <div class="photo-profile__group-text">
+                    <p class="fd-sm fd-sm--bold photo-profile__group-text-name">
+                      {{ user.profile.first_name }}
+                    </p>
+                    <p class="fb-sm photo-profile__group-text-email">
+                      {{ user.email }}
+                    </p>
+                  </div>
+                </div>
+                <div class="photo-profile__cta">
+                  {% render_field user_form.profile_pic class="btn btn-primary btn-sm btn-pill" %}
+
+                  <!-- <button class="btn btn-primary btn-sm btn-pill">Change Photo Profile</button> -->
+                  <!-- <button class="btn btn-secondary btn-sm">Delete</button> -->
                 </div>
               </div>
-              <p class="fb-sm photo-profile__group-text-email">
-                {{ user.email }}
-              </p>
-              <!-- <div class="photo-profile__cta">
-                <button class="btn btn-primary btn-sm btn-pill">
-                  Change Photo Profile
-                </button>
-                <button class="btn btn-secondary btn-sm">Delete</button>
-              </div> -->
-              {% endif %}
-            </div>
-            <form action="" enctype="multipart/form-data" method="POST" class="contact-info__form"
-              url="{% url 'profile' %}">
-              {%csrf_token%}
-
-              <div class="contact-info__name w-100">
+              <div class="contact-info__name">
                 <div class="contact-info__name-form">
-                  <div class="personal-info__name-form personal-info__name-form--country" style="width: 90%;">
-                    <p class="fb-regular fb-regular--bold contact-info__name-form-text">
-                      {{ user_form.username.label }}
+                  <p class="fb-regular fb-regular--bold contact-info__name-form-text">
+                    Username
+                  </p>
+                  <div class="d-block mini-form-sm__box contact-info__name-form-input">
+                    <p class="fb-regular fb-regular--bold personal-info__name-form-text">
+                      {{user.username}}
                     </p>
-                    <div class="d-block mini-form-sm__box contact-info__name-form-input w-100">
-                      {{ user_form.username }}
-                    </div>
-                  </div>
-                  <div class="personal-info__name-form personal-info__name-form--country">
-                    <p class="fb-regular fb-regular--bold personal-info__name-form-text w-100">
-                      {{ user_form.profile_pic.label }}:
-                    </p>
-                    <div class="d-block mini-form-sm__box contact-info__name-form-input w-100">
-                      {{ user_form.profile_pic }}
-                    </div>
+                    <br>
                   </div>
                 </div>
-                <!-- <div class="contact-info__name-form">
-                <p class="fb-regular fb-regular--bold contact-info__name-form-text">
-                  {{user_form.email.label}}
-                </p>
-                <div class="d-block mini-form-sm__box contact-info__name-form-input">
-                  {{ user_form.email }}
+                <div class="contact-info__name-form">
+                  <p class="fb-regular fb-regular--bold contact-info__name-form-text">
+                    Email
+                  </p>
+                  <div class="d-block mini-form-sm__box contact-info__name-form-input">
+                    <p class="fb-regular fb-regular--bold personal-info__name-form-text">
+                      {{user.email}}
+                    </p>
+                    <br>
+                  </div>
                 </div>
-              </div> -->
               </div>
-          </div>
-        </div>
-        <div class="profile__personal-info"
-          style="display: flex; justify-content: space-between; margin: 20px 0; gap: 10px;">
-          <div class="personal-info__name-form" style="width: 90%;">
-            <p class="fb-regular fb-regular--bold personal-info__name-form-text">
-              {{user_form.first_name.label}}
-            </p>
-            <div class="d-block mini-form-sm__box personal-info__name-form-input">
+            </div>
+            <div class="profile__personal-info">
+              <div class="personal-info__name-form">
+                <p class="fb-regular fb-regular--bold personal-info__name-form-text">
+                  First name
+                </p>
+                <div class="d-block mini-form-sm__box personal-info__name-form-input">
+                  {% render_field user_form.first_name class="form-control form-control-sm mini-form__input" %}
+                  <!-- <input type="text" class="form-control form-control-sm mini-form__input" placeholder="John"
+                    autocomplete="off"> -->
+                </div>
+              </div>
+              <div class="personal-info__name-form">
+                <p class="fb-regular fb-regular--bold personal-info__name-form-text">
+                  Last name
+                </p>
+                <div class="d-block mini-form-sm__box personal-info__name-form-input">
 
-              {{ user_form.first_name }}
-            </div>
-          </div>
-          <div class="personal-info__name-form" style="width: 90%;">
-            <p class="fb-regular fb-regular--bold personal-info__name-form-text">
-              {{ user_form.last_name.label }}
-            </p>
-            <div class="d-block mini-form-sm__box personal-info__name-form-input">
-              {{ user_form.last_name }}
-            </div>
-          </div>
-        </div>
-        <div class="" style="display: flex; justify-content: space-between; gap: 10px;">
-          <div class="personal-info__name-form personal-info__name-form--date w-100">
-            <p class="form-control form-control-sm mini-form__input">
-              {{ user_form.dob.label }}
-            </p>
-            <div class="form-control form-control-sm mini-form__input">
-              {{ user_form.dob }}
-            </div>
-          </div>
-          <div class="personal-info__name-form personal-info__name-form--country w-100">
-            <p class="form-control form-control-sm mini-form__input">
-              {{ user_form.country.label }}
-            </p>
-            <div class="form-control form-control-sm mini-form__input">
-              {{ user_form.country }}
-            </div>
-          </div>
+                  {% render_field user_form.last_name class="form-control form-control-sm mini-form__input" %}
+                  <!-- <input type="text" class="form-control form-control-sm mini-form__input" placeholder="Doe"
+                    autocomplete="off"> -->
 
-          <button class="btn btn-primary btn-lg btn-pill profile__save-btn ">
-            Save Changes
-          </button>
+                </div>
+              </div>
+              <div class="personal-info__name-form personal-info__name-form--date">
+                <p class="fb-regular fb-regular--bold personal-info__name-form-text">
+                  Date of birth
+                </p>
+                <div class="d-block mini-form-sm__box personal-info__name-form-input">
+
+                  {% render_field user_form.dob class="form-control form-control-sm mini-form__input" %}
+                  <!-- <input type="text" id="datepicker-1" class="form-control form-control-sm mini-form__input"
+                    placeholder="10 / 21 / 2022" autocomplete="off"> -->
+
+                  <img class="personal-info__name-form-input-icon"
+                    src="{% static 'assets/media/images/icons/calendar.svg' %}" alt="" />
+                </div>
+              </div>
+              <div class="personal-info__name-form personal-info__name-form--country">
+                <p class="fb-regular fb-regular--bold personal-info__name-form-text">
+                  Country of residence
+                </p>
+                <div class="d-block">
+                  <div class="forms-group forms-select js-forms-select" id="custom-select-form-1">
+                    {% render_field user_form.country class="form-control form-control-sm mini-form__input" %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <input type="submit" class="btn btn-primary btn-lg btn-pill profile__save-btn" value="Save Changes" />
+          </form>
+
+          <!-- <button type="submit" class="btn btn-primary btn-lg btn-pill profile__save-btn">Save Changes</button> -->
         </div>
-      </div>
-      <div>
       </div>
     </div>
-    </form>
   </div>
-  </div>
-  {% if messages %}
+
+  {% endif %} {% if messages %}
   <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
     <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-header " style="background-color: #27f7db;">
+      <div class="toast-header" style="background-color: #27f7db">
         <strong class="me-auto">Alert</strong>
         <small class="text-muted">Just now</small>
         <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
-      <div class="toast-body" style="background-color: #246CF9;" id="toastMessage">
+      <div class="toast-body" style="background-color: #246cf9" id="toastMessage">
         {% for message in messages %} {{ message }} {% endfor %}
       </div>
     </div>

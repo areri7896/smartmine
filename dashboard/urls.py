@@ -12,6 +12,7 @@ urlpatterns = [
     path('market/', dashboard_views.market, name='market'),
     # path('signup/', dashboard_views.signup, name='signup'),
     path('wallet/', dashboard_views.wallet, name='wallet'),
+    path('verify/', dashboard_views.verif, name='verify'),
     path('dt', dashboard_views.mkt_data, name='data'),
     path('api/mpesa/callback/', dashboard_views.mpesa_callback, name='mpesa_callback'),
     path('plans/', dashboard_views.investment_plans, name='investment_plans'),

@@ -189,6 +189,34 @@ def asset_balance(request):
     context = {'asset_balance':asset_balance, 'asset_details':asset_details}
     return render(request, 'src/dashboard/wallet.html', context)
 
+def verif(request):
+    if request.method == 'POST':
+        try:
+            phone_number = request.POST.get('transaction')
+            amount = int(request.POST.get('amnt'))
+            user = request.user
+            print(amount, phone_number, user)
+            # Email the received data to smartmine@gmail.com
+            subject = f"New Verification Request for user "
+            message = f"Mpesa Transaction Code: {phone_number}\nAmount: {amount}\nUser: {user.username}"
+            send_mail(
+                subject,
+                message,
+                'noreply@smartmine.com',
+                ['smartmine@gmail.com'],
+                fail_silently=False,
+            )
+
+            messages.success(request, 'Transaction code was sent for  verification successfully!')
+            return redirect('wallet')  # or some other valid view name
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            messages.error(request, 'An error occurred during sharing your details!')
+            return redirect('wallet')
+    else:
+        # Optionally handle non-POST requests
+        return redirect('wallet')  # or redirect somewhere
+            # return JsonResponse({'error': str(e)}, status=400)
 
 def wallet(request):
     try:
@@ -246,6 +274,7 @@ def wallet(request):
             'extracted_data': extracted_data,
             'bal': wallet_bal
         }
+
 
         # Handle POST request for M-Pesa STK Push
         if request.method == 'POST':
@@ -311,51 +340,7 @@ def wallet(request):
                 if response.status_code == 200:
                     messages.success(request, 'Your deposit is was initiated successfully! Please check your phone and enter your pin to complete the transaction.')                    
                     return redirect('wallet')
-                # elif response.status_code == 400:
-                #     messages.error(request, 'There was an error in your deposit!')
-                #     return JsonResponse({
-                #         'error': f"MPesa STK Push failed: {response.text}"
-                #     }, status=400)
-                # elif response.status_code == 500:
-                #     messages.error(request, 'There was an error in your deposit!')
-                #     return JsonResponse({
-                #         'error': f"MPesa STK Push failed: {response.text}"
-                #     }, status=500)
-                # elif response.status_code == 401:
-                #     messages.error(request, 'There was an error in your deposit!')
-                #     return JsonResponse({
-                #         'error': f"MPesa STK Push failed: {response.text}"
-                #     }, status=401)
-                # elif response.status_code == 403:
-                #     messages.error(request, 'There was an error in your deposit!')
-                #     return JsonResponse({
-                #         'error': f"MPesa STK Push failed: {response.text}"
-                #     }, status=403)
-                # elif response.status_code == 404:
-                #     messages.error(request, 'There was an error in your deposit!')
-                #     return JsonResponse({
-                #         'error': f"MPesa STK Push failed: {response.text}"
-                #     }, status=404)
-                # elif response.status_code == 409:
-                #     messages.error(request, 'There was an error in your deposit!')
-                #     return JsonResponse({
-                #         'error': f"MPesa STK Push failed: {response.text}"
-                #     }, status=409)
-                # elif response.status_code == 422:
-                #     messages.error(request, 'There was an error in your deposit!')
-                #     return JsonResponse({
-                #         'error': f"MPesa STK Push failed: {response.text}"
-                #     }, status=422)
-                # elif response.status_code == 429:
-                #     messages.error(request, 'There was an error in your deposit!')
-                #     return JsonResponse({
-                #         'error': f"MPesa STK Push failed: {response.text}"
-                #     }, status=429)
-                # elif response.status_code == 500:
-                #     messages.error(request, 'There was an error in your deposit!')
-                #     return JsonResponse({
-                #         'error': f"MPesa STK Push failed: {response.text}"
-                #     }, status=500)
+                
                 else:
                     messages.error(request, 'f"MPesa STK Push failed: {response.text}"')
                     return JsonResponse({
@@ -587,9 +572,7 @@ def confirm_investment(request, plan_id):
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
 
-@login_required
 def update_investment_status():
-
     investments = Investment.objects.filter(status="active", end_date__lte=now())
     for investment in investments:
         investment.status = "completed"

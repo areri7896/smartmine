@@ -299,14 +299,14 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
 
 # ACCOUNT_AUTHENTICATION_METHOD = 'email'
-DEFAULT_FROM_EMAIL = 'plpgroup25@gmail.com'
+DEFAULT_FROM_EMAIL = 'ssmartmine@gmail.com'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_FILE_PATH = BASE_DIR / 'emails'
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
-EMAIL_HOST_USER = 'plpgroup25@gmail.com'
+EMAIL_HOST_USER = 'ssmartmine@gmail.com'
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 # M-Pesa Daraja API credentials

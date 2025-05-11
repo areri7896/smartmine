@@ -49,6 +49,30 @@
             </form>
         </div>
     </div>
+
+    {% if messages %}
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="liveToast" class="toast bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto" style="background-color: #fa2256">Alert</strong>
+                <small class="text-muted">Just now</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" style="background-color: #246cf9" id="toastMessage">
+                {% for message in messages %} {{ message }} {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            const toastEl = document.getElementById("liveToast");
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        });
+    </script>
+    {% endif %}
+
     {% block js %}
 
     <!-- Start::Global Bundle Scripts (used by all pages) -->

@@ -56,7 +56,7 @@
         <div class="advance-card advance-card--type-3-v3">
           <div class="advance-card-left">
             <div class="advance-card__title">
-              <img src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="" class="advance-card__title-image">
+              <img src="{% static 'assets/media/images/mpesa.png' %}" alt="" class="advance-card__title-image">
               <h6 class="advance-card__title-text">MPESA</h6>
             </div>
             <div class="advance-card__balance-wrapper">
@@ -81,7 +81,8 @@
               </div>
             </div>
             <div class="advance-card__buttons">
-              <button class="btn btn-primary advance-card__button btn-sm btn-pill">Withdraw</button>
+              <button class="btn btn-primary advance-card__button btn-sm btn-pill" data-bs-toggle="offcanvas"
+                data-bs-target="#withdrawCanvas" aria-controls="withdrawCanvas">Withdraw</button>
               <button class="btn btn-secondary advance-card__button btn-sm" type="button" data-bs-toggle="modal"
                 data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Deposit</button>
             </div>
@@ -232,41 +233,108 @@
 
         <!--modal start-->
         <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Open modal for @getbootstrap</button> -->
+        <!-- Withdrawal Modal -->
+        <!-- Button to trigger offcanvas -->
+        <!-- <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#withdrawCanvas"
+        aria-controls="withdrawCanvas">
+        Initiate Withdrawal
+      </button>
+       -->
+        <!-- Offcanvas Component -->
+        <div class="offcanvas offcanvas-end" style="background: #1e1f25;" data-bs-backdrop="static" tabindex="-1"
+          id="withdrawCanvas" aria-labelledby="withdrawCanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="withdrawCanvasLabel">Initiate your Withdrawal Request</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
 
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content complete-card complete-card--type-3">
-              <div class="modal-header">
-                <h3 class="modal-title fs-5">Initiate your Withdrawal Request</h3>
-                <button type="button" class="btn-close" style="background-color: white;" data-bs-dismiss="modal"
-                  aria-label="Close"></button>
+            <form id="mpesa-w-form" method="post" action="{% url 'withdrawal' %}">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="wphone" class="col-form-label fd-md my-1" style="color: white;">Phone Number</label>
+                <input type="text" class="form-control" id="wphone" name="wphone">
               </div>
-              <div class="modal-body">
-
-                <!-- <form id="mpesa-w-form" method="post" action="">
-
-                  <div class="mb-3">
-                    <label for="phone-number" class="col-form-label fd-md my-1" style="color: white;">Phone
-                      Number</label>
-                    <input type="text" class="form-control" id="phone-number" name="phone">
-                  </div>
-                  <div class="mb-3">
-                    <label for="amount" class="col-form-label fd-md my-1" style="color: white;">Amount:</label>
-                    <input type="number" class="form-control" id="amount" name="amount">
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <input type="submit" class="btn btn-primary" value="Send Payment">
-                  </div>
-                </form> -->
+              <div class="mb-3">
+                <label for="wamount" class="col-form-label fd-md my-1" style="color: white;">Amount:</label>
+                <input type="number" class="form-control" id="wamount" name="wamount">
               </div>
-            </div>
+              <div class="d-flex justify-content-end mt-3">
+                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="offcanvas">Close</button>
+                <input type="submit" class="btn btn-primary" value="Withdraw">
+              </div>
+            </form>
+            <p class="text-danger">
+              Please!!! Upon request of withdrawal, Be patient while your request is being processed. Your request may
+              take upto 10 minutes to complete
+            </p>
           </div>
         </div>
-        <!--modal end-->
+
+        <!--offcanvas end-->
+
+        <script>
+          // Attach click event to Withdraw button to open the withdrawal modal
+          document.addEventListener('DOMContentLoaded', function () {
+            const withdrawBtn = document.querySelector('.advance-card__button.btn-primary');
+            if (withdrawBtn) {
+              withdrawBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const withdrawModal = new bootstrap.Modal(document.getElementById('withdrawModal'));
+                withdrawModal.show();
+              });
+            }
+          });
+        </script>
 
         <!-- Start::Table Section -->
-        <div class="table-wrapper table--type-1">
+        <div class=" table-wrapper table--type-1">
+          <div class="table-container">
+            <table class="table table-content">
+              <thead>
+                <tr>Withdrawal Requests</tr>
+                <tr>
+                  <!-- <th class="fb-regular table__head" colspan="2">Assets</th>
+                  <th class="fb-regular table__head">On Orders</th> -->
+                  <th class="fb-regular table__head">Amount</th>
+                  <th class="fb-regular table__head">phone number</th>
+                  <th class="fb-regular table__head">status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for withdrawal in withdrawals %}
+                <!-- <tr>
+                  <td class="table__assets">
+                    <div class="table__assets-crypto">
+                      <img src="{{ item.logo }}" alt="" class="table__assets-crypto-icon">
+                      <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">{{ item.symbol }}</p>
+                    </div>
+                  </td>
+                  <td>
+                    <p class="fb-regular table__assets-name">{{ item.name }}</p>
+                  </td>
+                  <td>
+                    <p class="fb-regular table__order">USD {{ item.on_orders }}</p>
+                  </td> -->
+                <td>
+                  <p class="fb-regular table__available">KSH {{ withdrawal.amount }}</p>
+                </td>
+                <td>
+                  <p class="fb-regular table__total">{{withdrawal.phone_number}}</p>
+                </td>
+                <td>
+                  <p class="fb-regular table__market text-bullish">{{ withdrawal.status }}</p>
+                </td>
+                </tr>
+
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Start::Table Section -->
+        <div class=" table-wrapper table--type-1">
           <div class="table-container">
             <table class="table table-content">
               <thead>
@@ -304,41 +372,39 @@
                   </td>
                 </tr>
 
+                {% endfor %}
               </tbody>
             </table>
           </div>
         </div>
-        {% endfor %}
         <!-- End::Table Section -->
       </div>
     </div>
   </div>
 </div>
-
 {% if messages %}
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
   <div id="liveToast" class="toast bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
-      <strong class="me-auto">Alert</strong>
+      <strong class="me-auto" style="background-color: #fa2256">Alert</strong>
       <small class="text-muted">Just now</small>
       <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
-    <div class="toast-body bg-primary" id="toastMessage">
-      {% for message in messages %}
-      {{ message }}
-      {% endfor %}
+    <div class="toast-body" style="background-color: #246cf9" id="toastMessage">
+      {% for message in messages %} {{ message }} {% endfor %}
     </div>
   </div>
 </div>
 
 <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const toastEl = document.getElementById('liveToast');
+  window.addEventListener("DOMContentLoaded", () => {
+    const toastEl = document.getElementById("liveToast");
     const toast = new bootstrap.Toast(toastEl);
     toast.show();
   });
 </script>
 {% endif %}
+
 
 <script>
 
@@ -384,6 +450,9 @@
 <!-- Start::Global Bundle Scripts (used by all pages) -->
 <!-- Bootstrap JS (place before closing </body>) -->
 <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> -->
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 
 <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
 <script src="{% static 'assets/js/custom/sidebar.js' %}"></script>

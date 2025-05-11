@@ -23,18 +23,34 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime, timedelta
 from .functions import *
 from django.http import JsonResponse
-from .models import InvestmentPlan, Investment, MpesaResponse, DepositTransaction, Wallet, Profile
+from .models import InvestmentPlan, Investment, MpesaResponse, DepositTransaction, Wallet, Profile, Withdrawal
 
 from dotenv import load_dotenv
 from django.utils.timezone import now
 
 load_dotenv()
 
+from binance.client import Client
+from binance.exceptions import BinanceAPIException
+from django.core.management.base import BaseCommand
+# from dashboard.views import update_investment_status
+from django.contrib.admin.views.decorators import staff_member_required
+
+
 api_key = os.environ['BINANCE_API_KEY']
 api_secret = os.environ['BINANCE_SECRET_KEY']
-client = Client(api_key, api_secret, testnet=True)
-client.API_URL = 'https://api.binance.com'  
-client.ping()
+def get_binance_client():
+    try:
+        client = Client(api_key, api_secret, testnet=True)
+        client.API_URL = 'https://api.binance.com'  # Set API URL if needed
+        client.ping()  # Test connectivity
+        return client
+    except BinanceAPIException as e:
+        print("Binance API error:", e)
+        return None
+    except Exception as e:
+        print("Unexpected error:", e)
+        return None
 # tickers = client.get_all_tickers()
 # df = pd.DataFrame(tickers)
 # df.head()
@@ -95,10 +111,24 @@ def invest(request, plan_id):
 #     investments = Investment.objects.filter(user=request.user)
 #     return render(request, 'src/dashboard/market.html', {'investments': investments})
 
-#checking server status
-client.ping() #empty response no errors
-res= client.get_server_time()
-ts=res['serverTime']/1000
+client = get_binance_client()
+if client:
+    # safe to use client
+    try:
+        balance = client.get_account()
+
+        # checking server status
+        client.ping()  # returns {} on success
+
+        res = client.get_server_time()
+        ts = res['serverTime'] / 1000
+        print(f"Binance server time (timestamp): {ts}")
+
+    except Exception as e:
+        print("Error while using Binance client:", e)
+else:
+    print("Failed to connect to Binance.")
+
 # your_dt = datetime.datetime.fromtimestamp(ts)
 # fmt = your_dt.strftime("%Y-%n-%d %H:%M:%S")
 # print(fmt)
@@ -175,19 +205,81 @@ def dashboard(request):
     return render(request, 'src/dashboard/dashboard.html', context)
 
 
-# def get_absolute_url(self):
-#     return reverse('book_edit', kwargs={'pk': self.pk}) 
 
 def account(request):
-    info = client.get_account()
-    return info
+    client = get_binance_client()
+    if not client:
+        return HttpResponse("Failed to connect to Binance", status=503)
+
+    try:
+        info = client.get_account()
+        return JsonResponse(info)
+    except Exception as e:
+        return HttpResponse(f"Error: {e}", status=500)
 
 
 def asset_balance(request):
-    asset_balance = client.get_asset_balance()
-    asset_details = client.get_asset_details()
-    context = {'asset_balance':asset_balance, 'asset_details':asset_details}
-    return render(request, 'src/dashboard/wallet.html', context)
+    client = get_binance_client()
+    if not client:
+        return HttpResponse("Failed to connect to Binance", status=503)
+
+    try:
+        asset_balance = client.get_asset_balance(asset='USDT')  # Replace 'USDT' as needed
+        asset_details = client.get_asset_details()
+        context = {'asset_balance': asset_balance, 'asset_details': asset_details}
+        return render(request, 'src/dashboard/wallet.html', context)
+    except Exception as e:
+        return HttpResponse(f"Error: {e}", status=500)
+
+
+def withdraw(request):
+    if request.method == 'POST':
+        try:
+            phone_number = request.POST.get('wphone')
+            amount = int(request.POST.get('wamount'))
+            user = request.user
+            print(amount, phone_number, user)
+
+            # Save withdrawal request to the Withdrawal model
+            Withdrawal.objects.create(
+                user=user,
+                amount=amount,
+                phone_number=phone_number,
+                status='Pending'
+            )
+            # Email the received data to smartmine@gmail.com
+            subject = f"New Withdrawal Request for customer "
+            message = f"Mpesa Transaction Code: {phone_number}\nAmount: {amount}\nUser: f'{user.first_name} + {user.last_name}'"
+            send_mail(
+                subject,
+                message,
+                'noreply@ssmartmine.com',
+                ['ssmartmine@gmail.com'],
+                fail_silently=False,
+            )
+            messages.success(request, 'Thank you. Your withdrawal request was Successfully sent. Please the request will be completed in less than 10 minutes.!')
+            return redirect('wallet')  # or some other valid view name
+        except Exception as e:
+            # print(f"An error occurred: {e}")
+            messages.error(request, 'An error occurred during sharing your with your withdrwal request!!')
+            return redirect('wallet')
+    else:
+        return redirect('wallet')  # or redirect somewhere
+            # return JsonResponse({'error': str(e)}, status=400)
+
+from django.contrib import admin
+
+@admin.action(description="Approve selected withdrawals")
+def approve_selected_withdrawals(modeladmin, request, queryset):
+    queryset.update(status='Approved', is_cancelled=False)
+    messages.success(request, f"{queryset.count()} withdrawals approved successfully.")
+
+class WithdrawalAdmin(admin.ModelAdmin):
+    list_display = ('user', 'phone_number', 'amount', 'status', 'is_cancelled')
+    actions = [approve_selected_withdrawals]
+
+admin.site.register(Withdrawal, WithdrawalAdmin)
+
 
 def verif(request):
     if request.method == 'POST':
@@ -202,16 +294,16 @@ def verif(request):
             send_mail(
                 subject,
                 message,
-                'noreply@smartmine.com',
-                ['smartmine@gmail.com'],
+                'noreply@ssmartmine.com',
+                ['ssmartmine@gmail.com'],
                 fail_silently=False,
             )
-
-            messages.success(request, 'Transaction code was sent for  verification successfully!')
+            messages.success(request, 'Thank you. Transaction code was sent for verification Successfully!')
+            print(list(messages.get_messages(request)))
             return redirect('wallet')  # or some other valid view name
         except Exception as e:
             print(f"An error occurred: {e}")
-            messages.error(request, 'An error occurred during sharing your details!')
+            messages.error(request, 'An error occurred during sharing your Transaction code!!')
             return redirect('wallet')
     else:
         # Optionally handle non-POST requests
@@ -268,11 +360,18 @@ def wallet(request):
         wallet_bal = Wallet.objects.filter(user=request.user).first()
         wallet_bal = wallet_bal.balance if wallet_bal else 0
 
+        # Import the Withdrawal model at the top if not already imported
+        # from .models import Withdrawal
+
+        # Fetch withdrawal history for the current user
+        withdrawals = Withdrawal.objects.filter(user=request.user).order_by('-id')
+        
         # Prepare context for rendering the template
         context = {
             'total_balance': total_balance,
             'extracted_data': extracted_data,
-            'bal': wallet_bal
+            'bal': wallet_bal,
+            'withdrawals' : withdrawals
         }
 
 
@@ -568,7 +667,7 @@ def confirm_investment(request, plan_id):
             print(f"Error during investment confirmation: {e}")  # Log the exception
             messages.error(request, 'OOPS!! There was an error, Please try again!')
             return redirect('market')
-
+    messages.error(request, 'OOPS!! There was an error, Please try again!')
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
 
@@ -578,8 +677,6 @@ def update_investment_status():
         investment.status = "completed"
         investment.save()
 
-from django.core.management.base import BaseCommand
-from dashboard.views import update_investment_status
 
 class Command(BaseCommand):
     help = 'Update the status of expired investments'

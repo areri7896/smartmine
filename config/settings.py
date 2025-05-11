@@ -75,7 +75,8 @@ INSTALLED_APPS = [
 
     #installed apps
     'smartmine',
-    'dashboard',
+    'dashboard.apps.DashboardConfig',
+    # 'dashboard',
     'binapi',
     # 'payment',
 
@@ -145,6 +146,16 @@ SOCIALACCOUNT_PROVIDERS = {
         'FETCH_USERINFO' : True
     }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',

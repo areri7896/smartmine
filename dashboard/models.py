@@ -3,11 +3,34 @@ from django.contrib.auth.models import User
 from datetime import timedelta
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+
+
+class WithdrawStatusTextChoices(models.TextChoices):
+    PENDING = "Processing"
+    COMPLETED = "Completed"
+    CANCELLED = "Cancelled"
+    FAILED = "Failed"
+
+class Withdrawal(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    phone_number = models.CharField(max_length=15)
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    completed = models.BooleanField(default=False) 
+    is_cancelled = models.BooleanField(default=False) 
+    status = models.CharField(max_length=20, choices=WithdrawStatusTextChoices, default="PENDING")
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.completed:
+            self.is_cancelled = False
+        else:
+            self.is_cancelled = True
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
-    profile_pic = models.ImageField(default='static/assets/media/images/32x32.png', upload_to = 'user/profile_pics')
+    profile_pic = models.ImageField(default='user/profile_pics/32x32.png', upload_to = 'user/profile_pics')
     username = models.CharField(max_length=100, default='')
     first_name = models.CharField(max_length=100, default='')
     last_name = models.CharField(max_length=100, default='')
@@ -336,6 +359,11 @@ class Investment(models.Model):
 
     def calculate_earnings(self):
         return self.plan.price * (self.plan.daily_interest_rate / 100) * self.plan.cycle_days
+    
+    def check_and_update_status(self):
+      if self.status == "active" and timezone.now() >= self.end_date:
+        self.status = "completed"
+        self.save(update_fields=["status"])
 
     def __str__(self):
         return f"{self.user.username} - {self.plan.name}"
@@ -344,7 +372,7 @@ class Investment(models.Model):
 
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    balance = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
+    balance = models.DecimalField(max_digits=15, decimal_places=2, default='0.00')
 
     def __str__(self):
         return f"{self.user.username} - Balance: {self.balance}"

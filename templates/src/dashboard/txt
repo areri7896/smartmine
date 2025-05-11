@@ -7,11 +7,8 @@
           aria-label="Close"></button>
       </div>
 
-      <div class="sign-in__break-or">
-        <div class="line"></div>
-        <p class="fb-lg">Or</p>
-        <div class="line"></div>
-      </div>
+
+
 
 
       <form id="mpesa-w-form" method="post" action="{% url 'wallet' %}">

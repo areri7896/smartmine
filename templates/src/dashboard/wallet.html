@@ -292,6 +292,64 @@
           <div class="table-container">
             <table class="table table-content">
               <thead>
+                <tr class="text-align">Deposit transactions</tr>
+                <tr>
+                  <!-- <th class="fb-regular table__head" colspan="2">Assets</th>
+                    <th class="fb-regular table__head">On Orders</th> -->
+                  <th class="fb-regular table__head">Amount</th>
+                  <th class="fb-regular table__head">Transaction code</th>
+                  <th class="fb-regular table__head">status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for depo in depos %}
+                <!-- <tr>
+                    <td class="table__assets">
+                      <div class="table__assets-crypto">
+                        <img src="{{ item.logo }}" alt="" class="table__assets-crypto-icon">
+                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">{{ item.symbol }}</p>
+                      </div>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__assets-name">{{ item.name }}</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__order">USD {{ item.on_orders }}</p>
+                    </td> -->
+                <td>
+                  <p class="fb-regular table__available">KSH {{ depo.amount }}</p>
+                </td>
+                <td>
+                  <p class="fb-regular table__total">{{depo.verification_code}}</p>
+                </td>
+                <td>
+                  {% if depo.is_completed == 0 %}
+                  <p class="fb-regular table__market text-bullish">Pending</p>
+                  {% elif depo.is_completed == 1 %}
+                  <p class="fb-regular table__market text-success">completed</p>
+                  {% elif depo.is_completed == 3 %}
+                  <p class="fb-regular table__market text-danger">Failed</p>
+                  {% elif depo.is_completed == 4 %}
+                  <p class="fb-regular table__market text-warning">Cancelled</p>
+                  {% else %}
+                  <p class="fb-regular table__market text-warning">Unknown</p>
+                  {% endif %}
+
+                </td>
+                </tr>
+
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+        <!-- Start::Table Section -->
+        <div class=" table-wrapper table--type-1">
+          <div class="table-container">
+            <table class="table table-content">
+              <thead>
                 <tr class="">Withdrawal Requests</tr>
                 <tr>
                   <!-- <th class="fb-regular table__head" colspan="2">Assets</th>
@@ -323,7 +381,18 @@
                   <p class="fb-regular table__total">{{withdrawal.phone_number}}</p>
                 </td>
                 <td>
-                  <p class="fb-regular table__market text-bullish">{{ withdrawal.status }}</p>
+                  {% if withdrawal.is_completed == 0 %}
+                  <p class="fb-regular table__market text-bullish">Pending</p>
+                  {% elif withdrawal.is_completed == 1 %}
+                  <p class="fb-regular table__market text-success">completed</p>
+                  {% elif withdrawal.is_completed == 3 %}
+                  <p class="fb-regular table__market text-danger">Failed</p>
+                  {% elif withdrawal.is_completed == 4 %}
+                  <p class="fb-regular table__market text-warning">Cancelled</p>
+                  {% else %}
+                  <p class="fb-regular table__market text-warning">Unknown</p>
+                  {% endif %}
+
                 </td>
                 </tr>
 

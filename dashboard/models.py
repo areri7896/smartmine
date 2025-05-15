@@ -6,27 +6,33 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 
-class WithdrawStatusTextChoices(models.TextChoices):
-    PENDING = "Processing"
-    COMPLETED = "Completed"
-    CANCELLED = "Cancelled"
-    FAILED = "Failed"
+# class WithdrawStatusTextChoices(models.TextChoices):
+#     PENDING = "Processing"
+#     COMPLETED = "Completed"
+#     CANCELLED = "Cancelled"
+#     FAILED = "Failed" 
 
 class Withdrawal(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=15)
     amount = models.DecimalField(max_digits=15, decimal_places=2)
-    completed = models.BooleanField(default=False) 
-    is_cancelled = models.BooleanField(default=False) 
-    status = models.CharField(max_length=20, choices=WithdrawStatusTextChoices, default="PENDING")
+    is_completed = models.IntegerField(default=0) 
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    # status = models.CharField(max_length=20, choices=WithdrawStatusTextChoices, default="PENDING")
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        if self.completed:
-            self.is_cancelled = False
-        else:
-            self.is_cancelled = True
-        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    #     if self.is_completed:
+    #         self.is_cancelled = False
+    #     else:
+    #         self.is_cancelled = True
+    #     super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
+class Depo_Verification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    verification_code = models.CharField(max_length=15)
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    is_completed = models.IntegerField(default=0) 
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)

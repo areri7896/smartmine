@@ -23,7 +23,7 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime, timedelta
 from .functions import *
 from django.http import JsonResponse
-from .models import InvestmentPlan, Investment, MpesaResponse, DepositTransaction, Wallet, Profile, Withdrawal
+from .models import InvestmentPlan, Investment, MpesaResponse, DepositTransaction, Wallet, Profile, Withdrawal, Depo_Verification
 
 from dotenv import load_dotenv
 from django.utils.timezone import now
@@ -274,11 +274,11 @@ def approve_selected_withdrawals(modeladmin, request, queryset):
     queryset.update(status='Approved', is_cancelled=False)
     messages.success(request, f"{queryset.count()} withdrawals approved successfully.")
 
-class WithdrawalAdmin(admin.ModelAdmin):
-    list_display = ('user', 'phone_number', 'amount', 'status', 'is_cancelled')
-    actions = [approve_selected_withdrawals]
+# class WithdrawalAdmin(admin.ModelAdmin):
+#     list_display = ('user', 'phone_number', 'amount', 'status', 'is_cancelled')
+#     actions = [approve_selected_withdrawals]
 
-admin.site.register(Withdrawal, WithdrawalAdmin)
+# admin.site.register(Withdrawal, WithdrawalAdmin)
 
 
 def verif(request):
@@ -287,10 +287,19 @@ def verif(request):
             phone_number = request.POST.get('transaction')
             amount = int(request.POST.get('amnt'))
             user = request.user
-            print(amount, phone_number, user)
+
+            # Save verification request to the Verification model
+            Depo_Verification.objects.create(
+                user=user,
+                amount=amount,
+                verification_code=phone_number,
+                is_completed=0
+            )
+
+            # print(amount, phone_number, user)
             # Email the received data to smartmine@gmail.com
             subject = f"New Verification Request for user "
-            message = f"Mpesa Transaction Code: {phone_number}\nAmount: {amount}\nUser: {user.username}"
+            message = f"Mpesa Transaction Code: {phone_number}\nAmount: {amount}\nUser: {user.username} \n Please take a moment and update the record"
             send_mail(
                 subject,
                 message,
@@ -365,13 +374,15 @@ def wallet(request):
 
         # Fetch withdrawal history for the current user
         withdrawals = Withdrawal.objects.filter(user=request.user).order_by('-id')
+        depos = Depo_Verification.objects.filter(user=request.user).order_by('-id')
         
         # Prepare context for rendering the template
         context = {
             'total_balance': total_balance,
             'extracted_data': extracted_data,
             'bal': wallet_bal,
-            'withdrawals' : withdrawals
+            'withdrawals' : withdrawals,
+            'depos' : depos,
         }
 
 

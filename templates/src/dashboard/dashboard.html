@@ -362,6 +362,153 @@
     });
   </script>
   {% endif %}
+
+
+  <!-- Modal -->
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">Terms and Conditions</h1>
+          <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="container my-5">
+            <h1 class="mb-4">Terms and Conditions for SmartMine</h1>
+            <p><strong>Effective Date:</strong> 2025</p>
+            <p>Welcome to <strong>SmartMine</strong> ("we", "our", "us"). By accessing or using our website
+              (<a href="http://www.smrtmine.com" target="_blank"><code>www.smartmine.com</code></a>) and the services
+              provided (collectively, the “Platform”), you agree to
+              comply
+              with and
+              be legally bound by these Terms and Conditions. If you do not agree, please do not use our services.</p>
+
+            <h3>1. Acceptance of Terms</h3>
+            <p>By registering, accessing, or using the Platform, you confirm that you are at least 18 years old (or the
+              age of
+              majority in your jurisdiction) and legally able to enter into binding agreements. Your use of SmartMine
+              signifies
+              your acceptance of these Terms and our Privacy Policy.</p>
+
+            <h3>2. Description of Service</h3>
+            <p>SmartMine provides a platform for trading digital assets, including but not limited to cryptocurrencies
+              and tokens.
+              We facilitate transactions between users and provide trading tools, market information, and account
+              management
+              services.</p>
+            <p>We do <strong>not</strong> provide financial advice or investment guarantees. All trading is conducted at
+              your own
+              risk.</p>
+
+            <h3>3. Account Registration</h3>
+            <p>To access the trading features of SmartMine, you must create an account, provide accurate and complete
+              information,
+              and verify your identity as required by applicable laws (including KYC/AML policies).</p>
+            <p>You are responsible for maintaining the confidentiality of your login credentials and any activities
+              under your
+              account.</p>
+
+            <h3>4. User Responsibilities</h3>
+            <p>By using SmartMine, you agree not to:</p>
+            <ul>
+              <li>Use the Platform for illegal or fraudulent purposes;</li>
+              <li>Violate any local, national, or international laws;</li>
+              <li>Upload or distribute malicious code or content;</li>
+              <li>Attempt to interfere with our systems or other users;</li>
+              <li>Misrepresent your identity or use multiple unauthorized accounts.</li>
+            </ul>
+
+            <h3>5. Risk Disclosure</h3>
+            <p>Trading digital assets involves a <strong>high level of risk</strong>, including the potential loss of
+              your entire
+              investment. Prices can fluctuate rapidly and are influenced by various unpredictable factors.</p>
+            <p>You understand and agree that SmartMine is <strong>not responsible for any financial losses</strong>
+              incurred
+              through your use of the Platform.</p>
+
+            <h3>6. Fees and Charges</h3>
+            <p>SmartMine may charge fees for trading, withdrawals, deposits, or other services. All applicable fees will
+              be
+              displayed transparently on the Platform. Fees are <strong>non-refundable</strong> unless explicitly
+              stated.</p>
+
+            <h3>7. Intellectual Property</h3>
+            <p>All content on SmartMine—including logos, software, graphics, and design—is our intellectual property or
+              licensed
+              to us. You may not reproduce, copy, or distribute any content without written permission from SmartMine.
+            </p>
+
+            <h3>8. Termination</h3>
+            <p>We reserve the right to suspend or terminate your account and access to the Platform at any time if you:
+            </p>
+            <ul>
+              <li>Violate these Terms,</li>
+              <li>Engage in fraudulent or illegal behavior,</li>
+              <li>Cause harm to the Platform or its users.</li>
+            </ul>
+            <p>Termination may result in the forfeiture of associated data or funds in accordance with applicable
+              regulations.</p>
+
+            <h3>9. Disclaimer of Warranties</h3>
+            <p>SmartMine provides the Platform on an <strong>“as is”</strong> and <strong>“as available”</strong> basis
+              without
+              any warranties, express or implied. We do not guarantee uninterrupted access, error-free functionality, or
+              the
+              accuracy of data displayed.</p>
+
+            <h3>10. Limitation of Liability</h3>
+            <p>To the maximum extent permitted by law, SmartMine shall not be liable for:</p>
+            <ul>
+              <li>Any indirect, incidental, or consequential damages;</li>
+              <li>Loss of data, profits, or digital assets;</li>
+              <li>Events beyond our reasonable control (e.g., cyberattacks, market crashes).</li>
+            </ul>
+
+            <h3>11. Governing Law</h3>
+            <p>These Terms and any disputes arising out of or related to your use of SmartMine shall be governed by the
+              laws of
+              [Insert Jurisdiction]. All disputes will be resolved exclusively in the courts of [Insert Location].</p>
+
+            <h3>12. Amendments to Terms</h3>
+            <p>We reserve the right to amend these Terms at any time. We will notify users of material changes, and
+              continued use
+              of the Platform constitutes acceptance of updated Terms.</p>
+
+            <h3>13. Contact Information</h3>
+            <p>If you have any questions or concerns about these Terms, please contact us at:</p>
+            <p>
+              <strong>SmartMine Support</strong><br>
+              Email: <a href="mailto:support@smrtmine.com">support@smartmine.com</a><br>
+              Website: <a href="http://www.smrtmine.com" target="_blank">www.smartmine.com</a><br>
+
+            </p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Accept Terms and Conditions</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include jQuery and Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Script to show modal on page load -->
+  <script type="text/javascript">
+    $(document).ready(function () {
+      setTimeout(function () {
+        var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {
+          backdrop: 'static',
+          keyboard: false
+        });
+        myModal.show();
+      }, 500); // Adjust delay as needed (e.g., 500ms)
+    });
+  </script>
+
   <!-- 
   <script>
     async function fetchData() {

@@ -20,8 +20,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/clearcache/', include('clearcache.urls')),
-    path('admin/', admin.site.urls),
+    path('maze/clearcache/', include('clearcache.urls')),
+    path('maze/', admin.site.urls),
     path('', include('smartmine.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('accounts/', include('allauth.urls')),

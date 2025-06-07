@@ -486,7 +486,9 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Accept Terms and Conditions</button>
+          <button type="button" class="btn btn-primary" id="acceptTermsBtn" data-bs-dismiss="modal">Accept Terms and
+            Conditions</button>
+
         </div>
       </div>
     </div>
@@ -497,7 +499,34 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Script to show modal on page load -->
+  {% if user.is_authenticated and user.show_terms_modal %}
   <script type="text/javascript">
+    $(document).ready(function () {
+      setTimeout(function () {
+        var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {
+          backdrop: 'static',
+          keyboard: false
+        });
+        myModal.show();
+      }, 500);
+    });
+
+
+
+    $('#acceptTermsBtn').click(function () {
+      $.ajax({
+        url: '{% url "hide_terms_modal" %}', // Create this view below
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        success: function (response) {
+          console.log('Terms modal flag updated');
+        }
+      });
+    });
+
+  </script>
+  {% endif %}
+  <!-- <script type="text/javascript">
     $(document).ready(function () {
       setTimeout(function () {
         var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {
@@ -507,7 +536,7 @@
         myModal.show();
       }, 500); // Adjust delay as needed (e.g., 500ms)
     });
-  </script>
+  </script> -->
 
   <!-- 
   <script>

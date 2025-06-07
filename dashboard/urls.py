@@ -15,12 +15,14 @@ urlpatterns = [
     path('withdrawal/', dashboard_views.withdraw, name='withdrawal'),
     path('verify/', dashboard_views.verif, name='verify'),
     path('dt', dashboard_views.mkt_data, name='data'),
+    path('convert/', dashboard_views.convert_view, name='convert_view'),
+
     path('api/mpesa/callback/', dashboard_views.mpesa_callback, name='mpesa_callback'),
     path('plans/', dashboard_views.investment_plans, name='investment_plans'),
     path('invest/<int:plan_id>/', dashboard_views.invest, name='invest'),
     # path('initiate-investment/', dashboard_views.initiate_investment, name='initiate_investment'),
     path('invest/confirm/<int:plan_id>/', dashboard_views.confirm_investment, name='confirm_investment'),
-
+     path('hide-terms-modal/', dashboard_views.hide_terms_modal, name='hide_terms_modal'),
     path('api/tickers/', dashboard_views.get_ticker_data, name='get_ticker_data'),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

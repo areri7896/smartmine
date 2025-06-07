@@ -4,6 +4,10 @@ from datetime import timedelta
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+
+User = get_user_model()
 
 
 # class WithdrawStatusTextChoices(models.TextChoices):
@@ -41,6 +45,7 @@ class Profile(models.Model):
     first_name = models.CharField(max_length=100, default='')
     last_name = models.CharField(max_length=100, default='')
     dob = models.DateField(null=True, blank=True)
+    show_terms_modal = models.BooleanField(default=True)
     COUNTRY_CHOICES = [
       ("AD", "Andorra (+376)"),
       ("AE", "United Arab Emirates (+971)"),
@@ -350,30 +355,51 @@ class InvestmentPlan(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.price} USDT"
-
 class Investment(models.Model):
     STATUS_CHOICES = [
         ("active", "Active"),
         ("completed", "Completed"),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    plan = models.ForeignKey(InvestmentPlan, on_delete=models.CASCADE)
-    start_date = models.DateTimeField(auto_now_add=True)
-    end_date = models.DateTimeField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    plan = models.ForeignKey('InvestmentPlan', on_delete=models.CASCADE, null=True, blank=True)
+    start_date = models.DateTimeField(auto_now_add=True, null=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    duration_minutes = models.IntegerField(default=60)
+    is_completed = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
 
-    def calculate_earnings(self):
-        return self.plan.price * (self.plan.daily_interest_rate / 100) * self.plan.cycle_days
-    
-    def check_and_update_status(self):
-      if self.status == "active" and timezone.now() >= self.end_date:
-        self.status = "completed"
-        self.save(update_fields=["status"])
-
     def __str__(self):
-        return f"{self.user.username} - {self.plan.name}"
+        return f"Investment #{self.id} - {self.plan.name} - {self.user.username}"
 
+    @property
+    def end_time(self):
+        return self.created_at + timedelta(minutes=self.duration_minutes)
+
+    @property
+    def time_remaining(self):
+        remaining = self.end_time - timezone.now()
+        return max(timedelta(0), remaining)
+
+    def process_completion(self):
+        if not self.is_completed and timezone.now() >= self.end_time:
+            self.is_completed = True
+            self.status = "completed"
+
+            # Calculate profit
+            plan_price = self.plan.price
+            interest = self.plan.daily_interest_rate
+            profit = plan_price * (interest / Decimal(100))
+
+            # Add to user's balance
+            profile = self.user.profile
+            profile.balance += plan_price + profit
+            profile.save()
+
+            self.save()
+# models.py
+from decimal import Decimal
 
 
 class Wallet(models.Model):

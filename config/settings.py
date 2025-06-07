@@ -36,21 +36,22 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 ALLOWED_HOSTS = ['2qd-talented-lyell.circumeo-apps.net',
     'localhost',
-    'https://2qd-talented-lyell.circumeo-apps.net',
     '127.0.0.1',
-    'www.smrtmine.com',
-    'smrtmine.com',
+    'https://www.smrtmine.com',
+    'https://smrtmine.com',
     '*',]
 
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://2qd-talented-lyell.circumeo-apps.net'
+    'https://www.smrtmine.com',
+    'https://smrtmine.com',
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
-    'https://2qd-talented-lyell.circumeo-apps.net',
-    '127.0.0.1',
+    'https://www.smrtmine.com',
+    'https://smrtmine.com',
+    'http://127.0.0.1',
 ]
 # Application definition
 
@@ -64,6 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "channels", 
+    'django_celery_beat',
 
 
     #third party apps
@@ -184,6 +186,13 @@ DATABASES = {
 
 SITE_ID = 1
 
+# settings.py
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'my_cache_table',
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -272,6 +281,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# settings.py
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -321,5 +332,12 @@ MPESA_ENVIRONMENT = 'sandbox'  # or 'production'
 MPESA_SHORTCODE_TYPE = config('MPESA_SHORTCODE_TYPE')
 MPESA_INITIATOR_USERNAME = config('MPESA_INITIATOR_USERNAME')
 MPESA_INITIATOR_SECURITY_CREDENTIAL = config('MPESA_INITIATOR_SECURITY_CREDENTIAL')
+
+
+# settings.py
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
 
 django_heroku.settings(locals())

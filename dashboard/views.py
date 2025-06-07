@@ -10,6 +10,8 @@ from django.core.mail import send_mail
 from django_daraja.mpesa.core import MpesaClient
 from binance.exceptions import BinanceAPIException
 from django.shortcuts import render
+from .utils.utils import convert_kes_to_usd
+
 from .utils.coingecko import get_token_data
 
 import os
@@ -23,8 +25,8 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime, timedelta
 from .functions import *
 from django.http import JsonResponse
-from .models import InvestmentPlan, Investment, MpesaResponse, DepositTransaction, Wallet, Profile, Withdrawal, Depo_Verification
-
+from .models import *
+from .forms import *
 from dotenv import load_dotenv
 from django.utils.timezone import now
 
@@ -35,6 +37,10 @@ from binance.exceptions import BinanceAPIException
 from django.core.management.base import BaseCommand
 # from dashboard.views import update_investment_status
 from django.contrib.admin.views.decorators import staff_member_required
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 
 api_key = os.environ['BINANCE_API_KEY']
@@ -65,6 +71,43 @@ def get_binance_client():
 # df = pd.DataFrame.from_records(response)
 # # print(response)
 # df.head()
+
+# views.py
+
+@login_required
+@csrf_exempt  # Only use this if CSRF token isn't working properly
+def hide_terms_modal(request):
+    if request.method == 'POST':
+        user = request.user
+        user.show_terms_modal = False
+        user.save()
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+    def convert_kes_to_usd(amount_kes):
+        """
+        Converts the given amount in Kenyan Shillings (KES) to US Dollars (USD)
+        using the Frankfurter API.
+        """
+        try:
+            url = "https://api.frankfurter.app/latest"
+            params = {"amount": amount_kes, "from": "KES", "to": "USD"}
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            data = response.json()
+            usd_amount = data["rates"]["USD"]
+            return usd_amount
+        except Exception as e:
+            print(f"Currency conversion error: {e}")
+            return None
+        
+
+from .models import Investment
+
+def investment_detail(request, investment_id):
+    investment = Investment.objects.get(id=investment_id, user=request.user)
+    investment.check_and_update_status()  # Check on access
+    return render(request, 'investment_detail.html', {'investment': investment})
 
 def investment_plans(request):
     if not request.user.is_authenticated:
@@ -183,6 +226,17 @@ def crypto_assets_view(request):
     tickers = ['btc', 'eth', 'bnb', 'ada', 'doge']
     tokens = get_token_data(tickers)
     return render(request, 'your_template.html', {'tokens': tokens})
+
+# views.py
+def active_investments(request):
+    investments = Investment.objects.filter(user=request.user, is_active=True)
+    for inv in investments:
+        inv.process_completion()  # ensures expired investments are updated
+    return render(request, 'active_investments.html', {'investments': investments})
+
+def completed_investments(request):
+    investments = Investment.objects.filter(user=request.user, is_completed=True)
+    return render(request, 'completed_investments.html', {'investments': investments})
 
 
 @login_required
@@ -381,7 +435,7 @@ def wallet(request):
             'total_balance': total_balance,
             'extracted_data': extracted_data,
             'bal': wallet_bal,
-            'withdrawals' : withdrawals,
+            'withdrawals' : withdrawals, 
             'depos' : depos,
         }
 
@@ -416,7 +470,7 @@ def wallet(request):
                 cl = MpesaClient()
                 account_reference = 'reference'
                 transaction_desc = 'Description'
-                callback_url = 'https://smartmine-3d9e499f723e.herokuapp.com/api/mpesa/callback/'
+                callback_url = 'https://www.smrtmine.com/api/mpesa/callback/'
                 response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
 
                 # Log the response for debugging
@@ -730,7 +784,9 @@ def profile(request):
 def profile(request):
     if request.user.is_authenticated:
         # Get the Profile instance for the logged-in user
+        user_instance = request.user
         profile_instance = Profile.objects.get(user=request.user)
+        user_form = CustomUserChangeForm(request.POST or None, instance=user_instance)
         user_form = ProfileUpdateForm(request.POST or None, request.FILES or None, instance=profile_instance)
 
         if request.method == 'POST':
@@ -741,13 +797,36 @@ def profile(request):
                 return redirect('dashboard')
 
         context = {
-            'user_form': user_form,
-        }
+             'user_form': user_form,
+         }
         return render(request, 'src/dashboard/profile.html', context)
     else:
         messages.error(request, 'You need to log in to access your profile.')
         return redirect('login')
 
+
+# @login_required
+# def profile(request):
+#     user_instance = request.user
+#     profile_instance = request.user.profile
+
+#     user_form = CustomUserChangeForm(request.POST or None, instance=user_instance)
+#     user_form = ProfileUpdateForm(request.POST or None, request.FILES or None, instance=profile_instance)
+
+#     if request.method == 'POST':
+#         if user_form.is_valid():# '''and profile_form.is_valid()''':
+#             user_form.save()
+#             # profile_form.save()
+#             messages.success(request, 'Your profile was updated successfully!')
+#             return redirect('dashboard')
+#         else:
+#             print("Errors:", user_form.errors, '''profile_form.errors''')
+
+#     context = {
+#         'user_form': user_form,
+#         # 'profile_form': profile_form,
+#     }
+#     return render(request, 'src/dashboard/profile.html', context)
 
 @login_required
 def exchange(request):
@@ -777,6 +856,23 @@ def exchange(request):
 #             fail_silently=False,
 #         )
 #         return user
+
+# myapp/views.py
+
+def convert_view(request):
+    context = {}
+    if request.method == 'POST':
+        try:
+            amount_kes = float(request.POST.get('amount_kes', 0))
+            usd_value = convert_kes_to_usd(amount_kes)
+            context.update({
+                'usd_value': usd_value,
+                'amount_kes': amount_kes
+            })
+        except ValueError:
+            context['error'] = "Invalid input. Please enter a valid number."
+    return render(request, 'myapp/converter.html', context)
+
 
 def signin(request):
     if request.method == 'POST':

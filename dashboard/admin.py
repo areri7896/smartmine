@@ -27,3 +27,5 @@ admin.site.register(InvestmentPlan)
 admin.site.register(MpesaCallback)
 admin.site.register(Wallet)
 admin.site.register(Profile)
+
+from django_celery_beat.models import PeriodicTask, IntervalSchedule

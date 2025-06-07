@@ -4,11 +4,44 @@ from .models import Profile
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-class UserUpdateForm(forms.ModelForm):
-    email = forms.EmailField(required=True, label='Email Address')
+User = get_user_model()
+# class CustomUserCreationForm(UserCreationForm):
+#     class Meta:
+#         model = User
+#         fields = ['username', 'email', 'first_name', 'last_name']
+#         widgets = {
+#             'username': forms.TextInput(attrs={"class": "form-control"}),
+#             'email': forms.EmailInput(attrs={"class": "form-control"}),
+#             'first_name': forms.TextInput(attrs={"class": "form-control"}),
+#             'last_name': forms.TextInput(attrs={"class": "form-control"}),
+#         }
+
+class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'first_name', 'last_name']
+        widgets = {
+            'username': forms.TextInput(attrs={"class": "form-control"}),
+            'email': forms.EmailInput(attrs={"class": "form-control"}),
+            'first_name': forms.TextInput(attrs={"class": "form-control"}),
+            'last_name': forms.TextInput(attrs={"class": "form-control"}),
+        }
+
+# class ProfileUpdateForm(forms.ModelForm):
+#     class Meta:
+#         model = Profile
+#         fields = ['profile_pic', 'dob', 'country']
+#         widgets = {
+#             'dob': forms.DateInput(attrs={'type': 'date', "class": "form-control"}),
+#             'profile_pic': forms.ClearableFileInput(attrs={"class": "form-control"}),
+#             'country': forms.Select(attrs={"class": "form-control"}),
+#         }
+
+# class UserUpdateForm(forms.ModelForm):
+#     email = forms.EmailField(required=True, label='Email Address')
+#     class Meta:
+#         model = User
+#         fields = ['username', 'email']
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:

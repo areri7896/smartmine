@@ -83,8 +83,6 @@ INSTALLED_APPS = [
     # 'dashboard',
     'binapi',
     # 'payment',
-
-
 ]
 
 MIDDLEWARE = [

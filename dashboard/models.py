@@ -340,11 +340,15 @@ class MpesaCallback(models.Model):
 
 class InvestmentPlan(models.Model):
     PLAN_CHOICES = [
-        ("AMATUER", "AMATUER"),
-        ("BEGINNER", "BEGINNER"),
-        ("INTERMIDIATE", "INTERMIDIATE"),
-        ("LEGENDARY", "LEGENDARY"),
-        ("PRO", "PRO"),
+        ("Alpha Return CFD", "Alpha Return CFD"),
+        ("Rapid Growth CFD", "Rapid Growth CFD"),
+        ("CryptoFortress_CFD", "CryptoFortress_CFD"),
+        ("AI-Powered_Profit_CFD", "AI-Powered_Profit_CFD"),
+        ("Freedom_Fund_CFD", "Freedom_Fund_CFD"),
+        ("Lagacy_Builder_CFD", "Lagacy_Builder_CFD"),
+        ("Platimum_Wealth_CFD", "Platimum_Wealth_CFD"),
+        ("SmartReturns_Algorithm", "SmartReturns_Algorithm"),
+        ("Compounding_Fortune_CFD", "Compounding_Fortune_CFD"),
     ]
 
     name = models.CharField(max_length=50, choices=PLAN_CHOICES, unique=True)

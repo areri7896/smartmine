@@ -710,14 +710,14 @@ def confirm_investment(request, plan_id):
 
             # Calculate investment start and end date
             start_date = now()
-            end_date = start_date + timedelta(days=plan.cycle_days)
+            db_end_date = start_date + timedelta(days=plan.cycle_days)
 
             # Create investment record
             investment = Investment.objects.create(
                 user=request.user,
                 plan=plan,
                 start_date=start_date,
-                end_date=end_date,
+                db_end_date=db_end_date,
                 status="active"
             )
 

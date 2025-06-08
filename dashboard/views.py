@@ -835,6 +835,17 @@ def exchange(request):
     context = {'df':df,}
     return render(request, 'src/dashboard/exchange.html')
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_protect
+
+@csrf_protect
+def accept_terms(request):
+    if request.method == 'POST' and request.user.is_authenticated:
+        request.user.show_terms_modal = False
+        request.user.terms_accepted = True
+        request.user.save()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
 
 # class MyCustomSocialSignupForm(SignupForm):
 #     first_name = forms.CharField(max_length=30, label='First Name')
@@ -860,7 +871,17 @@ def exchange(request):
 # myapp/views.py
 
 def convert_view(request):
-    context = {}
+    # Import wallet balance for the logged-in user
+    wallet = Wallet.objects.filter(user=request.user).first()
+    wallet_balance = wallet.balance if wallet else 0
+
+    # Convert wallet balance (KES) to USD
+    usd_wallet_balance = convert_kes_to_usd(wallet_balance) if wallet_balance else 0
+
+    context = {
+        'wallet_balance': wallet_balance,
+        'usd_wallet_balance': usd_wallet_balance,
+    }
     if request.method == 'POST':
         try:
             amount_kes = float(request.POST.get('amount_kes', 0))

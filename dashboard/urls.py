@@ -16,6 +16,7 @@ urlpatterns = [
     path('verify/', dashboard_views.verif, name='verify'),
     path('dt', dashboard_views.mkt_data, name='data'),
     path('convert/', dashboard_views.convert_view, name='convert_view'),
+    path('accept-terms/', dashboard_views.accept_terms, name='accept_terms'),
 
     path('api/mpesa/callback/', dashboard_views.mpesa_callback, name='mpesa_callback'),
     path('plans/', dashboard_views.investment_plans, name='investment_plans'),

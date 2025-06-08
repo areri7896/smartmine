@@ -355,51 +355,71 @@ class InvestmentPlan(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.price} USDT"
+    
+from django.db import models
+from django.utils import timezone
+from datetime import timedelta
+from decimal import Decimal
+
 class Investment(models.Model):
     STATUS_CHOICES = [
         ("active", "Active"),
         ("completed", "Completed"),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
     plan = models.ForeignKey('InvestmentPlan', on_delete=models.CASCADE, null=True, blank=True)
     start_date = models.DateTimeField(auto_now_add=True, null=True)
-    end_date = models.DateTimeField(null=True, blank=True)
+    db_end_date = models.DateTimeField(null=True, blank=True)  # Renamed to avoid conflict
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-    duration_minutes = models.IntegerField(default=60)
+    duration_minutes = models.IntegerField(default=60)  # Consider using if needed
     is_completed = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
 
     def __str__(self):
-        return f"Investment #{self.id} - {self.plan.name} - {self.user.username}"
+        plan_name = self.plan.name if self.plan else 'No Plan'
+        return f"Investment {self.start_date.strftime('%Y-%m-%d %H:%M')} - {plan_name}"
 
     @property
-    def end_time(self):
-        return self.created_at + timedelta(minutes=self.duration_minutes)
+    def end_date(self):
+        """Calculate the end date based on the plan's cycle days."""
+        if self.plan and self.start_date:
+            return self.start_date + timedelta(days=self.plan.cycle_days)
+        return None
 
     @property
     def time_remaining(self):
-        remaining = self.end_time - timezone.now()
-        return max(timedelta(0), remaining)
+        """Calculate the time remaining until the investment ends."""
+        if self.end_date:
+            remaining = self.end_date - timezone.now()
+            return max(timedelta(0), remaining)
+        return timedelta(0)
 
     def process_completion(self):
-        if not self.is_completed and timezone.now() >= self.end_time:
+        """Process the investment completion if the end date has been reached."""
+        if self.is_completed or not self.end_date or not self.user or not self.plan:
+            return  # Skip if already completed or required fields are missing
+
+        if timezone.now() >= self.end_date:
             self.is_completed = True
             self.status = "completed"
 
-            # Calculate profit
-            plan_price = self.plan.price
-            interest = self.plan.daily_interest_rate
-            profit = plan_price * (interest / Decimal(100))
+            # Calculate profit using Decimal for precision
+            plan_price = Decimal(str(self.plan.price))
+            interest = Decimal(str(self.plan.daily_interest_rate))
+            profit = plan_price * (interest / Decimal('100'))
 
             # Add to user's balance
-            profile = self.user.profile
-            profile.balance += plan_price + profit
-            profile.save()
+            try:
+                profile = self.user.profile
+                profile.balance += plan_price + profit
+                profile.save()
+            except AttributeError:
+                # Handle missing profile gracefully
+                pass
 
+            self.db_end_date = self.end_date  # Store the calculated end date
             self.save()
-# models.py
-from decimal import Decimal
 
 
 class Wallet(models.Model):

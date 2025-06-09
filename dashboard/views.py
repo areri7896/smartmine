@@ -781,30 +781,38 @@ def profile(request):
         form = ProfileUpdateForm(instance=request.user)
     return render(request, 'src/dashboard/profile.html', {'user_form': form})
 '''
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import CustomUserChangeForm, ProfileUpdateForm
+from .models import Profile
+from django.contrib.auth.decorators import login_required
+
+@login_required
 def profile(request):
-    if request.user.is_authenticated:
-        # Get the Profile instance for the logged-in user
-        user_instance = request.user
-        profile_instance = Profile.objects.get(user=request.user)
-        user_form = CustomUserChangeForm(request.POST or None, instance=user_instance)
-        user_form = ProfileUpdateForm(request.POST or None, request.FILES or None, instance=profile_instance)
-
-        if request.method == 'POST':
-            if user_form.is_valid():
-                user_form.save()
-                print('user_form:', user_form)
-                messages.success(request, 'Congratulations! Your profile was updated successfully.')
-                return redirect('dashboard')
-
-        context = {
-             'user_form': user_form,
-         }
-        return render(request, 'src/dashboard/profile.html', context)
+    # Get the Profile instance for the logged-in user
+    user_instance = request.user
+    profile_instance = Profile.objects.get(user=request.user)
+    
+    if request.method == 'POST':
+        user_form = CustomUserChangeForm(request.POST, instance=user_instance)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile_instance)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Congratulations! Your profile was updated successfully.')
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Please correct the errors below.')
     else:
-        messages.error(request, 'You need to log in to access your profile.')
-        return redirect('login')
+        user_form = CustomUserChangeForm(instance=user_instance)
+        profile_form = ProfileUpdateForm(instance=profile_instance)
 
-
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+    }
+    return render(request, 'src/dashboard/profile.html', context)
 # @login_required
 # def profile(request):
 #     user_instance = request.user

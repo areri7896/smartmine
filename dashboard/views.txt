@@ -1,0 +1,576 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.contrib import messages, admin
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.http import HttpResponse, JsonResponse
+from django.core.mail import send_mail
+from django_daraja.mpesa.core import MpesaClient
+from django.core.paginator import Paginator
+from django.core.cache import cache
+from django.utils.timezone import now
+from datetime import datetime, timedelta
+from binance.client import Client
+from binance.exceptions import BinanceAPIException
+import pandas as pd
+import requests
+import json
+import os
+from dotenv import load_dotenv
+from .models import Investment, InvestmentPlan, Wallet, Withdrawal, Depo_Verification, DepositTransaction, MpesaResponse, Profile
+from .forms import CustomUserChangeForm, ProfileUpdateForm
+from .utils.utils import convert_kes_to_usd
+from .utils.coingecko import get_token_data
+
+load_dotenv()
+
+# Initialize Binance client
+def get_binance_client():
+    api_key = os.environ.get('BINANCE_API_KEY')
+    api_secret = os.environ.get('BINANCE_SECRET_KEY')
+    try:
+        client = Client(api_key, api_secret, testnet=False)
+        client.ping()  # Test connectivity
+        return client
+    except BinanceAPIException as e:
+        print(f"Binance API error: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return None
+
+@login_required
+@csrf_exempt
+def hide_terms_modal(request):
+    if request.method == 'POST':
+        request.user.show_terms_modal = False
+        request.user.save()
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+def investment_detail(request, investment_id):
+    investment = get_object_or_404(Investment, id=investment_id, user=request.user)
+    investment.check_and_update_status()
+    return render(request, 'investment_detail.html', {'investment': investment})
+
+@login_required
+def investment_plans(request):
+    plans = InvestmentPlan.objects.all()
+    investments = Investment.objects.filter(user=request.user).select_related("plan")
+    context = {'investments': investments, 'plans': plans}
+    return render(request, 'src/dashboard/market.html', context)
+
+@login_required
+def invest(request, plan_id):
+    plan = get_object_or_404(InvestmentPlan, id=plan_id)
+    wallet = Wallet.objects.filter(user=request.user).first()
+    
+    if not wallet or wallet.balance < plan.price:
+        messages.error(request, 'Insufficient balance. Please deposit funds!')
+        return redirect('wallet')
+    
+    if request.method == 'POST':
+        end_date = now() + timedelta(days=plan.cycle_days)
+        Investment.objects.create(
+            user=request.user,
+            plan=plan,
+            end_date=end_date,
+            status="active"
+        )
+        return redirect('market')
+    
+    return render(request, 'src/dashboard/invest.html', {'pl': plan})
+
+@csrf_exempt
+def get_ticker_data(request):
+    client = get_binance_client()
+    if not client:
+        return JsonResponse({"error": "Failed to connect to Binance"}, status=503)
+    
+    try:
+        tickers = client.get_all_tickers()
+        df = pd.DataFrame(tickers)
+        df['price'] = pd.to_numeric(df['price'], errors='coerce')
+        return JsonResponse(df.to_dict(orient='records'), safe=False)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+def wallet_view(request):
+    wallet = Wallet.objects.get(user=request.user)
+    balance_kes = wallet.balance
+    balance_usd = convert_kes_to_usd(float(balance_kes)) or "Conversion unavailable"
+    context = {'balance_kes': balance_kes, 'balance_usd': balance_usd}
+    return render(request, 'src/dashboard/wallet.html', context)
+
+@login_required
+def active_investments(request):
+    investments = Investment.objects.filter(user=request.user, status="active")
+    for inv in investments:
+        inv.check_and_update_status()
+    return render(request, 'src/dashboard/market.html', {'investments': investments})
+
+@login_required
+def completed_investments(request):
+    investments = Investment.objects.filter(user=request.user, status="completed")
+    return render(request, 'src/dashboard/market.html', {'investments': investments})
+
+@login_required
+def dashboard(request):
+    client = get_binance_client()
+    if not client:
+        messages.error(request, "Failed to connect to Binance")
+        return render(request, 'src/dashboard/dashboard.html', {})
+    
+    try:
+        tickers = client.get_all_tickers()
+        df = pd.DataFrame(tickers)
+        tics = ['btc', 'eth', 'bnb', 'ada', 'doge']
+        tokens = get_token_data(tics)
+        combined_tickers = [(ticker['symbol'], ticker['price']) for ticker in tickers]
+        context = {'tks': combined_tickers, 'df': df, 'tickers': tickers, 'tokens': tokens}
+        return render(request, 'src/dashboard/dashboard.html', context)
+    except Exception as e:
+        messages.error(request, f"Error fetching data: {e}")
+        return render(request, 'src/dashboard/dashboard.html', {})
+
+@login_required
+def account(request):
+    client = get_binance_client()
+    if not client:
+        return HttpResponse("Failed to connect to Binance", status=503)
+    
+    try:
+        info = client.get_account()
+        return JsonResponse(info)
+    except Exception as e:
+        return HttpResponse(f"Error: {e}", status=500)
+
+@login_required
+def asset_balance(request):
+    client = get_binance_client()
+    if not client:
+        return HttpResponse("Failed to connect to Binance", status=503)
+    
+    try:
+        asset_balance = client.get_asset_balance(asset='USDT')
+        asset_details = client.get_asset_details()
+        context = {'asset_balance': asset_balance, 'asset_details': asset_details}
+        return render(request, 'src/dashboard/wallet.html', context)
+    except Exception as e:
+        return HttpResponse(f"Error: {e}", status=500)
+
+@login_required
+def withdraw(request):
+    if request.method == 'POST':
+        try:
+            phone_number = request.POST.get('wphone')
+            amount = int(request.POST.get('wamount'))
+            Withdrawal.objects.create(
+                user=request.user,
+                amount=amount,
+                phone_number=phone_number,
+                status='Pending'
+            )
+            send_mail(
+                subject=f"New Withdrawal Request for {request.user.first_name} {request.user.last_name}",
+                message=f"Mpesa Transaction Code: {phone_number}\nAmount: {amount}\nUser: {request.user.username}",
+                from_email='noreply@ssmartmine.com',
+                recipient_list=['ssmartmine@gmail.com'],
+                fail_silently=False,
+            )
+            messages.success(request, 'Your withdrawal request was successfully sent. It will be processed in less than 10 minutes.')
+            return redirect('wallet')
+        except Exception as e:
+            messages.error(request, 'An error occurred during your withdrawal request.')
+            return redirect('wallet')
+    return redirect('wallet')
+
+@admin.action(description="Approve selected withdrawals")
+def approve_selected_withdrawals(modeladmin, request, queryset):
+    queryset.update(status='Approved', is_cancelled=False)
+    messages.success(request, f"{queryset.count()} withdrawals approved successfully.")
+
+@login_required
+def verif(request):
+    if request.method == 'POST':
+        try:
+            phone_number = request.POST.get('transaction')
+            amount = int(request.POST.get('amnt'))
+            Depo_Verification.objects.create(
+                user=request.user,
+                amount=amount,
+                verification_code=phone_number,
+                is_completed=False
+            )
+            send_mail(
+                subject=f"New Verification Request for {request.user.username}",
+                message=f"Mpesa Transaction Code: {phone_number}\nAmount: {amount}\nUser: {request.user.username}\nPlease update the record.",
+                from_email='noreply@ssmartmine.com',
+                recipient_list=['ssmartmine@gmail.com'],
+                fail_silently=False,
+            )
+            messages.success(request, 'Transaction code sent for verification successfully!')
+            return redirect('wallet')
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            messages.error(request, 'An error occurred during transaction code submission.')
+            return redirect('wallet')
+    return redirect('wallet')
+
+@login_required
+def wallet(request):
+    try:
+        client = get_binance_client()
+        if not client:
+            raise ValueError("Failed to connect to Binance.")
+        
+        # Synchronize time with Binance server
+        server_time = client.get_server_time()
+        client.time_offset = server_time['serverTime'] - int(time.time() * 1000)
+        client.ping()
+
+        # Fetch account information
+        account_info = client.get_account()
+        balances = account_info['balances']
+        reference_assets = ['BTC', 'ETH', 'XRP', 'USDT']
+        extracted_data = []
+        total_balance = 0
+
+        for entry in balances:
+            asset = entry['asset']
+            free = float(entry['free'])
+            if asset in reference_assets:
+                extracted_data.append({'asset': asset, 'free': free, 'locked': float(entry['locked'])})
+                if free > 0:
+                    try:
+                        symbol = f"{asset}USDT"
+                        price = float(client.get_avg_price(symbol=symbol)['price'])
+                        total_balance += free * price
+                    except BinanceAPIException as e:
+                        print(f"Error fetching price for {symbol}: {e}")
+
+        wallet = Wallet.objects.filter(user=request.user).first()
+        wallet_bal = wallet.balance if wallet else 0
+        wallet_bal_usd = convert_kes_to_usd(float(wallet_bal)) if wallet_bal else 0
+        total_balance_usd = convert_kes_to_usd(float(total_balance)) if total_balance else 0
+
+        withdrawals = Withdrawal.objects.filter(user=request.user).order_by('-id')
+        depos = Depo_Verification.objects.filter(user=request.user).order_by('-id')
+
+        context = {
+            'total_balance': total_balance_usd,
+            'extracted_data': extracted_data,
+            'bal': wallet_bal_usd,
+            'withdrawals': withdrawals,
+            'depos': depos,
+        }
+
+        if request.method == 'POST':
+            try:
+                data = json.loads(request.body.decode('utf-8')) if request.body else {}
+                phone_number = data.get('phone', request.POST.get('phone'))
+                amount = int(data.get('amount', request.POST.get('amount')))
+                
+                if phone_number.startswith("0"):
+                    phone_number = "254" + phone_number[1:]
+
+                DepositTransaction.objects.create(
+                    user=request.user,
+                    amount=amount,
+                    phone_number=phone_number,
+                    transaction_id=f"TXN{int(datetime.now())}",
+                    status='Pending'
+                )
+
+                cl = MpesaClient()
+                callback_url = 'https://www.smrtmine.com/api/mpesa/callback/'
+                response = cl.stk_push(phone_number, amount, 'reference', 'Description', callback_url)
+                response_data = json.loads(response.text)
+                result_code = response_data.get('ResultCode', '')
+
+                MpesaResponse.objects.create(
+                    merchant_request_id=response_data.get('MerchantRequestID'),
+                    checkout_request_id=response_data.get('CheckoutRequestID'),
+                    response_code=response_data.get('ResponseCode'),
+                    response_description=response_data.get('ResponseDescription'),
+                    customer_message=response_data.get('CustomerMessage')
+                )
+
+                if result_code == '0':
+                    messages.success(request, 'Your deposit was initiated successfully! Please check your phone and enter your pin.')
+                elif result_code == '1032':
+                    messages.error(request, 'Transaction canceled by user.')
+                elif result_code == '1037':
+                    messages.error(request, 'STK Push timed out.')
+                else:
+                    messages.error(request, f"Unknown response: {response_data.get('ResultDesc', 'No description')}")
+                return redirect('wallet')
+
+            except Exception as e:
+                messages.error(request, f"Deposit error: {e}")
+                return JsonResponse({'error': str(e)}, status=400)
+
+        return render(request, 'src/dashboard/wallet.html', context)
+
+    except Exception as e:
+        messages.error(request, f"An error occurred: {e}")
+        return redirect('wallet')
+
+@csrf_exempt
+def mpesa_callback(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        body = data.get('Body', {}).get('stkCallback', {})
+        result_code = body.get('ResultCode')
+        metadata = body.get('CallbackMetadata', {}).get('Item', [])
+        
+        transaction_id = amount = phone_number = None
+        for item in metadata:
+            if item['Name'] == 'MpesaReceiptNumber':
+                transaction_id = item['Value']
+            elif item['Name'] == 'Amount':
+                amount = float(item['Value'])
+            elif item['Name'] == 'PhoneNumber':
+                phone_number = str(item['Value'])
+
+        if result_code == 0:
+            try:
+                transaction = DepositTransaction.objects.get(phone_number=phone_number, transaction_id=transaction_id, status='Pending')
+                transaction.status = 'Completed'
+                transaction.save()
+                wallet, _ = Wallet.objects.get_or_create(user=transaction.user)
+                wallet.balance += amount
+                wallet.save()
+                return JsonResponse({'success': True, 'message': 'Deposit validated successfully.'}, status=200)
+            except DepositTransaction.DoesNotExist:
+                return JsonResponse({'error': 'Transaction not found.'}, status=404)
+        return JsonResponse({'error': 'M-Pesa transaction failed.'}, status=400)
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data received.'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
+
+def mkt_data(request):
+    client = get_binance_client()
+    if not client:
+        return render(request, 'src/dashboard/exchange.html', {'df': pd.DataFrame()})
+    
+    try:
+        market_depth = client.get_order_book(symbol='BTCBUSD')
+        bids = pd.DataFrame(market_depth['bids'], columns=['price', 'bids'])
+        asks = pd.DataFrame(market_depth['asks'], columns=['price', 'asks'])
+        df = pd.concat([bids, asks]).fillna(0)
+        return render(request, 'src/dashboard/exchange.html', {'df': df})
+    except Exception as e:
+        messages.error(request, f"Error fetching market data: {e}")
+        return render(request, 'src/dashboard/exchange.html', {'df': pd.DataFrame()})
+
+@login_required
+def confirm_investment(request, plan_id):
+    plan = get_object_or_404(InvestmentPlan, id=plan_id)
+    wallet = Wallet.objects.filter(user=request.user).first()
+
+    if not wallet:
+        messages.error(request, 'Wallet not found. Please create a wallet first.')
+        return redirect('wallet')
+
+    if request.method == 'POST':
+        try:
+            if wallet.balance < plan.price:
+                messages.error(request, 'Insufficient balance. Please deposit funds.')
+                return redirect('wallet')
+
+            start_date = now()
+            end_date = start_date + timedelta(days=plan.cycle_days)
+            investment = Investment.objects.create(
+                user=request.user,
+                plan=plan,
+                start_date=start_date,
+                end_date=end_date,
+                status="active"
+            )
+            wallet.balance -= plan.price
+            wallet.save()
+            messages.success(request, 'Your investment was successful!')
+            return redirect('market')
+        except Exception as e:
+            messages.error(request, 'An error occurred during investment.')
+            return redirect('market')
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+
+@login_required
+def market(request):
+    plans = InvestmentPlan.objects.all()
+    investments = Investment.objects.filter(user=request.user).select_related("plan")
+    return render(request, 'src/dashboard/market.html', {'plans': plans, 'investments': investments})
+
+@login_required
+def profile(request):
+    profile_instance = Profile.objects.get(user=request.user)
+    if request.method == 'POST':
+        user_form = CustomUserChangeForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile_instance)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile was updated successfully!')
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        user_form = CustomUserChangeForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=profile_instance)
+    
+    context = {'user_form': user_form, 'profile_form': profile_form}
+    return render(request, 'src/dashboard/profile.html', context)
+
+@login_required
+def exchange(request):
+    try:
+        client = get_binance_client()
+        if not client:
+            raise ValueError("Failed to connect to Binance")
+
+        cache_key = 'tickers'
+        tickers = cache.get(cache_key)
+        if not tickers:
+            tickers = client.get_ticker()
+            cache.set(cache_key, tickers, 300)
+
+        df = pd.DataFrame(tickers)[['symbol', 'priceChangePercent', 'lastPrice', 'lowPrice', 'highPrice', 'openPrice', 'closePrice']]
+        paginator = Paginator(df.to_dict('records'), 10)
+        page_obj = paginator.get_page(request.GET.get('page'))
+
+        trades_cache_key = 'recent_trades'
+        recent_trades = cache.get(trades_cache_key)
+        if not recent_trades:
+            recent_trades = client.get_recent_trades(symbol='BTCUSDT', limit=10)
+            cache.set(trades_cache_key, recent_trades, 60)
+
+        trades_list = [
+            {
+                'time': datetime.fromtimestamp(trade['time'] / 1000).strftime('%H:%M:%S'),
+                'price': float(trade['price']),
+                'amount': float(trade['qty']),
+                'total': float(trade['price']) * float(trade['qty']),
+                'side': 'text-bullish' if trade['isBuyerMaker'] else 'text-bearish'
+            } for trade in recent_trades
+        ]
+
+        chart_data = {
+            'labels': [f'Point {i}' for i in range(10)],
+            'series': [{'name': 'Price', 'data': [10000, 10500, 10300, 10700, 11000, 10800, 11200, 11500, 11300, 11600]}]
+        }
+
+        context = {'tickers': page_obj, 'trades': trades_list, 'chart_data': chart_data}
+        return render(request, 'src/dashboard/exchange.html', context)
+    except Exception as e:
+        messages.error(request, f"Error fetching exchange data: {str(e)}")
+        return render(request, 'src/dashboard/exchange.html', {'tickers': [], 'trades': [], 'chart_data': {'labels': [], 'series': []}})
+
+@csrf_protect
+def accept_terms(request):
+    if request.method == 'POST' and request.user.is_authenticated:
+        request.user.show_terms_modal = False
+        request.user.terms_accepted = True
+        request.user.save()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+def convert_view(request):
+    wallet = Wallet.objects.filter(user=request.user).first()
+    wallet_balance = wallet.balance if wallet else 0
+    usd_wallet_balance = convert_kes_to_usd(wallet_balance) if wallet_balance else 0
+    context = {'wallet_balance': wallet_balance, 'usd_wallet_balance': usd_wallet_balance}
+    
+    if request.method == 'POST':
+        try:
+            amount_kes = float(request.POST.get('amount_kes', 0))
+            usd_value = convert_kes_to_usd(amount_kes)
+            context.update({'usd_value': usd_value, 'amount_kes': amount_kes})
+        except ValueError:
+            context['error'] = "Invalid input. Please enter a valid number."
+    return render(request, 'myapp/converter.html', context)
+
+def signin(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user is None:
+            try:
+                User.objects.get(username=username)
+                messages.error(request, 'Wrong password! Please try again.')
+            except User.DoesNotExist:
+                messages.error(request, 'User does not exist.')
+            return render(request, 'account/login.html', {})
+        
+        login(request, user)
+        return redirect('dashboard')
+    return render(request, 'account/login.html', {})
+
+@login_required
+def logoutUser(request):
+    logout(request)
+    return redirect('account_login')
+
+@login_required
+def trade(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        # Implement Binance API call (e.g., client.create_order())
+        messages.success(request, f"{action.capitalize()} order placed successfully!")
+        return redirect('exchange')
+    return redirect('exchange')
+
+@login_required
+def exchange_trade(request):
+    if request.method == 'POST':
+        # Implement Binance API call for exchange
+        messages.success(request, "Exchange completed successfully!")
+        return redirect('exchange')
+    return redirect('exchange')
+
+def crypto_view(request):
+    try:
+        data = []
+        assets = ["BTC", "ETH", "BNB", "XRP", "USDT"]
+        asset_details = {"BTC": "Bitcoin", "ETH": "Ethereum", "BNB": "Binance Coin", "XRP": "XRP", "USDT": "Tether"}
+        
+        # Binance data
+        binance_response = requests.get("https://api.binance.com/api/v3/ticker/24hr")
+        if binance_response.status_code == 200:
+            for item in binance_response.json():
+                if item["symbol"][:-4] in assets:
+                    data.append({
+                        "symbol": item["symbol"][:-4],
+                        "name": asset_details[item["symbol"][:-4]],
+                        "on_orders": f"USD {float(item['askPrice']):,.2f}",
+                        "available_balance": f"USD {float(item['bidPrice']):,.2f}",
+                        "total_balance": f"USD {float(item['askPrice']) + float(item['bidPrice']):,.2f}",
+                        "market_change": f"{item['priceChangePercent']}%"
+                    })
+        
+        # CoinGecko data
+        coingecko_response = requests.get("https://api.coingecko.com/api/v3/simple/price", 
+                                        params={"ids": ",".join([asset.lower() for asset in assets]), "vs_currencies": "usd"})
+        if coingecko_response.status_code == 200:
+            gecko_data = coingecko_response.json()
+            for asset in assets:
+                if asset.lower() in gecko_data:
+                    data.append({
+                        "symbol": asset,
+                        "name": asset_details[asset],
+                        "on_orders": "N/A",
+                        "available_balance": f"USD {gecko_data[asset.lower()]['usd']:.2f}",
+                        "total_balance": f"USD {gecko_data[asset.lower()]['usd']:.2f}",
+                        "market_change": "N/A"
+                    })
+        
+        return render(request, 'src/dashboard/wallet.html', {'crypto_data': data})
+    except Exception as e:
+        print(f"Error fetching crypto data: {e}")
+        return render(request, 'src/dashboard/wallet.html', {'crypto_data': []})

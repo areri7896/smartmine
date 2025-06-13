@@ -429,7 +429,12 @@ class Investment(models.Model):
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     balance = models.DecimalField(max_digits=15, decimal_places=2, default='0.00')
+    balance_usd = models.CharField(max_length=20, default='0.00')  # Assuming this is a string for USD balance
 
+    def save(self, *args, **kwargs):
+      if self.balance < 0 or self.balance_usd < 0:
+        raise ValueError("Wallet balances cannot be negative.")
+      super().save(*args, **kwargs)
     def __str__(self):
         return f"{self.user.username} - Balance: {self.balance}"
 

@@ -38,6 +38,10 @@ from django.core.management.base import BaseCommand
 # from dashboard.views import update_investment_status
 from django.contrib.admin.views.decorators import staff_member_required
 
+import requests
+from django.core.cache import cache
+    
+from .models import Investment
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -46,6 +50,16 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .utils.exchange_rate import fetch_pair_conversion
 from .models import Wallet
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.core.paginator import Paginator
+from django.core.cache import cache
+import pandas as pd
+from binance.client import Client  # Adjust if using ccxt
+import os
+from datetime import datetime
 
 
 api_key = os.environ['BINANCE_API_KEY']
@@ -88,12 +102,6 @@ def hide_terms_modal(request):
         user.save()
         return JsonResponse({'status': 'ok'})
     return JsonResponse({'status': 'error'}, status=400)
-import requests
-from django.core.cache import cache
-import requests
-from django.core.cache import cache
-    
-from .models import Investment
 
 
 
@@ -116,36 +124,54 @@ def investment_plans(request):
     }
     return render(request, 'src/dashboard/market.html', context)
 
-def invest(request, plan_id):
-    plan = get_object_or_404(InvestmentPlan, id=plan_id)
-    wc = Wallet.objects.filter(user=request.user).first()
-    # print ('wallet balance:', wc.balance)
-    # print ('plan price:', plan.price)
-    if wc and wc.balance >= 0:
-        if plan.price >= wc.balance:
-        # if wc.balance >= plan.price:
-            if request.method == 'POST':
-                end_date = datetime.now() + timedelta(days=plan.cycle_days)
-                investment = Investment.objects.create(
-                    user=request.user,
-                    plan=plan,
-                    end_date=end_date,
-                    status="active"
-                )
-                return redirect('market/')
-            else:
-                messages.error(request, 'Your balance is sufficent!!, please deposit!')
-                return redirect('wallet')
-    else:
-        messages.error(request, 'Your account balance is low, please deposit!')
-        return redirect('wallet')
+# from django.shortcuts import render, redirect, get_object_or_404
+# from django.contrib import messages
+# from django.db import transaction
+# from datetime import datetime, datetime
+# from .models import InvestmentPlan, Wallet, Investment
 
-    return render(request, 'src/dashboard/market.html', {'pl': plan})
-
-
-# def my_investments(request):
-#     investments = Investment.objects.filter(user=request.user)
-#     return render(request, 'src/dashboard/market.html', {'investments': investments})
+# def invest(request, plan_id):
+#     # Retrieve the investment plan or raise 404 if not found
+#     plan = get_object_or_404(InvestmentPlan, id=plan_id)
+    
+#     # Get the user's wallet
+#     wallet = Wallet.objects.filter(user=request.user).first()
+    
+#     # Check if user has a wallet
+#     if not wallet:
+#         messages.error(request, 'No wallet found. Please create a wallet first.')
+#         return redirect('wallet')
+    
+#     # Check if wallet balance is sufficient
+#     if wallet.balance < plan.price:
+#         messages.error(request, 'Your balance is insufficient. Please deposit funds!')
+#         return redirect('wallet')
+    
+#     # Handle POST request to create investment
+#     if request.method == 'POST':
+#         try:
+#             with transaction.atomic():
+#                 # Create investment
+#                 end_date = datetime.now() + timedelta(days=plan.cycle_days)
+#                 investment = Investment.objects.create(
+#                     user=request.user,
+#                     plan=plan,
+#                     end_date=end_date,
+#                     status="active"
+#                 )
+                
+#                 # Deduct plan price from wallet balance
+#                 wallet.balance -= plan.price
+#                 wallet.save()
+                
+#                 messages.success(request, 'Investment in {plan.name} created successfully!')
+#                 return redirect('market/')
+#         except Exception as e:
+#             messages.error(request, 'An error occurred while processing your investment. Please try again.')
+#             return redirect('wallet')
+    
+#     # Render the template for GET request
+#     return render(request, 'src/dashboard/market.html', {'pl': plan})
 
 client = get_binance_client()
 if client:
@@ -165,40 +191,7 @@ if client:
 else:
     print("Failed to connect to Binance.")
 
-# your_dt = datetime.datetime.fromtimestamp(ts)
-# fmt = your_dt.strftime("%Y-%n-%d %H:%M:%S")
-# print(fmt)
 
-
-# getting all tickers
-# coin_info = client.get_all_tickers()
-# df=pd.DataFrame(coin_info)
-# df.head()
-
-# print(tickers)
-
-# Create your views here.
-# assets = ['BTCUSDT','ETHUDT','BNBUSDT']
-# assets =(coin.lower()+'@kline_1m' for coin in assets)
-# assets ='/'.join(assets)
-# socket = "wss://stream.binance.com:9443/stream?streams="
-# ws=websockets.websocketApp(socket,on_message='on_message')
-# ws.run_forever()
-
-# def on_message(ws, message):
-#     message=json.loads(message)
-#     manipulation(message)
-#     print (message)
-
-# def manipulation(source):
-#     rel_data = source ['data']['k']['c']
-#     evt_time = pd.to_datetime(source['data']['E'], unit='ms')
-#     df=pd.DataFrame(rel_data,columns=source[['data']['s']], index=[evt_time])
-#     df.index.name ='timestamp'
-#     df = df.astype(float)
-#     df=df.reset_index()
-#     print(df)
-#     return df
 
 #https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbTR2cHBLOV9rN0lvTUJNVWJRMGE5bWd6RzBuQXxBQ3Jtc0tuTW85WUdYcVdXMEdNdXVwczZzeUthbEhRWUpRX3AzRnI3eWNBZUdONDdvYURfOFZyMVVuNlh6Y0VSNlpYWi13LUQzemxTaWJ5dlpyNHMwWkRndUVqcy0tVkRFZzNXYkx3aXR0WWlEb1U3NGZLRTJtVQ&q=https%3A%2F%2Fgithub.com%2Fsevenisalie%2Fdjango_alpha_vantage&v=3OOD9bFdBOQ
 
@@ -410,7 +403,7 @@ def withdraw(request):
                 phone_number=phone_number,
                 status='Pending'
             )
-            # Email the received data to smartmine@gmail.com
+            # Email the received data to ssmartmine@gmail.com
             subject = f"New Withdrawal Request for customer "
             message = f"Mpesa Transaction Code: {phone_number}\nAmount: {amount}\nUser: f'{user.first_name} + {user.last_name}'"
             send_mail(
@@ -480,6 +473,8 @@ def verif(request):
         # Optionally handle non-POST requests
         return redirect('wallet')  # or redirect somewhere
             # return JsonResponse({'error': str(e)}, status=400)
+
+            
 def wallet(request):
     try:
         # Fetch Binance API keys from environment variables
@@ -803,49 +798,49 @@ def crypto_view(request):
     print(data)
     return render(request, 'src/dashboard/wallet.html', {'crypto_data': data})
 
-@login_required
-def confirm_investment(request, plan_id):
+# @login_required
+# def confirm_investment(request, plan_id):
 
-    plan = get_object_or_404(InvestmentPlan, id=plan_id)
-    wallet = Wallet.objects.filter(user=request.user).first()
+#     plan = get_object_or_404(InvestmentPlan, id=plan_id)
+#     wallet = Wallet.objects.filter(user=request.user).first()
 
-    if not wallet:
-        messages.error(request, 'Wallet not found. Please create a wallet first.')
-        return redirect('wallet')
+#     if not wallet:
+#         messages.error(request, 'Wallet not found. Please create a wallet first.')
+#         return redirect('wallet')
 
-    if request.method == 'POST':
-        try:
-            # Check if the user has sufficient balance
-            if wallet.balance <= plan.price:
-                messages.error(request, 'Insufficient balance. Please deposit funds to proceed.')
-                return redirect('wallet')
+#     if request.method == 'POST':
+#         try:
+#             # Check if the user has sufficient balance
+#             if wallet.balance <= plan.price:
+#                 messages.error(request, 'Insufficient balance. Please deposit funds to proceed.')
+#                 return redirect('wallet')
 
-            # Calculate investment start and end date
-            start_date = now()
-            db_end_date = start_date + timedelta(days=plan.cycle_days)
+#             # Calculate investment start and end date
+#             start_date = now()
+#             db_end_date = start_date + timedelta(days=plan.cycle_days)
 
-            # Create investment record
-            investment = Investment.objects.create(
-                user=request.user,
-                plan=plan,
-                start_date=start_date,
-                db_end_date=db_end_date,
-                status="active"
-            )
+#             # Create investment record
+#             investment = Investment.objects.create(
+#                 user=request.user,
+#                 plan=plan,
+#                 start_date=start_date,
+#                 db_end_date=db_end_date,
+#                 status="active"
+#             )
 
-            # Deduct plan price from wallet balance
-            wallet.balance -= plan.price
-            wallet.save()
+#             # Deduct plan price from wallet balance
+#             wallet.balance -= plan.price
+#             wallet.save()
 
-            messages.success(request, 'Your investment was successful!')
-            return redirect('market')
+#             messages.success(request, 'Your investment was successful!')
+#             return redirect('market')
 
-        except Exception as e:
-            print(f"Error during investment confirmation: {e}")  # Log the exception
-            messages.error(request, 'OOPS!! There was an error, Please try again!')
-            return redirect('market')
-    messages.error(request, 'OOPS!! There was an error, Please try again!')
-    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
+#         except Exception as e:
+#             print(f"Error during investment confirmation: {e}")  # Log the exception
+#             messages.error(request, 'OOPS!! There was an error, Please try again!')
+#             return redirect('market')
+#     messages.error(request, 'OOPS!! There was an error, Please try again!')
+#     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
 
 
 def update_investment_status():
@@ -866,11 +861,109 @@ def avg_price(request):
     avg_price = client.get_avg_price()
     return avg_price
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.db import transaction
+from datetime import datetime, timedelta
+from django.utils.timezone import now
+from .models import InvestmentPlan, Investment, Wallet
+
 @login_required
 def market(request):
+    """Display all investment plans for the user to pick."""
     plans = InvestmentPlan.objects.all()
     investments = Investment.objects.filter(user=request.user).select_related("plan")
-    return render(request, 'src/dashboard/market.html', {'plans': plans, 'investments':investments})
+    return render(request, 'src/dashboard/market.html', {'plans': plans, 'investments': investments})
+@login_required
+def confirm_investment(request, plan_id):
+    """Show confirmation page and process investment on confirmation."""
+    plan = get_object_or_404(InvestmentPlan, id=plan_id)
+    wallet = Wallet.objects.filter(user=request.user).first()
+
+    if not wallet:
+        messages.error(request, 'Wallet not found. Please create a wallet first.')
+        return redirect('wallet')
+
+    if wallet.balance < plan.price:
+        messages.error(request, 'Insufficient balance. Please deposit funds to proceed.')
+        return redirect('wallet')
+
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # Create investment
+                start_date = now()
+                end_date = start_date + timedelta(days=plan.cycle_days)
+                investment = Investment.objects.create(
+                    user=request.user,
+                    plan=plan,
+                    start_date=start_date,
+                    db_end_date=end_date,
+                    status="active"
+                )
+
+                # Deduct plan price from wallet balance
+                wallet.balance -= plan.price
+                wallet.save()
+
+                messages.success(request, f'Investment in {plan.name} created successfully!')
+                return redirect('market')
+        except Exception as e:
+            messages.error(request, 'An error occurred while processing your investment. Please try again.')
+            return redirect('wallet')
+
+    # Render confirmation template for GET request
+    return render(request, 'src/dashboard/confirm_investment.html', {
+        'plan': plan,
+        'wallet': wallet
+    })
+@login_required
+def invest(request, plan_id):
+    """Process the investment after confirmation."""
+    plan = get_object_or_404(InvestmentPlan, id=plan_id)
+    wallet = Wallet.objects.filter(user=request.user).first()
+
+    if not wallet:
+        messages.error(request, 'No wallet found. Please create a wallet first.')
+        return redirect('wallet')
+
+    if wallet.balance < plan.price:
+        messages.error(request, 'Your balance is insufficient. Please deposit funds!')
+        return redirect('wallet')
+
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                # Create investment
+                start_date = now()
+                end_date = start_date + timedelta(days=plan.cycle_days)
+                investment = Investment.objects.create(
+                    user=request.user,
+                    plan=plan,
+                    db_start_date=start_date,
+                    end_date=end_date,
+                    status="active"
+                )
+
+                # Deduct plan price from wallet balance
+                wallet.balance -= plan.price
+                wallet.save()
+
+                messages.success(request, f'Investment in {plan.name} created successfully!')
+                return redirect('market')
+        except Exception as e:
+            messages.error(request, 'An error occurred while processing your investment. Please try again.')
+            return redirect('wallet')
+
+    # Redirect to confirmation if accessed directly via GET
+    return redirect('confirm_investment', plan_id=plan_id)
+
+# @login_required
+# def market(request):
+#     plans = InvestmentPlan.objects.all()
+#     investments = Investment.objects.filter(user=request.user).select_related("plan")
+#     return render(request, 'src/dashboard/market.html', {'plans': plans, 'investments':investments})
     # api_key = os.environ['BINANCE_API_KEY']
     # api_secret = os.environ['BINANCE_SECRET_KEY']
     # client = Client(api_key, api_secret, testnet=True)
@@ -948,15 +1041,6 @@ def profile(request):
 #     }
 #     return render(request, 'src/dashboard/profile.html', context)
 
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.core.paginator import Paginator
-from django.core.cache import cache
-import pandas as pd
-from binance.client import Client  # Adjust if using ccxt
-import os
-from datetime import datetime
 
 @login_required
 def exchanges(request):

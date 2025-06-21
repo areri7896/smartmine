@@ -1,6 +1,6 @@
 {% extends 'src/dashboard/basic.html' %}
 {% load static %}
-<title>{% block title %}Wallet {% endblock %}</title>
+<title>{% block title %}Market {% endblock %}</title>
 {% block css_page %}
 <link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
 
@@ -38,13 +38,16 @@
               </div>
               <div class="standard-card__content-head">
                 <p class="standard-card__content-price-1">{{ plan.cycle_days }} Days</p>
-                <p class="standard-card__content-price-2">${{ plan.price }} USD</p>
+                <p class="standard-card__content-price-2">{{ plan.price }} KSH</p>
               </div>
 
               <!-- Button to open confirmation modal -->
-              <a class="btn btn-secondary btn-sm invest-button" href="{% url 'invest' plan.id %}">
-                Invest Now
-              </a>
+              <form action="{% url 'invest' plan.id %}" method="post">
+                {% csrf_token %}
+                <a class="btn btn-secondary btn-sm invest-button" href="{% url 'confirm_investment' plan.id %}">
+                  Invest Now
+                </a>
+              </form>
             </div>
           </div>
         </div>

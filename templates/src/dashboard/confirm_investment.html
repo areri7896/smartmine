@@ -1,0 +1,89 @@
+{% extends 'src/dashboard/basic.html' %}
+{% load static %}
+<title>{% block title %}Market {% endblock %}</title>
+{% block css_page %}
+<link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+
+<!-- Start::Global Styles (used by all pages) -->
+<link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
+<!-- End::Global Styles -->
+<!-- Start::Plugins (used by this page) -->
+<link href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}" rel="stylesheet" type="text/css" />
+<!-- End::Plugins -->
+<!-- Start::Page Styles (used by this page) -->
+<link href="{% static 'assets/css/pages/wallet-v1.css' %}" rel="stylesheet" type="text/css" />
+<!-- End::Page Styles -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+{% endblock %}
+</head>
+
+{% block content %}
+
+
+<div style="width: 70%; justify-content: center; align-self: center; margin: auto;">
+    <div class="container container--dashboard">
+        <h1 class="component__title mb-3 text-center">Confirm Investing In <span id="plan-name">{{ plan.name }}</span>
+        </h1>
+
+        {% if messages %}
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">Alert</strong>
+                    <small class="text-muted">Just now</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastMessage">
+                    {% for message in messages %}
+                    {{ message }}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="standard-card standard-card--type-8-v1">
+            <div class="standard-card__container">
+                <div class="standard-card__items">
+                    <!-- <div class="standard-card__item standard-card__item--1"> -->
+
+                    <div class="standard-card__content-head" style="display: block; justify-items: center;">
+                        <h3 class="w-100">Investment Plan: {{ plan.name }}</h3>
+
+                        <p class="advance-card__balance-title">
+                            {{ plan.description }}</p>
+                        <p class="advance-card__balance-title"> <strong> Daily Interest Rate:</strong>
+                            {{ plan.daily_interest_rate }}<span class="advance-card__balance-currency">%</span></p>
+                        <p class="standard-card__content-price-2"><strong>Duration:</strong> {{ plan.cycle_days }}
+                            Days
+                        </p>
+                        <p class="advance-card__balance-crypto-value"><strong>Price:</strong> {{ plan.price }} KSH
+                        </p>
+                        <p class="advance-card__balance-crypto-value"><strong>Your Wallet
+                                Balance:</strong>{{ wallet.balance }}
+                            KSH</p>
+
+                        <form method="post" action="{% url 'confirm_investment' plan.id %}">
+                            {% csrf_token %}
+                            <div style="display: flex; align-items: center;">
+                                <a href="{% url 'market' %}" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-primary">Confirm Investment</button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                const toastEl = document.getElementById('liveToast');
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            });
+        </script>
+
+        {% endblock %}

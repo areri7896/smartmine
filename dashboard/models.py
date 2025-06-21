@@ -353,7 +353,7 @@ class InvestmentPlan(models.Model):
 
     name = models.CharField(max_length=50, choices=PLAN_CHOICES, unique=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    description = models.TextField(max_length = 100, null=True)
+    description = models.TextField(max_length = 1000, null=True)
     daily_interest_rate = models.DecimalField(max_digits=5, decimal_places=2)  # Stored as 2.30 for 2.3%
     cycle_days = models.IntegerField()
 

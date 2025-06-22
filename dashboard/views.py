@@ -342,7 +342,27 @@ def completed_investments(request):
 
 
 @login_required
-def dashboard(request): 
+def dashboard(request):
+
+    total_balance = 0
+    total_balance_usd = 0
+
+   
+     # Convert total balance to USD if applicable
+    if total_balance > 0:
+        total_balance_usd = fetch_pair_conversion('KES', 'USD', float(total_balance))
+        
+        # Fetch wallet balance
+    wallet_bal = Wallet.objects.filter(user=request.user).first()
+    wallet_bal_usd = 0
+    if wallet_bal:
+        wallet_bal = wallet_bal.balance
+        wallet_bal_usd = fetch_pair_conversion('KES', 'USD', float(wallet_bal))
+    else:
+        wallet_bal = 0
+
+        # print(wallet_bal_usd)
+ 
     api_key = os.environ['BINANCE_API_KEY']
     api_secret = os.environ['BINANCE_SECRET_KEY']
     client = Client(api_key, api_secret, testnet=False)

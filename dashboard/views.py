@@ -61,37 +61,8 @@ from binance.client import Client  # Adjust if using ccxt
 import os
 from datetime import datetime
 
-
 api_key = os.environ['BINANCE_API_KEY']
 api_secret = os.environ['BINANCE_SECRET_KEY']
-def get_binance_client():
-    try:
-        client = Client(api_key, api_secret, testnet=True)
-        client.API_URL = 'https://api.binance.com'  # Set API URL if needed
-        client.ping()  # Test connectivity
-        return client
-    except BinanceAPIException as e:
-        print("Binance API error:", e)
-        return None
-    except Exception as e:
-        print("Unexpected error:", e)
-        return None
-# tickers = client.get_all_tickers()
-# df = pd.DataFrame(tickers)
-# df.head()
-# # print(tickers)
-
-
-# url = 'https://api1.binance.com'
-# api_call = '/api/v3/ticker/price'
-# headers = {'content-type': 'application/json', 'X-MBX-APIKEY': api_key}
-# response = requests.get(url + api_call , headers=headers)
-# response = json.loads(response.text)
-# df = pd.DataFrame.from_records(response)
-# # print(response)
-# df.head()
-
-# views.py
 
 @login_required
 @csrf_exempt  # Only use this if CSRF token isn't working properly
@@ -173,23 +144,23 @@ def investment_plans(request):
 #     # Render the template for GET request
 #     return render(request, 'src/dashboard/market.html', {'pl': plan})
 
-client = get_binance_client()
-if client:
-    # safe to use client
-    try:
-        balance = client.get_account()
+# client = get_binance_client()
+# if client:
+#     # safe to use client
+#     try:
+#         balance = client.get_account()
 
-        # checking server status
-        client.ping()  # returns {} on success
+#         # checking server status
+#         client.ping()  # returns {} on success
 
-        res = client.get_server_time()
-        ts = res['serverTime'] / 1000
-        print(f"Binance server time (timestamp): {ts}")
+#         res = client.get_server_time()
+#         ts = res['serverTime'] / 1000
+#         print(f"Binance server time (timestamp): {ts}")
 
-    except Exception as e:
-        print("Error while using Binance client:", e)
-else:
-    print("Failed to connect to Binance.")
+#     except Exception as e:
+#         print("Error while using Binance client:", e)
+# else:
+#     print("Failed to connect to Binance.")
 
 
 
@@ -343,16 +314,6 @@ def completed_investments(request):
 
 @login_required
 def dashboard(request):
-
-    total_balance = 0
-    total_balance_usd = 0
-
-   
-     # Convert total balance to USD if applicable
-    if total_balance > 0:
-        total_balance_usd = fetch_pair_conversion('KES', 'USD', float(total_balance))
-        
-        # Fetch wallet balance
     wallet_bal = Wallet.objects.filter(user=request.user).first()
     wallet_bal_usd = 0
     if wallet_bal:
@@ -375,11 +336,11 @@ def dashboard(request):
     # tick_symbol = [ticker['symbol'] for ticker in tickers]
     # tick_price = [ticker['price'] for ticker in tickers]
     combined_tickers = [(ticker['symbol'], ticker['price']) for ticker in tickers]
-    context = {'tks': combined_tickers, 'df':df, 'tickers': tickers, 'tokens': tokens}
+    context = {'tks': combined_tickers, 'df':df, 'tickers': tickers, 'tokens': tokens,'bal': wallet_bal,
+            'bal_usd': wallet_bal_usd,}
 
     # context = {'tick_symbol':tick_symbol, 'tick_price':tick_price}
     return render(request, 'src/dashboard/dashboard.html', context)
-
 
 
 def account(request):

@@ -41,7 +41,8 @@
                     2.36%</p>
                 </div>
               </div>
-              <p class="complete-card__balance-head__value">USD 12.243,55</p>
+              <p class="complete-card__balance-head__value">ksh {{ bal }}</p>
+              <p class="complete-card__balance-head__value">${{ bal_usd.converted_amount }} USD</p>
             </div>
             <div class="complete-card__balance-revenue">
               <div class="complete-card__balance-revenue__income">
@@ -50,7 +51,7 @@
                     class="balance-revenue__income-title-icon">
                   <p class="fb-regular balance-revenue__income-title-text">Income</p>
                 </div>
-                <p class="fd-sm fd-sm--bold balance-revenue__income-value">USD 12.243,55</p>
+                <!-- <p class="fd-sm fd-sm--bold balance-revenue__income-value">USD 12.243,55</p> -->
               </div>
               <div class="complete-card__balance-revenue__separator"></div>
               <div class="complete-card__balance-revenue__expenses">
@@ -59,7 +60,7 @@
                     class="balance-revenue__expenses-title-icon">
                   <p class="fb-regular balance-revenue__expenses-title-text">Expenses</p>
                 </div>
-                <p class="fd-sm fd-sm--bold balance-revenue__expenses-value">USD 3.132,23</p>
+                <!-- <p class="fd-sm fd-sm--bold balance-revenue__expenses-value">USD 3.132,23</p> -->
               </div>
             </div>
           </div>
@@ -141,138 +142,16 @@
                 </ul>
               </div>
             </div>
-            <div class="standard-card__content">
-              {% for token in tokens %}
-              <div class="standard-card__content__list">
+            <div class="standard-card__content" id="transactionContainer">
+              <div class="standard-card__content__list" id="transactionList">
                 <div class="standard-card__content__list-currency">
-                  <img src="../assets/media/images/icons/Bitcoin.svg" alt=""
+                  <img src="{% static 'assets/media/images/icons/Bitcoin.svg' %}" alt="Bitcoin Icon"
                     class="standard-card__content__list-currency-icon">
                   <p class="standard-card__content__list-currency-name">BTC</p>
                 </div>
                 <div class="standard-card__content__list-status">
                   <p class="standard-card__content__list-status-name">Receive</p>
-                  <img src="../assets/media/images/icons/transaction-arrow-green.svg" alt=""
-                    class="standard-card__content__list-status-icon">
-                </div>
-                <div class="standard-card__content__list-price">
-                  <p class="standard-card__content__list-price-value">$0.143,21</p>
-                </div>
-              </div>
-              {% endfor %}
-              <div class="standard-card__content__list">
-                <div class="standard-card__content__list-currency">
-                  <img src="../assets/media/images/icons/Bitcoin.svg" alt=""
-                    class="standard-card__content__list-currency-icon">
-                  <p class="standard-card__content__list-currency-name">BTC</p>
-                </div>
-                <div class="standard-card__content__list-status">
-                  <p class="standard-card__content__list-status-name">Receive</p>
-                  <img src="../assets/media/images/icons/transaction-arrow-green.svg" alt=""
-                    class="standard-card__content__list-status-icon">
-                </div>
-                <div class="standard-card__content__list-price">
-                  <p class="standard-card__content__list-price-value">$0.143,21</p>
-                </div>
-              </div>
-              <div class="standard-card__content__list">
-                <div class="standard-card__content__list-currency">
-                  <img src="../assets/media/images/icons/ETH.svg" alt=""
-                    class="standard-card__content__list-currency-icon">
-                  <p class="standard-card__content__list-currency-name">ETH</p>
-                </div>
-                <div class="standard-card__content__list-status">
-                  <p class="standard-card__content__list-status-name">Send</p>
-                  <img src="../assets/media/images/icons/transaction-arrow-red.svg" alt=""
-                    class="standard-card__content__list-status-icon">
-                </div>
-                <div class="standard-card__content__list-price">
-                  <p class="standard-card__content__list-price-value">$0.34,223</p>
-                </div>
-              </div>
-              <div class="standard-card__content__list">
-                <div class="standard-card__content__list-currency">
-                  <img src="../assets/media/images/icons/Bitcoin.svg" alt=""
-                    class="standard-card__content__list-currency-icon">
-                  <p class="standard-card__content__list-currency-name">BTC</p>
-                </div>
-                <div class="standard-card__content__list-status">
-                  <p class="standard-card__content__list-status-name">Receive</p>
-                  <img src="../assets/media/images/icons/transaction-arrow-green.svg" alt=""
-                    class="standard-card__content__list-status-icon">
-                </div>
-                <div class="standard-card__content__list-price">
-                  <p class="standard-card__content__list-price-value">$0.143,21</p>
-                </div>
-              </div>
-              <div class="standard-card__content__list">
-                <div class="standard-card__content__list-currency">
-                  <img src="../assets/media/images/icons/Bitcoin.svg" alt=""
-                    class="standard-card__content__list-currency-icon">
-                  <p class="standard-card__content__list-currency-name">BTC</p>
-                </div>
-                <div class="standard-card__content__list-status">
-                  <p class="standard-card__content__list-status-name">Receive</p>
-                  <img src="../assets/media/images/icons/transaction-arrow-green.svg" alt=""
-                    class="standard-card__content__list-status-icon">
-                </div>
-                <div class="standard-card__content__list-price">
-                  <p class="standard-card__content__list-price-value">$0.143,21</p>
-                </div>
-              </div>
-              <div class="standard-card__content__list">
-                <div class="standard-card__content__list-currency">
-                  <img src="../assets/media/images/icons/Bitcoin.svg" alt=""
-                    class="standard-card__content__list-currency-icon">
-                  <p class="standard-card__content__list-currency-name">BTC</p>
-                </div>
-                <div class="standard-card__content__list-status">
-                  <p class="standard-card__content__list-status-name">Receive</p>
-                  <img src="../assets/media/images/icons/transaction-arrow-green.svg" alt=""
-                    class="standard-card__content__list-status-icon">
-                </div>
-                <div class="standard-card__content__list-price">
-                  <p class="standard-card__content__list-price-value">$0.143,21</p>
-                </div>
-              </div>
-              <div class="standard-card__content__list">
-                <div class="standard-card__content__list-currency">
-                  <img src="../assets/media/images/icons/ETH.svg" alt=""
-                    class="standard-card__content__list-currency-icon">
-                  <p class="standard-card__content__list-currency-name">ETH</p>
-                </div>
-                <div class="standard-card__content__list-status">
-                  <p class="standard-card__content__list-status-name">Send</p>
-                  <img src="../assets/media/images/icons/transaction-arrow-red.svg" alt=""
-                    class="standard-card__content__list-status-icon">
-                </div>
-                <div class="standard-card__content__list-price">
-                  <p class="standard-card__content__list-price-value">$0.34,223</p>
-                </div>
-              </div>
-              <div class="standard-card__content__list">
-                <div class="standard-card__content__list-currency">
-                  <img src="../assets/media/images/icons/Bitcoin.svg" alt=""
-                    class="standard-card__content__list-currency-icon">
-                  <p class="standard-card__content__list-currency-name">BTC</p>
-                </div>
-                <div class="standard-card__content__list-status">
-                  <p class="standard-card__content__list-status-name">Receive</p>
-                  <img src="../assets/media/images/icons/transaction-arrow-green.svg" alt=""
-                    class="standard-card__content__list-status-icon">
-                </div>
-                <div class="standard-card__content__list-price">
-                  <p class="standard-card__content__list-price-value">$0.143,21</p>
-                </div>
-              </div>
-              <div class="standard-card__content__list">
-                <div class="standard-card__content__list-currency">
-                  <img src="../assets/media/images/icons/Bitcoin.svg" alt=""
-                    class="standard-card__content__list-currency-icon">
-                  <p class="standard-card__content__list-currency-name">BTC</p>
-                </div>
-                <div class="standard-card__content__list-status">
-                  <p class="standard-card__content__list-status-name">Receive</p>
-                  <img src="../assets/media/images/icons/transaction-arrow-green.svg" alt=""
+                  <img src="{% static 'assets/media/images/icons/transaction-arrow-green.svg' %}" alt="Green Arrow"
                     class="standard-card__content__list-status-icon">
                 </div>
                 <div class="standard-card__content__list-price">
@@ -479,7 +358,7 @@
             <p>If you have any questions or concerns about these Terms, please contact us at:</p>
             <p>
               <strong>SmartMine Support</strong><br>
-              Email: <a href="mailto:support@smrtmine.com">support@smartmine.com</a><br>
+              Email: <a href="mailto:support@smrtmine.com" target="_blank">support@smartmine.com</a><br>
               Website: <a href="http://www.smrtmine.com" target="_blank">www.smartmine.com</a><br>
 
             </p>
@@ -584,8 +463,7 @@
       });
     }
     plotChart();
-  </script> -->
-
+  
   {% block js %}
   <!-- Bootstrap JS (place before closing </body>) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

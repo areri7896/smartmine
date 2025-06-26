@@ -37,6 +37,179 @@ class Depo_Verification(models.Model):
     amount = models.DecimalField(max_digits=15, decimal_places=2)
     is_completed = models.IntegerField(default=0) 
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+# Create your models here.
+class Kline(models.Model):
+    pair = models.CharField(max_length=30, default= 'BTCUSDC')
+    open_time = models.DateTimeField()
+    close_time = models.DateTimeField()
+    open_amount = models.DecimalField(decimal_places=50, max_digits=200)
+    high = models.DecimalField(decimal_places=50, max_digits=200)
+    low = models.DecimalField(decimal_places=50, max_digits=200)
+    close_amount = models.DecimalField(decimal_places=50, max_digits=200)
+
+
+class MpesaCallback(models.Model):
+    merchant_request_id = models.CharField(max_length=255, unique=True)
+    checkout_request_id = models.CharField(max_length=255, unique=True)
+    response_code = models.CharField(max_length=10)
+    response_description = models.TextField()
+    result_code = models.CharField(max_length=10)
+    result_desc = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.merchant_request_id} - {self.result_desc}"
+
+# class InvestmentPlan(models.Model):
+#     user = 
+#     name = models.Charfield(max_length = 50)
+#     daily_interest_rate = models.DecimalField(max_digits=5, decimal_places=2)
+#     available_balance = models.DecimalField(max_digits=5, decimal_places=2)
+#     purchase_limit = models.CharField(max_length = 100, default="no restrictions")
+#     purchase_quantity = models.IntegerField(default=1)
+#     rate = 
+#     cycle_days = 
+#     price = 
+
+
+class InvestmentPlan(models.Model):
+    PLAN_CHOICES = [
+        ("Alpha Return CFD", "Alpha Return CFD"),
+        ("Rapid Growth CFD", "Rapid Growth CFD"),
+        ("CryptoFortress_CFD", "CryptoFortress_CFD"),
+        ("AI-Powered_Profit_CFD", "AI-Powered_Profit_CFD"),
+        ("Freedom_Fund_CFD", "Freedom_Fund_CFD"),
+        ("Lagacy_Builder_CFD", "Lagacy_Builder_CFD"),
+        ("Platimum_Wealth_CFD", "Platimum_Wealth_CFD"),
+        ("SmartReturns_Algorithm", "SmartReturns_Algorithm"),
+        ("Compounding_Fortune_CFD", "Compounding_Fortune_CFD"),
+    ]
+
+    name = models.CharField(max_length=50, choices=PLAN_CHOICES, unique=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(max_length = 1000, null=True)
+    daily_interest_rate = models.DecimalField(max_digits=5, decimal_places=2)  # Stored as 2.30 for 2.3%
+    cycle_days = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.name} - {self.price} USDT"
+    
+from django.db import models
+from django.utils import timezone
+from datetime import timedelta
+from decimal import Decimal
+
+class Investment(models.Model):
+    STATUS_CHOICES = [
+        ("active", "Active"),
+        ("completed", "Completed"),
+    ]
+
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
+    plan = models.ForeignKey('InvestmentPlan', on_delete=models.CASCADE, null=True, blank=True)
+    start_date = models.DateTimeField(auto_now_add=True, null=True)
+    db_end_date = models.DateTimeField(null=True, blank=True)  # Renamed to avoid conflict
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    duration_minutes = models.IntegerField(default=60)  # Consider using if needed
+    is_completed = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
+
+    def __str__(self):
+        plan_name = self.plan.name if self.plan else 'No Plan'
+        return f"Investment {self.start_date.strftime('%Y-%m-%d %H:%M')} - {plan_name}"
+
+    @property
+    def end_date(self):
+        """Calculate the end date based on the plan's cycle days."""
+        if self.plan and self.start_date:
+            return self.start_date + timedelta(days=self.plan.cycle_days)
+        
+
+    @property
+    def time_remaining(self):
+        """Calculate the time remaining until the investment ends."""
+        if self.end_date:
+            remaining = self.end_date - timezone.now()
+            return max(timedelta(0), remaining)
+        return timedelta(0)
+
+    def process_completion(self):
+        """Process the investment completion if the end date has been reached."""
+        if self.is_completed or not self.end_date or not self.user or not self.plan:
+            return  # Skip if already completed or required fields are missing
+
+        if timezone.now() >= self.end_date:
+            self.is_completed = True
+            self.status = "completed"
+
+            # Calculate profit using Decimal for precision
+            plan_price = Decimal(str(self.plan.price))
+            interest = Decimal(str(self.plan.daily_interest_rate))
+            profit = plan_price * (interest / Decimal('100'))
+
+            # Add to user's balance
+            try:
+                wallet.user = self.user.profile
+                wallet.balance += plan_price + profit
+                wallet.save()
+            except AttributeError:
+                # Handle missing profile gracefully
+                pass
+
+            self.db_end_date = self.end_date  # Store the calculated end date
+            self.save()
+
+
+class Wallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    balance = models.DecimalField(max_digits=15, decimal_places=2, default='0.00')
+    balance_usd = models.CharField(max_length=20, default='0.00', null=True, blank=True)  # Assuming this is a string for USD balance
+
+    def __str__(self):
+            """Return the user's full name, or username if full name is not available."""
+            full_name = f"{self.user.first_name} {self.user.last_name}".strip()
+            return full_name if full_name else self.user.username
+
+
+    def save(self, *args, **kwargs):
+        if self.balance is None:
+            self.balance = 0  # Set a default value
+        if self.balance < 0:
+            raise ValueError("Balance cannot be negative")
+        super().save(*args, **kwargs)
+
+        def deposit(self, amount):
+            """Increase wallet balance by the deposit amount."""
+            self.balance += amount
+            self.save()
+
+
+class DepositTransaction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=15, decimal_places=2)
+    phone_number = models.CharField(max_length=15)
+    transaction_id = models.CharField(max_length=50, unique=True)
+    status = models.CharField(
+        max_length=20,
+        choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Failed', 'Failed')],
+        default='Pending'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.amount} ({self.status})"
+
+
+class MpesaResponse(models.Model):
+    merchant_request_id = models.CharField(max_length=255)
+    checkout_request_id = models.CharField(max_length=255)
+    response_code = models.CharField(max_length=10)
+    response_description = models.TextField()
+    customer_message = models.TextField()
+
+    def __str__(self):
+        return self.merchant_request_id
+
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE)
@@ -303,169 +476,3 @@ class Profile(models.Model):
     def __str__(self):
         return f'{self.user.username} Profile'
     
-# Create your models here.
-class Kline(models.Model):
-    pair = models.CharField(max_length=30, default= 'BTCUSDC')
-    open_time = models.DateTimeField()
-    close_time = models.DateTimeField()
-    open_amount = models.DecimalField(decimal_places=50, max_digits=200)
-    high = models.DecimalField(decimal_places=50, max_digits=200)
-    low = models.DecimalField(decimal_places=50, max_digits=200)
-    close_amount = models.DecimalField(decimal_places=50, max_digits=200)
-
-
-class MpesaCallback(models.Model):
-    merchant_request_id = models.CharField(max_length=255, unique=True)
-    checkout_request_id = models.CharField(max_length=255, unique=True)
-    response_code = models.CharField(max_length=10)
-    response_description = models.TextField()
-    result_code = models.CharField(max_length=10)
-    result_desc = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.merchant_request_id} - {self.result_desc}"
-
-# class InvestmentPlan(models.Model):
-#     user = 
-#     name = models.Charfield(max_length = 50)
-#     daily_interest_rate = models.DecimalField(max_digits=5, decimal_places=2)
-#     available_balance = models.DecimalField(max_digits=5, decimal_places=2)
-#     purchase_limit = models.CharField(max_length = 100, default="no restrictions")
-#     purchase_quantity = models.IntegerField(default=1)
-#     rate = 
-#     cycle_days = 
-#     price = 
-
-
-class InvestmentPlan(models.Model):
-    PLAN_CHOICES = [
-        ("Alpha Return CFD", "Alpha Return CFD"),
-        ("Rapid Growth CFD", "Rapid Growth CFD"),
-        ("CryptoFortress_CFD", "CryptoFortress_CFD"),
-        ("AI-Powered_Profit_CFD", "AI-Powered_Profit_CFD"),
-        ("Freedom_Fund_CFD", "Freedom_Fund_CFD"),
-        ("Lagacy_Builder_CFD", "Lagacy_Builder_CFD"),
-        ("Platimum_Wealth_CFD", "Platimum_Wealth_CFD"),
-        ("SmartReturns_Algorithm", "SmartReturns_Algorithm"),
-        ("Compounding_Fortune_CFD", "Compounding_Fortune_CFD"),
-    ]
-
-    name = models.CharField(max_length=50, choices=PLAN_CHOICES, unique=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    description = models.TextField(max_length = 1000, null=True)
-    daily_interest_rate = models.DecimalField(max_digits=5, decimal_places=2)  # Stored as 2.30 for 2.3%
-    cycle_days = models.IntegerField()
-
-    def __str__(self):
-        return f"{self.name} - {self.price} USDT"
-    
-from django.db import models
-from django.utils import timezone
-from datetime import timedelta
-from decimal import Decimal
-
-class Investment(models.Model):
-    STATUS_CHOICES = [
-        ("active", "Active"),
-        ("completed", "Completed"),
-    ]
-
-    user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
-    plan = models.ForeignKey('InvestmentPlan', on_delete=models.CASCADE, null=True, blank=True)
-    start_date = models.DateTimeField(auto_now_add=True, null=True)
-    db_end_date = models.DateTimeField(null=True, blank=True)  # Renamed to avoid conflict
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    duration_minutes = models.IntegerField(default=60)  # Consider using if needed
-    is_completed = models.BooleanField(default=False)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
-
-    def __str__(self):
-        plan_name = self.plan.name if self.plan else 'No Plan'
-        return f"Investment {self.start_date.strftime('%Y-%m-%d %H:%M')} - {plan_name}"
-
-    @property
-    def end_date(self):
-        """Calculate the end date based on the plan's cycle days."""
-        if self.plan and self.start_date:
-            return self.start_date + timedelta(days=self.plan.cycle_days)
-        
-
-    @property
-    def time_remaining(self):
-        """Calculate the time remaining until the investment ends."""
-        if self.end_date:
-            remaining = self.end_date - timezone.now()
-            return max(timedelta(0), remaining)
-        return timedelta(0)
-
-    def process_completion(self):
-        """Process the investment completion if the end date has been reached."""
-        if self.is_completed or not self.end_date or not self.user or not self.plan:
-            return  # Skip if already completed or required fields are missing
-
-        if timezone.now() >= self.end_date:
-            self.is_completed = True
-            self.status = "completed"
-
-            # Calculate profit using Decimal for precision
-            plan_price = Decimal(str(self.plan.price))
-            interest = Decimal(str(self.plan.daily_interest_rate))
-            profit = plan_price * (interest / Decimal('100'))
-
-            # Add to user's balance
-            try:
-                profile = self.user.profile
-                profile.balance += plan_price + profit
-                profile.save()
-            except AttributeError:
-                # Handle missing profile gracefully
-                pass
-
-            self.db_end_date = self.end_date  # Store the calculated end date
-            self.save()
-
-
-class Wallet(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    balance = models.DecimalField(max_digits=15, decimal_places=2, default='0.00')
-    balance_usd = models.CharField(max_length=20, default='0.00', null=True, blank=True)  # Assuming this is a string for USD balance
-
-def save(self, *args, **kwargs):
-    if self.balance is None:
-        self.balance = 0  # Set a default value
-    if self.balance < 0:
-        raise ValueError("Balance cannot be negative")
-    super().save(*args, **kwargs)
-
-    def deposit(self, amount):
-        """Increase wallet balance by the deposit amount."""
-        self.balance += amount
-        self.save()
-
-
-class DepositTransaction(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=15, decimal_places=2)
-    phone_number = models.CharField(max_length=15)
-    transaction_id = models.CharField(max_length=50, unique=True)
-    status = models.CharField(
-        max_length=20,
-        choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Failed', 'Failed')],
-        default='Pending'
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.amount} ({self.status})"
-
-
-class MpesaResponse(models.Model):
-    merchant_request_id = models.CharField(max_length=255)
-    checkout_request_id = models.CharField(max_length=255)
-    response_code = models.CharField(max_length=10)
-    response_description = models.TextField()
-    customer_message = models.TextField()
-
-    def __str__(self):
-        return self.merchant_request_id

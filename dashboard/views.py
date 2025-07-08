@@ -456,6 +456,168 @@ def verif(request):
             # return JsonResponse({'error': str(e)}, status=400)
 
             
+# def wallet(request):
+#     try:
+#         # Fetch Binance API keys from environment variables
+#         api_key = os.environ.get('BINANCE_API_KEY')
+#         api_secret = os.environ.get('BINANCE_SECRET_KEY')
+        
+#         if not api_key or not api_secret:
+#             raise ValueError("Binance API key or secret not found in environment variables.")
+
+#         # Initialize Binance client
+#         client = Client(api_key, api_secret)
+
+#         # Synchronize time with Binance server
+#         server_time = client.get_server_time()
+#         time_offset = server_time['serverTime'] - int(time.time() * 1000)
+#         client.time_offset = time_offset
+
+#         # Test the connection
+#         client.ping()
+
+#         # Fetch account information
+#         account_info = client.get_account()
+#         balances = account_info['balances']
+
+#         # Define reference assets and extract relevant data
+#         reference_assets = ['BTC', 'ETH', 'XRP', 'USDT']
+#         extracted_data = []
+#         total_balance = 0
+#         total_balance_usd = 0
+
+#         for entry in balances:
+#             asset = entry['asset']
+#             free = float(entry['free'])
+#             locked = float(entry['locked'])
+
+#             if asset in reference_assets:
+#                 extracted_data.append({'asset': asset, 'free': free, 'locked': locked})
+
+#             if free > 0:
+#                 try:
+#                     symbol = f"{asset}USDT"
+#                     avg_price_info = client.get_avg_price(symbol=symbol)
+#                     price = float(avg_price_info['price'])
+#                     total_balance += free * price
+#                 except BinanceAPIException as e:
+#                     print(f"Error fetching price for {symbol}: {e}")
+
+#         # Convert total balance to USD if applicable
+#         if total_balance > 0:
+#             total_balance_usd = fetch_pair_conversion('KES', 'USD', float(total_balance))
+        
+#         # Fetch wallet balance
+#         wallet_bal = Wallet.objects.filter(user=request.user).first()
+#         wallet_bal_usd = 0
+#         if wallet_bal:
+#             wallet_bal = wallet_bal.balance
+#             wallet_bal_usd = fetch_pair_conversion('KES', 'USD', float(wallet_bal))
+#         else:
+#             wallet_bal = 0
+
+#         # print(wallet_bal_usd)
+
+
+#         # Fetch withdrawal and deposit history
+#         withdrawals = Withdrawal.objects.filter(user=request.user).order_by('-id')
+#         depos = Depo_Verification.objects.filter(user=request.user).order_by('-id')
+        
+#         # Prepare context for rendering the template
+#         context = {
+#             'total_balance': total_balance,
+#             'total_balance_usd': total_balance_usd,
+#             'extracted_data': extracted_data,
+#             'bal': wallet_bal,
+#             'bal_usd': wallet_bal_usd,
+#             'withdrawals': withdrawals,
+#             'depos': depos,
+#         }
+
+#         # Handle POST request for M-Pesa STK Push
+#         if request.method == 'POST':
+#             try:
+#                 # Try retrieving data from request body (in case of JSON)
+#                 try:
+#                     data = json.loads(request.body.decode('utf-8'))
+#                     phone_number = data.get('phone')
+#                     amount = int(data.get('amount'))
+#                 except json.JSONDecodeError:
+#                     # Fallback to form data (if request is not JSON)
+#                     phone_number = request.POST.get('phone')
+#                     amount = int(request.POST.get('amount'))
+
+#                 # Format phone number if it starts with "0"
+#                 if phone_number.startswith("0"):
+#                     phone_number = "254" + phone_number[1:]
+
+#                 # Create deposit transaction
+#                 DepositTransaction.objects.create(
+#                     user=request.user,
+#                     amount=amount,
+#                     phone_number=phone_number,
+#                     transaction_id=f"TXN{int(time.time())}",
+#                     status='Pending'
+#                 )
+
+#                 # Initialize M-Pesa client and initiate STK Push
+#                 cl = MpesaClient()
+#                 account_reference = 'reference'
+#                 transaction_desc = 'Description'
+#                 callback_url = 'https://www.smrtmine.com/dashboard/api/mpesa/callback/'
+#                 response = cl.stk_push(phone_number, amount, account_reference, transaction_desc, callback_url)
+
+#                 # Decode response data
+#                 response_data = json.loads(response.text)
+#                 result_code = response_data.get('ResultCode', '')
+
+#                 # Handle different response scenarios
+#                 if result_code == '0':
+#                     messages.success(request, "Transaction successful ✅")
+#                 elif result_code == '1032':
+#                     messages.error(request, "Transaction canceled by user ❌")
+#                 elif result_code == '1037':
+#                     messages.error(request, "STK Push timed out ⏳")
+#                 else:
+#                     messages.error(request, f"Unknown response: {response_data.get('ResultDesc', 'No description')}")
+
+#                 # Save the response to the database
+#                 MpesaResponse.objects.create(
+#                     merchant_request_id=response_data.get('MerchantRequestID'),
+#                     checkout_request_id=response_data.get('CheckoutRequestID'),
+#                     response_code=response_data.get('ResponseCode'),
+#                     response_description=response_data.get('ResponseDescription'),
+#                     customer_message=response_data.get('CustomerMessage')
+#                 )
+
+#                 # Return JSON response based on STK Push result
+#                 if response.status_code == 200:
+#                     messages.success(request, 'Your deposit was initiated successfully! Please check your phone and enter your pin to complete the transaction.')
+#                     return redirect('wallet')
+#                 else:
+#                     messages.error(request, f"M-Pesa STK Push failed: {response.text}")
+#                     return JsonResponse({
+#                         'error': f"M-Pesa STK Push failed: {response.text}"
+#                     }, status=400)
+
+#             except Exception as e:
+#                 print(f"An error occurred during STK Push: {e}")
+#                 messages.error(request, 'There was an error in your deposit!')
+#                 return JsonResponse({'error': str(e)}, status=400)
+
+#         # Render the wallet page
+#         return render(request, 'src/dashboard/wallet.html', context)
+
+#     except BinanceAPIException as e:
+#         print(f"Binance API Error: {e}")
+#         messages.error(request, f"Binance API Error: {e}")
+#         return redirect('wallet')
+#     except Exception as e:
+#         print(f"An error occurred: {e}")
+#         messages.error(request, f"An error occurred: {e}")
+#         return redirect('wallet')
+    
+
 def wallet(request):
     try:
         # Fetch Binance API keys from environment variables
@@ -480,8 +642,14 @@ def wallet(request):
         account_info = client.get_account()
         balances = account_info['balances']
 
-        # Define reference assets and extract relevant data
+        # Define reference assets and extract relevant data with icon mapping
         reference_assets = ['BTC', 'ETH', 'XRP', 'USDT']
+        asset_icons = {
+            'BTC': 'static/assets/media/images/crypto-coins-1.png',
+            'ETH': 'static/assets/media/images/crypto-coins-2.png',
+            'XRP': 'static/assets/media/images/crypto-coins-3.png',
+            'USDT': 'static/assets/media/images/crypto-coins-4.png'
+        }
         extracted_data = []
         total_balance = 0
         total_balance_usd = 0
@@ -492,7 +660,12 @@ def wallet(request):
             locked = float(entry['locked'])
 
             if asset in reference_assets:
-                extracted_data.append({'asset': asset, 'free': free, 'locked': locked})
+                extracted_data.append({
+                    'asset': asset,
+                    'free': free,
+                    'locked': locked,
+                    'icon': asset_icons.get(asset, 'default.svg')
+                })
 
             if free > 0:
                 try:
@@ -515,9 +688,6 @@ def wallet(request):
             wallet_bal_usd = fetch_pair_conversion('KES', 'USD', float(wallet_bal))
         else:
             wallet_bal = 0
-
-        # print(wallet_bal_usd)
-
 
         # Fetch withdrawal and deposit history
         withdrawals = Withdrawal.objects.filter(user=request.user).order_by('-id')
@@ -617,6 +787,7 @@ def wallet(request):
         messages.error(request, f"An error occurred: {e}")
         return redirect('wallet')
     
+
 @csrf_exempt
 def mpesa_callback(request):
     """
@@ -1224,7 +1395,7 @@ def exchange(request):
         return render(request, 'src/dashboard/exchange.html', context)
 
     except Exception as e:
-        messages.error(request, f"Error fetching exchange data: {str(e)}")
+        # messages.error(request, f"Error fetching exchange data: {str(e)}")
         return render(request, 'src/dashboard/exchange.html', {
             'tickers': [],
             'trades': [],
@@ -1256,189 +1427,212 @@ def exchange_trade(request):
     return redirect('exchange')
 
 
+from django.contrib import admin
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.contrib import messages
+
+@admin.action(description='Send email to selected users')
+def send_email_to_users(modeladmin, request, queryset):
+    for user in queryset:
+        if user.email:
+            send_mail(
+                subject='Hello from Admin!',
+                message='This is a test email sent from the Django admin panel.',
+                from_email='admin@example.com',  # Update to your email
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+    messages.success(request, "Emails have been sent successfully!")
+
+class CustomUserAdmin(admin.ModelAdmin):
+    actions = [send_email_to_users]
 
 
 
-def homeView(request):
-
-
-    api_key = os.environ['BINANCE_API_KEY']
-
-    stock = 'PLTR'
-
-    api_key = os.environ['BINANCE_API_KEY']
-    period= 60
-
-    ts = TimeSeries(key=api_key, output_format='pandas',)
-    data_ts, meta_data_ts = ts.get_intraday(stock, interval='1min', outputsize='compact')
-
-    ti = TechIndicators(key=api_key, output_format='pandas')
-    data_ti, meta_data_ti  = ti.get_rsi(stock, interval='1min', time_period=period, series_type='close')
-
-    ts_df = data_ts
-    ti_df = data_ti
-
-    #Fundamentals
-    payload = {'function': 'OVERVIEW', 'symbol': 'PLTR', 'apikey': api_key}
-    r = requests.get('https://www.alphavantage.co/query', params=payload)
-    r = r.json()
-
-
-    #plotly graph
-    def candlestick():
-        figure = go.Figure(
-            data = [
-                    go.Candlestick(
-                        x = ts_df.index,
-                        high = ts_df['2. high'],
-                        low = ts_df['3. low'],
-                        open = ts_df['1. open'],
-                        close = ts_df['4. close'],
-                    )
-                    ]
-        )
-
-        candlestick_div = plot(figure, output_type='div')
-        return candlestick_div
-
-
-    sector = r['Sector']
-    marketcap = r['MarketCapitalization']
-    peratio = r['PERatio']
-    yearhigh = r['52WeekHigh']
-    yearlow = r['52WeekLow']
-    eps = r['EPS']
 
 
 
-    timeseries = ts_df.to_dict(orient='records')
-
-    closingprice = []
-    for k in timeseries:
-        closingprice.append(k['4. close'])
-
-    lowprice = []
-    for k in timeseries:
-        closingprice.append(k['3. low'])
-
-    highprice = []
-    for k in timeseries:
-        closingprice.append(k['2. high'])
-
-    openprice = []
-    for k in timeseries:
-        closingprice.append(k['1. open'])
-
-    pricedata = {
-        'close': [closingprice],
-        'open': [openprice],
-        'high': [highprice],
-        'low': [lowprice],
-    }
-
-    #miscellaneous stuff
-    day = datetime.datetime.now()
-    day = day.strftime("%A")
-
-    def human_format(num):
-        magnitude = 0
-        while abs(num) >= 1000:
-            magnitude += 1
-            num /= 1000.0
-        # add more suffixes if you need them
-        return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
-
-    marketcap = int(marketcap)
-    marketcap = human_format(marketcap)
-
-    closingprice = closingprice[0:15]
+# def homeView(request):
 
 
-    context = {
-        'sector': sector,
-        'marketcap': marketcap,
-        'peratio': peratio,
-        'yearhigh': yearhigh,
-        'yearlow': yearlow,
-        'eps': eps,
-        'closingprice': closingprice,
-        'openprice': openprice,
-        'highprice': highprice,
-        'lowprice': lowprice,
-        'pricedata': pricedata,
-        'timeseries': timeseries,
-        'stock': stock,
-        'day': day,
-        'candlestick': candlestick(),
-    }
+#     api_key = os.environ['BINANCE_API_KEY']
 
-    context={}
-    return render(request, 'src/dashboard/market.html', context)
+#     stock = 'PLTR'
 
-def homeView(request):
-    if request.method == 'POST':
-        symbol = request.POST.get('symbol')
-        return redirect('/')
+#     api_key = os.environ['BINANCE_API_KEY']
+#     period= 60
 
-    context={
+#     ts = TimeSeries(key=api_key, output_format='pandas',)
+#     data_ts, meta_data_ts = ts.get_intraday(stock, interval='1min', outputsize='compact')
 
-    }
-    return render(request, 'src/dashboard/market.html', context)
+#     ti = TechIndicators(key=api_key, output_format='pandas')
+#     data_ti, meta_data_ti  = ti.get_rsi(stock, interval='1min', time_period=period, series_type='close')
+
+#     ts_df = data_ts
+#     ti_df = data_ti
+
+#     #Fundamentals
+#     payload = {'function': 'OVERVIEW', 'symbol': 'PLTR', 'apikey': api_key}
+#     r = requests.get('https://www.alphavantage.co/query', params=payload)
+#     r = r.json()
+
+
+#     #plotly graph
+#     def candlestick():
+#         figure = go.Figure(
+#             data = [
+#                     go.Candlestick(
+#                         x = ts_df.index,
+#                         high = ts_df['2. high'],
+#                         low = ts_df['3. low'],
+#                         open = ts_df['1. open'],
+#                         close = ts_df['4. close'],
+#                     )
+#                     ]
+#         )
+
+#         candlestick_div = plot(figure, output_type='div')
+#         return candlestick_div
+
+
+#     sector = r['Sector']
+#     marketcap = r['MarketCapitalization']
+#     peratio = r['PERatio']
+#     yearhigh = r['52WeekHigh']
+#     yearlow = r['52WeekLow']
+#     eps = r['EPS']
 
 
 
-def cryptoView(request):
+#     timeseries = ts_df.to_dict(orient='records')
 
-    if request.method == 'POST':
-        symbol = request.POST.get('symbol')
-        symbol = symbol.upper()
-    else:
-        symbol = 'BTCUSD'
+#     closingprice = []
+#     for k in timeseries:
+#         closingprice.append(k['4. close'])
 
-    data = spotquote(symbol)
-    pricedata = pricechange(symbol)
-    moredata = pricechange(symbol)
+#     lowprice = []
+#     for k in timeseries:
+#         closingprice.append(k['3. low'])
+
+#     highprice = []
+#     for k in timeseries:
+#         closingprice.append(k['2. high'])
+
+#     openprice = []
+#     for k in timeseries:
+#         closingprice.append(k['1. open'])
+
+#     pricedata = {
+#         'close': [closingprice],
+#         'open': [openprice],
+#         'high': [highprice],
+#         'low': [lowprice],
+#     }
+
+#     #miscellaneous stuff
+#     day = datetime.datetime.now()
+#     day = day.strftime("%A")
+
+#     def human_format(num):
+#         magnitude = 0
+#         while abs(num) >= 1000:
+#             magnitude += 1
+#             num /= 1000.0
+#         # add more suffixes if you need them
+#         return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
+
+#     marketcap = int(marketcap)
+#     marketcap = human_format(marketcap)
+
+#     closingprice = closingprice[0:15]
+
+
+#     context = {
+#         'sector': sector,
+#         'marketcap': marketcap,
+#         'peratio': peratio,
+#         'yearhigh': yearhigh,
+#         'yearlow': yearlow,
+#         'eps': eps,
+#         'closingprice': closingprice,
+#         'openprice': openprice,
+#         'highprice': highprice,
+#         'lowprice': lowprice,
+#         'pricedata': pricedata,
+#         'timeseries': timeseries,
+#         'stock': stock,
+#         'day': day,
+#         'candlestick': candlestick(),
+#     }
+
+#     context={}
+#     return render(request, 'src/dashboard/market.html', context)
+
+# def homeView(request):
+#     if request.method == 'POST':
+#         symbol = request.POST.get('symbol')
+#         return redirect('/')
+
+#     context={
+
+#     }
+#     return render(request, 'src/dashboard/market.html', context)
 
 
 
-    #get a fricken df
-    ts_df = candles(symbol)
-    #PlotlyGraph
-    def candlestick():
-        figure = go.Figure(
-            data = [
-                    go.Candlestick(
-                        x = ts_df.index,
-                        high = ts_df['high'],
-                        low = ts_df['low'],
-                        open = ts_df['open'],
-                        close = ts_df['close'],
-                    )
-                    ]
-        )
+# def cryptoView(request):
 
-        candlestick_div = plot(figure, output_type='div')
-        return candlestick_div
-    #endPlotlyGraph
-    percentchange = pricedata['priceChangePercent']
-    buyers = pricedata['askQty']
-    sellers = pricedata['bidQty']
+#     if request.method == 'POST':
+#         symbol = request.POST.get('symbol')
+#         symbol = symbol.upper()
+#     else:
+#         symbol = 'BTCUSD'
 
-    eth = pricechange(symbol='ETHUSD')
-    btc = pricechange(symbol="BTCUSD")
-    ltc = pricechange(symbol="LTCUSD")
+#     data = spotquote(symbol)
+#     pricedata = pricechange(symbol)
+#     moredata = pricechange(symbol)
 
 
 
-    context={
-    'moredata': moredata,
-    'eth': eth,
-    'btc': btc,
-    'ltc': ltc,
-    'percentchange': percentchange,
-    'buyers': buyers,
-    'sellers': sellers,
-    'data': data,
-    'candlestick': candlestick(),
-    }
-    return render(request, 'src/dashboard/market.html', context)
+#     #get a fricken df
+#     ts_df = candles(symbol)
+#     #PlotlyGraph
+#     def candlestick():
+#         figure = go.Figure(
+#             data = [
+#                     go.Candlestick(
+#                         x = ts_df.index,
+#                         high = ts_df['high'],
+#                         low = ts_df['low'],
+#                         open = ts_df['open'],
+#                         close = ts_df['close'],
+#                     )
+#                     ]
+#         )
+
+#         candlestick_div = plot(figure, output_type='div')
+#         return candlestick_div
+#     #endPlotlyGraph
+#     percentchange = pricedata['priceChangePercent']
+#     buyers = pricedata['askQty']
+#     sellers = pricedata['bidQty']
+
+#     eth = pricechange(symbol='ETHUSD')
+#     btc = pricechange(symbol="BTCUSD")
+#     ltc = pricechange(symbol="LTCUSD")
+
+
+
+#     context={
+#     'moredata': moredata,
+#     'eth': eth,
+#     'btc': btc,
+#     'ltc': ltc,
+#     'percentchange': percentchange,
+#     'buyers': buyers,
+#     'sellers': sellers,
+#     'data': data,
+#     'candlestick': candlestick(),
+#     }
+#     return render(request, 'src/dashboard/market.html', context)

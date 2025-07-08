@@ -3,6 +3,11 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import Profile
 
+from django import forms
+
+class EmailUsersForm(forms.Form):
+    subject = forms.CharField(max_length=255)
+    message = forms.CharField(widget=forms.Textarea)
 
 # Custom User Creation Form
 class CustomUserCreationForm(UserCreationForm):

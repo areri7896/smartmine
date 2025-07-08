@@ -35,7 +35,7 @@
             <div class="standard-card__content">
               <div class="standard-card__content-head">
                 <div class="standard-card__content-currency">
-                  <img src="{% static 'assets/media/images/icons/Bitcoin.svg' %}" alt=""
+                  <img src="{% static 'assets/media/images/icons/'|add:asset.icon %}" alt=""
                     class="standard-card__content-currency-icon">
                   <p class="standard-card__content-currency-name">{{ asset.asset }}</p>
                 </div>
@@ -44,7 +44,7 @@
               <p class="standard-card__content-price-1">{{ asset.free }}</p>
               <p class="standard-card__content-price-2">{{ asset.locked }}USD</p>
               <div class="standard-card__content-chart-wrapper">
-                <div id="standard-card__content-chart-7" class="standard-card__content-chart-render"></div>
+                <!-- <div id="standard-card__content-chart-7" class="standard-card__content-chart-render"></div> -->
               </div>
             </div>
           </div>
@@ -93,15 +93,16 @@
           <div class="advance-card-right">
             <div class="advance-card__card">
               <div class="advance-card__card-content">
+                <p class="advance-card__card-desc-title">Exchange Balance</p>
                 {% for asset in extracted_data %}
                 <div class="advance-card__card-desc">
-                  <p class="advance-card__card-desc-title">Exchange Balance</p>
-                  <div class="advance-card__card-desc-value">
+                  <p class="advance-card__card-desc-title">{{ asset.asset }}</p>
+                  <div class="advance-card__card-desc-value d-flex">
                     <p class="advance-card__card-desc-value-crypto">{{ asset.free.btc }}</p>
                     <p class="advance-card__card-desc-value-currency">{{ asset.locked }}</p>
                   </div>
-                  {% endfor %}
                 </div>
+                {% endfor %}
                 <div class="advance-card__card-data">
                   <div class="advance-card__card-chart-wrapper">
                     <div id="advance-card__card-line-3" class="advance-card__card-chart-render"></div>
@@ -115,9 +116,10 @@
             </div>
             <div class="advance-card__card">
               <div class="advance-card__card-content">
+                <p class="advance-card__card-desc-title">Exchange Balance</p>
                 {% for asset in extracted_data %}
                 <div class="advance-card__card-desc">
-                  <p class="advance-card__card-desc-title">Assets Balance</p>
+                  <p class="advance-card__card-desc-title">{{ asset.asset }}</p>
                   <div class="advance-card__card-desc-value">
                     <p class="advance-card__card-desc-value-crypto">{{ asset.free.btc }}</p>
                     <p class="advance-card__card-desc-value-currency">{{ asset.locked }}</p>

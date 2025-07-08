@@ -5,6 +5,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django.core.mail import send_mail
+from django.db.models import CASCADE
 
 
 User = get_user_model()
@@ -16,7 +18,37 @@ User = get_user_model()
 #     CANCELLED = "Cancelled"
 #     FAILED = "Failed" 
 
-# class 
+
+class EmailSender(models.Model):
+    receivers = models.ManyToManyField(User)
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Email to {self.receivers.count()} users - {self.subject}"
+
+    def send_emails(self):
+        for user in self.receivers.all():
+            if user.email:
+                send_mail(
+                    subject=self.subject,
+                    message=self.message,
+                    from_email='ssmartmine@gmail.com',  # Change to your address
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+
+    def save(self, *args, **kwargs):
+        # Determine if this is a new instance
+        is_new = self.pk is None
+        super().save(*args, **kwargs)  # Save the instance first to get a PK
+
+        # If it's a new instance, send emails
+        if is_new:
+            self.send_emails()
+    
+
 
 class Withdrawal(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -1427,26 +1427,26 @@ def exchange_trade(request):
     return redirect('exchange')
 
 
-from django.contrib import admin
-from django.contrib.auth.models import User
-from django.core.mail import send_mail
-from django.contrib import messages
+# from django.contrib import admin
+# from django.contrib.auth.models import User
+# from django.core.mail import send_mail
+# from django.contrib import messages
 
-@admin.action(description='Send email to selected users')
-def send_email_to_users(modeladmin, request, queryset):
-    for user in queryset:
-        if user.email:
-            send_mail(
-                subject='Hello from Admin!',
-                message='This is a test email sent from the Django admin panel.',
-                from_email='admin@example.com',  # Update to your email
-                recipient_list=[user.email],
-                fail_silently=False,
-            )
-    messages.success(request, "Emails have been sent successfully!")
+# @admin.action(description='Send email to selected users')
+# def send_email_to_users(modeladmin, request, queryset):
+#     for user in queryset:
+#         if user.email:
+#             send_mail(
+#                 subject='Hello from Admin!',
+#                 message='This is a test email sent from the Django admin panel.',
+#                 from_email='admin@example.com',  # Update to your email
+#                 recipient_list=[user.email],
+#                 fail_silently=False,
+#             )
+#     messages.success(request, "Emails have been sent successfully!")
 
-class CustomUserAdmin(admin.ModelAdmin):
-    actions = [send_email_to_users]
+# class CustomUserAdmin(admin.ModelAdmin):
+#     actions = [send_email_to_users]
 
 
 

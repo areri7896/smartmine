@@ -80,49 +80,30 @@ from django_celery_beat.models import PeriodicTask, IntervalSchedule
 #             form = EmailUsersForm()
 #         return render(request, "admin/send_email_form.html", {"form": form})
 
-''' from django.core import mail
+from django.contrib import admin
+from django.core.mail import send_mail
+from .models import EmailSender
 
-connection = mail.get_connection()
+@admin.register(EmailSender)
+class EmailSenderAdmin(admin.ModelAdmin):
+    list_display = ['subject', 'created_at']
+    actions = ['send_email_to_receivers']
 
-# Manually open the connection
-connection.open()
+    @admin.action(description="Send email to selected users")
+    def send_email_to_receivers(self, request, queryset):
+        for email_instance in queryset:
+            subject = email_instance.subject
+            message = email_instance.message
+            receivers = email_instance.receivers.all()
 
-# Construct an email message that uses the connection
-email1 = mail.EmailMessage(
-    "Hello",
-    "Body goes here",
-    "from@example.com",
-    ["to1@example.com"],
-    connection=connection,
-)
-email1.send()  # Send the email
+            for user in receivers:
+                if user.email:
+                    send_mail(
+                        subject=subject,
+                        message=message,
+                        from_email='ssmartmine@gmail.com',  # Set your email here
+                        recipient_list=[user.email],
+                        fail_silently=False,
+                    )
 
-# Construct two more messages
-email2 = mail.EmailMessage(
-    "Hello",
-    "Body goes here",
-    "from@example.com",
-    ["to2@example.com"],
-)
-email3 = mail.EmailMessage(
-    "Hello",
-    "Body goes here",
-    "from@example.com",
-    ["to3@example.com"],
-)
-
-# Send the two emails in a single call -
-connection.send_messages([email2, email3])
-# The connection was already open so send_messages() doesn't close it.
-# We need to manually close the connection.
-connection.close()
-
-
-from django.core import mail
-
-connection = mail.get_connection()  # Use default email connection
-messages = get_notification_email()
-connection.send_messages(messages)
-
-
-'''
+        self.message_user(request, "Emails sent successfully.")

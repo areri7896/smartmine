@@ -1,0 +1,127 @@
+{% extends 'src/dashboard/basic.html' %} {% load static %}
+<title>{% block title %}Invest{% endblock %}</title>
+{% block css_page %}
+<link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
+<link href="{% static 'assets/css/pages/wallet-v1.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %} {% block content %}
+
+{% if messages %}
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">Alert</strong>
+      <small class="text-muted">Just now</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body" id="toastMessage">
+      {% for message in messages %}
+      {{ message }}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const toastEl = document.getElementById('liveToast');
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+  });
+</script>
+{% endif %}
+
+<div style="width: 70%; justify-content: center; align-self: center; margin: auto;">
+
+  <h1 class="component__title mb-3 text-center"> Invest in <span id="plan-name">{{ pl.name }}</span></h1>
+  <div class="advance-card advance-card--type-3-v3">
+    <div class="advance-card-left">
+      <div class="advance-card__balance-wrapper">
+        <div class="advance-card__balance">
+          <p class="advance-card__balance-title"> Price: </p>
+          <p class="advance-card__balance-crypto-value">{{ pl.price }} USDT</p>
+          <p class="advance-card__balance-title"> Rate: </p>
+          <p class="advance-card__balance-crypto-value">
+            {{ pl.daily_interest_rate }}
+            <span class="advance-card__balance-currency">%</span>
+          </p>
+        </div>
+
+        <div class="advance-card__balance-chart">
+          <div class="advance-card__balance-chart-wrapper">
+            <div id="advance-card__card-line-7" class="advance-card__balance-chart-render"></div>
+          </div>
+          <div class="advance-card__balance-chart-percent">
+            <img src="{% static 'assets/media/images/icons/arrow-bearish.svg' %}" alt=""
+              class="advance-card__balance-chart-percent-image">
+            <p class="advance-card__balance-chart-percent-value text-bearish">2.36%</p>
+          </div>
+        </div>
+      </div>
+      <div class="advance-card__buttons">
+        <form method="POST" class="d-flex flex-column align-items-center"
+          action="{% url 'confirm_investment' plan_id=pl.id %}">
+          {% csrf_token %}
+          <button class="btn btn-primary advance-card__button btn-sm btn-pill">Confirm Investment
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="advance-card-separator"></div>
+
+    <div class="advance-card-right">
+
+      <div class="advance-card__card">
+        <div class="advance-card__card-content">
+          <div class="advance-card__card-desc">
+            <p class="advance-card__card-desc-title">Cycle:</p>
+            <div class="advance-card__card-desc-value">
+              <p class="advance-card__card-desc-value-crypto"><strong id="cycle-days">{{ pl.cycle_days }} Days</strong>
+              </p>
+              <!-- <p class="advance-card__card-desc-value-currency">3,897.98 USD</p> -->
+            </div>
+          </div>
+          <div class="advance-card__card-data">
+            <div class="advance-card__card-chart-wrapper">
+              <div id="advance-card__card-line-4" class="advance-card__card-chart-render"></div>
+            </div>
+            <p class="advance-card__card-percent">+{{ pl.daily_interest_rate }}%</p>
+          </div>
+        </div>
+        <div class="advance-card__card-progress">
+          <div class="advance-card__card-progress-bar progress-bar--green"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End::Advance Card -->
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      fetch(window.location.href) // Fetch the same page content
+        .then((response) => response.text())
+        .then((html) => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, "text/html");
+
+          document.getElementById("plan-name").innerText =
+            doc.querySelector("#plan-name").innerText;
+          document.getElementById("price").innerText =
+            doc.querySelector("#price").innerText;
+          document.getElementById("interest-rate").innerText =
+            doc.querySelector("#interest-rate").innerText;
+          document.getElementById("cycle-days").innerText =
+            doc.querySelector("#cycle-days").innerText;
+        })
+        .catch((error) =>
+          console.error("Error fetching investment details:", error)
+        );
+    });
+  </script>
+
+  {% block js %}
+  <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+  {% endblock %} {% endblock %}
+</div>
+<!-- Bootstrap JS (place before closing </body>) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,0 +1,92 @@
+To extend `UserChangeForm` in Django properly and combine it with your custom `ProfileUpdateForm`, you need to ensure that both user-related fields and profile-related fields are handled correctly in your forms. From your code, it looks like you're creating separate forms for `User` and `Profile`, which is fine, but if you want to combine them into a single form (or process them together), here's how you could approach it.
+
+---
+
+### ✅ Option 1: Combine Both Forms in a View
+
+You already have two forms:
+
+* `UserUpdateForm` (handles Django’s built-in `User` model)
+* `ProfileUpdateForm` (handles your custom `Profile` model)
+
+You can use both in your view and render them together in the same template:
+
+```python
+def profile_update_view(request):
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('profile')
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = ProfileUpdateForm(instance=request.user.profile)
+
+    return render(request, 'users/profile_update.html', {
+        'user_form': user_form,
+        'profile_form': profile_form
+    })
+```
+
+---
+
+### ✅ Option 2: Combine into a Single Form (Optional)
+
+You can subclass `forms.ModelForm` and create a custom form that handles both `User` and `Profile`, though this requires manually saving both models.
+
+```python
+class CombinedUserProfileForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+    profile_pic = forms.ImageField(required=False)
+    dob = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    first_name = forms.CharField(required=False)
+    last_name = forms.CharField(required=False)
+    country = forms.CharField(required=False)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('instance')
+        self.profile = self.user.profile
+        super().__init__(*args, **kwargs)
+
+        self.fields['username'].initial = self.user.username
+        self.fields['email'].initial = self.user.email
+        self.fields['first_name'].initial = self.profile.first_name
+        self.fields['last_name'].initial = self.profile.last_name
+        self.fields['dob'].initial = self.profile.dob
+        self.fields['country'].initial = self.profile.country
+        self.fields['profile_pic'].initial = self.profile.profile_pic
+
+    def save(self, commit=True):
+        self.user.username = self.cleaned_data['username']
+        self.user.email = self.cleaned_data['email']
+        if commit:
+            self.user.save()
+
+        self.profile.first_name = self.cleaned_data['first_name']
+        self.profile.last_name = self.cleaned_data['last_name']
+        self.profile.dob = self.cleaned_data['dob']
+        self.profile.country = self.cleaned_data['country']
+        if self.cleaned_data.get('profile_pic'):
+            self.profile.profile_pic = self.cleaned_data['profile_pic']
+        if commit:
+            self.profile.save()
+
+        return self.user
+```
+
+In your view, you'd use it like this:
+
+```python
+form = CombinedUserProfileForm(request.POST or None, request.FILES or None, instance=request.user)
+```
+
+---
+
+Would you prefer keeping two separate forms, or do you want to merge them into one?

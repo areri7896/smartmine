@@ -1,0 +1,165 @@
+{% extends 'src/dashboard/basic.html' %}
+{% load static %}
+<title>{% block title %}Market {% endblock %}</title>
+{% block css_page %}
+<link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+
+<!-- Start::Global Styles (used by all pages) -->
+<link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
+<!-- End::Global Styles -->
+<!-- Start::Plugins (used by this page) -->
+<link href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}" rel="stylesheet" type="text/css" />
+<!-- End::Plugins -->
+<!-- Start::Page Styles (used by this page) -->
+<link href="{% static 'assets/css/pages/wallet-v1.css' %}" rel="stylesheet" type="text/css" />
+<!-- End::Page Styles -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+{% endblock %}
+</head>
+{% block content %}
+
+<div class="wallet wallet--v1">
+  <div class="container container--dashboard">
+    <div class="wallet-group">
+      <div class="wallet-group--left">
+        {% for plan in plans %}
+        <div class="standard-card standard-card--type-6-v1">
+          <div class="container">
+            <div class="standard-card__content">
+              <div class="standard-card__content-head">
+                <div class="standard-card__content-currency">
+                  <p class="standard-card__content-currency-name">{{ plan.name }}</p>
+                </div>
+                <p class="standard-card__content-percentage text-bullish">
+                  {{ plan.daily_interest_rate }}%
+                </p>
+              </div>
+              <div class="standard-card__content-head">
+                <p class="standard-card__content-price-1">{{ plan.cycle_days }} Days</p>
+                <p class="standard-card__content-price-2">{{ plan.price }} KSH</p>
+              </div>
+
+              <!-- Button to open confirmation modal -->
+              <form action="{% url 'invest' plan.id %}" method="post">
+                {% csrf_token %}
+                <a class="btn btn-secondary btn-sm invest-button" href="{% url 'confirm_investment' plan.id %}">
+                  Invest Now
+                </a>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="wallet-group--right">
+
+        <!-- Start::Table Section -->
+        <div class="table-wrapper table--type-1">
+          {% if investments %}
+          <div class="table-container">
+            <h6 class="component__title mb-3 text-center">My Investments</h6>
+            <table class="table table-content w-75">
+              <thead class="table__head">
+                <tr>
+                  <th class="fb-regular w-25 table__head" >Plan</th>
+                  <th class="fb-regular w-25 table__head" >Start Date</th>
+                  <th class="fb-regular w-25 table__head" >End Date</th>
+                  <th class="fb-regular w-25 table__head" >Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for investment in investments %}
+                <tr>
+                  <td>
+                    <p class="fb-regular table__assets-crypto-abbr">{{ investment.plan.name }}</p>
+                  </td>
+                  <td>
+                    <p class="fb-regular table__order" >{{ investment.db_start_date|date:"Y-m-d H:i" }}
+                    </p>
+                  </td>
+                  <td>
+                    <p class="fb-regular table__available">{{ investment.db_end_date|date:"Y-m-d H:i"}}
+                    </p>
+                  </td>
+                  <td>
+                    {% if investment.status == 'active' %}
+                    <p class="fb-regular table__status text-success">
+                      {{ investment.status }}
+                    </p>
+                    {% else %}
+                    <p class="fb-regular table__status text-danger">
+                      {{ investment.status }}
+                    </p>
+                    {% endif %}
+
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center">You have not invested yet! <span class="text-danger"> Please
+                      Invest </span></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {% else %}
+        <p class="standard-card__content-currency-name mb-3 text-center">You have not invested yet! <span
+            class="text-danger"> Please Invest </span></p>
+        {% endif %}
+        <!-- End::Table Section -->
+        <!-- base.html or any template -->
+        {% if messages %}
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <strong class="me-auto">Alert</strong>
+              <small class="text-muted">Just now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body bg-primary" id="toastMessage">
+              {% for message in messages %}
+              {{ message }}
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <script>
+          window.addEventListener('DOMContentLoaded', () => {
+            const toastEl = document.getElementById('liveToast');
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+          });
+        </script>
+        {% endif %}
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% block js %}
+<!-- Start::Global Bundle Scripts (used by all pages) -->
+<script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+<script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
+<!-- End::Global Bundle Scripts -->
+<!-- Start::Plugins (used by this page) -->
+<script src="{% static 'assets/plugins/apexcharts/apexcharts.min.js' %}"></script>
+<!-- Bootstrap JS (place before closing </body>) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="{% static 'assets/plugins/slick/slick.min.js' %}"></script>
+<!-- End::Plugins -->
+<!-- Start::Page Scripts (used by this page) -->
+<script src="{% static 'assets/js/custom/chart.js' %}"></script>
+<script src="{% static 'assets/js/pages/wallet-page-v1.js' %}"></script>
+<script src="{% static 'assets/js/custom/navbar.js' %}"></script>
+<!-- End::Page Scripts -->
+{% endblock %}
+{% endblock %}

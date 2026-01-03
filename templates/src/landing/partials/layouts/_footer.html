@@ -1,0 +1,266 @@
+{% load static %} {% load tz %}
+
+<!-- Start::Footer -->
+<footer class="footer">
+  <!-- Toast Notification -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="subscribe-toast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body">Subscribed successfully!</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+  
+
+  <div class="container">
+    <div class="footer__content">
+      <div class="footer__item footer-item-main">
+        <img
+          class="footer-item-main__logo"
+          src="{% static 'assets/media/images/Smr.png' %}"
+          alt="SmartMine"
+        />
+        <p class="fb-lg footer-item-main__desc">Your best crypto partner.</p>
+        <div class="footer-item-main__socmed">
+          <!-- <a href="#" class="footer-socmed">
+            <img class="footer-item-main__logo" src="{% static 'assets/media/images/icons/logo-linkedin.svg' %}" alt="Linkedin" />
+          </a> -->
+          <a href="#" class="footer-socmed">
+            <img
+              class="footer-item-main__logo"
+              src="{% static 'assets/media/images/icons/logo-facebook.svg' %}"
+              alt="Facebook"
+            />
+          </a>
+          <a href="#" class="footer-socmed">
+            <img
+              class="footer-item-main__logo"
+              src="{% static 'assets/media/images/icons/logo-ig.svg' %}"
+              alt="Instagram"
+            />
+          </a>
+        </div>
+      </div>
+      <div class="footer__item footer-item-quick-links">
+        <h6 class="footer__item-title">Quick Links.</h6>
+        <div class="footer-quick-links">
+          <a
+            href="https://www.binance.com/en"
+            class="fb-md footer-quick-links__link"
+            >Binance</a
+          >
+          <a
+            href="https://www.bitcoin.com/"
+            class="fb-md footer-quick-links__link"
+            >Bitcoin</a
+          >
+          <a href="{% url 'dashboard' %}" class="fb-md footer-quick-links__link"
+            >Trade Now</a
+          >
+          <!-- <a href="" class="fb-md footer-quick-links__link">Company</a> -->
+          <!-- <a href="" class="fb-md footer-quick-links__link">Pricing</a> -->
+        </div>
+      </div>
+      <div class="footer__item footer-item-updates">
+        <h6 class="footer__item-title">Submit for updates.</h6>
+        <p class="fb-md footer-item-updates__desc">
+          Subscribe to get updates and notifications on our Exchange, Products and Services.
+        </p>
+        <div class="mini-form-sm__box">
+          <form class="mini-form" id="subscribe-form">
+            <input
+              type="text"
+              id="email-input"
+              class="form-control form-control-sm mini-form__input"
+              placeholder="Enter your email address"
+              autocomplete="off"
+            />
+            <input
+              type="submit"
+              class="btn btn-primary btn-sm mini-form__submit"
+              value="Send"
+            />
+          </form>
+          <p id="subscribe-message"></p>
+        </div>
+      </div>
+    <div class="footer__foot">
+      <p class="fb-md footer-foot__copyright">
+        SmartMine © {% now "Y" %}. All rights reserved.
+      </p>
+      <div class="footer-foot__tos-privacy">
+        <a href="#" class="fb-md footer-foot__link">Term of Service</a>
+        <span class="separator"></span>
+        <a href="#" class="fb-md footer-foot__link">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- End::Footer -->
+<!-- <script>
+document.getElementById("subscribe-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    const email = document.getElementById("email-input").value.trim();
+    const messageElement = document.getElementById("subscribe-message");
+
+    fetch("/subscribe/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-CSRFToken": getCookie("csrftoken"), // CSRF token function required
+      },
+      body: `email=${encodeURIComponent(email)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        messageElement.textContent = "";
+        showToast("Subscribed successfully! 🎉");
+      } else {
+        messageElement.textContent = data.error;
+        messageElement.style.color = "red";
+      }
+    })
+    .catch(error => console.error("Error:", error));
+  });
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      document.cookie.split(";").forEach(cookie => {
+        cookie = cookie.trim();
+        if (cookie.startsWith(name + "=")) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        }
+      });
+    }
+    return cookieValue;
+  }
+
+  function showToast(message) {
+    const toastElement = document.getElementById("subscribe-toast");
+    const toastBody = toastElement.querySelector(".toast-body");
+    toastBody.textContent = message;
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+  }
+</script> -->
+<!-- <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector(".mini-form");
+    const toastElement = document.getElementById("subscribe-toast");
+    const toast = new bootstrap.Toast(toastElement);
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      const emailInput = document.querySelector(".mini-form__input").value.trim();
+
+      fetch("/subscribe/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: `email=${encodeURIComponent(emailInput)}`
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.querySelector(".mini-form__input").value = ""; // Clear input
+          showToast("Subscribed successfully! 🎉");
+        } else {
+          alert(data.error); // Temporary alert for debugging
+        }
+      })
+      .catch(error => console.error("Error:", error));
+    });
+
+    function showToast(message) {
+      const toastBody = toastElement.querySelector(".toast-body");
+      toastBody.textContent = message;
+      toast.show(); // Correctly show the toast
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        document.cookie.split(";").forEach(cookie => {
+          cookie = cookie.trim();
+          if (cookie.startsWith(name + "=")) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          }
+        });
+      }
+      return cookieValue;
+    }
+  });
+</script> -->
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".mini-form").forEach(form => {
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        
+        const emailInput = this.querySelector(".mini-form__input");
+        const email = emailInput.value.trim();
+        const messageElement = this.querySelector("#subscribe-message");
+
+        if (!email) {
+          messageElement.textContent = "Please enter a valid Email.";
+          messageElement.style.color = "red";
+          return;
+        }
+
+        fetch("/subscribe/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: `email=${encodeURIComponent(email)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            emailInput.value = ""; // Clear input field
+            messageElement.textContent = "Subscribed Successfully! 🎉";
+            messageElement.style.color = "green";
+            showToast("Subscribed Successfully!");
+          } else {
+            messageElement.textContent = data.error;
+            messageElement.style.color = "red";
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          messageElement.textContent = "Error Subscribing.";
+          messageElement.style.color = "red";
+        });
+      });
+    });
+
+    function showToast(message) {
+      const toastElement = document.getElementById("subscribe-toast");
+      const toastBody = toastElement.querySelector(".toast-body");
+      toastBody.textContent = message;
+      const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+      toast.show();
+    }
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== "") {
+        document.cookie.split(";").forEach(cookie => {
+          cookie = cookie.trim();
+          if (cookie.startsWith(name + "=")) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          }
+        });
+      }
+      return cookieValue;
+    }
+  });
+</script>

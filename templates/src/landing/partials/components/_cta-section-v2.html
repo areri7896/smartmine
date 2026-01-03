@@ -1,0 +1,38 @@
+<!-- Start::CTA -->
+{% load static %}
+<section class="cta">
+  <div class="cta__background cta__background--pattern">
+    <img
+      class="cta__pattern-bg"
+      src="{% static 'assets/media/images/landing-page-v2/landing-page-v2-cta-pattern.png' %}"
+      alt="Background Pattern CTA"
+    />
+  </div>
+  <div class="cta__background--mobile cta__background--pattern">
+    <img
+      class="cta__pattern-bg"
+      src="{% static 'assets/media/images/landing-page-v2/mobile-landing-page-v2-cta-pattern.png' %}"
+      alt="Background Pattern CTA"
+    />
+  </div>
+  <div class="container">
+    <div class="cta__container text-center">
+      <p class="fd-sm cta__subtitle">Ready to start trading Cryptocurrency?</p>
+      <h3 class="cta__title">New users can earn up to $8 in Crypto rewards.</h3>
+      <form class="mini-form">
+        <input
+          type="text"
+          class="form-control mini-form__input"
+          placeholder="Enter you email address"
+          autocomplete="off"
+        />
+        <input
+          type="submit"
+          class="btn btn-primary mini-form__submit"
+          value="Get Started"
+        />
+      </form>
+    </div>
+  </div>
+</section>
+<!-- End::CTA -->

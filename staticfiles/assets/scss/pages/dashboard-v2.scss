@@ -1,0 +1,101 @@
+// Initialize first
+@import "../init";
+
+// Import files  
+@import "home";
+
+// Dashboard v2
+.container {
+  &--dashboard-v2 {
+    max-width: -webkit-fill-available;
+    margin-left: 96px;
+    margin-bottom: 4.25rem;
+    padding: 0 2.5rem;
+
+    @include media-breakpoint-down(lg) {
+      margin-left: 0;
+    }
+
+    .header-navbar-dashboard--v2 {
+      .container--dashboard-nav {
+        padding: 0;
+      }
+    }
+
+    .container--dashboard {
+      padding: 0;
+
+      .dashboard__title {
+        display: none;
+        @include media-breakpoint-down(sm) {
+          display: block;
+        }
+      }
+    }
+
+    .dashboard__group {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+
+      &--outer {
+        .complete-card--type-1-v3 {
+          @include media-breakpoint-down(1480px) {
+            width: 100%;
+          }
+        }
+      }
+
+      &--middle {
+        flex-direction: column;
+        @include media-breakpoint-down(lg) {
+          width: 100%;
+        }
+
+        .complete-card--type-2-v2 {
+          @media only screen and (min-width: 1440px) {
+            max-width: 832px;
+          }
+
+          @include media-breakpoint-down(lg) {
+            width: 100%;
+            max-width: none;
+          }
+        }
+      }
+
+      &--inner {
+        flex-wrap: nowrap;
+        @include media-breakpoint-down(lg) {
+          flex-wrap: wrap;
+        }
+
+        .standard-card--type-7 {
+          max-width: none;
+
+          @include media-breakpoint-down(lg) {
+            .container {
+              max-width: none
+            }
+          }
+        }
+
+        .standard-card--type-5-v1 {
+          max-width: none;
+
+          @include media-breakpoint-down(lg) {
+            .container {
+              max-width: none
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.sidebar {
+  @include media-breakpoint-down(lg) {
+    display: none;
+  }
+}

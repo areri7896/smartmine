@@ -1,0 +1,53 @@
+{% extends "socialaccount/base_entrance.html" %}
+{% load i18n %}
+{% load allauth %}
+{% block head_title %}
+{% trans "Signup" %}
+{% endblock head_title %}
+{% block content %}
+{% element h1 %}
+{% trans "Sign Up" %}
+{% endelement %}
+{% element p %}
+{% blocktrans with provider_name=account.get_provider.name site_name=site.name %}You are about to use your
+{{provider_name}} account to login to
+{{site_name}}. As a final step, please complete the following form:{% endblocktrans %}
+{% endelement %}
+{% url 'socialaccount_signup' as action_url %}
+{% element form form=form method="post" action=action_url %}
+{% slot body %}
+{% csrf_token %}
+{% element fields form=form unlabeled=True %}
+{% endelement %}
+{{ redirect_field }}
+{% endslot %}
+{% slot actions %}
+{% element button type="submit" %}
+{% trans "Sign Up" %}
+{% endelement %}
+{% endslot %}
+{% endelement %}
+{% if messages %}
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="liveToast" class="toast bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto" style="background-color: #fa2256">Alert</strong>
+            <small class="text-muted">Just now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" style="background-color: #246cf9" id="toastMessage">
+            {% for message in messages %} {{ message }} {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    window.addEventListener("DOMContentLoaded", () => {
+        const toastEl = document.getElementById("liveToast");
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    });
+</script>
+{% endif %}
+
+{% endblock content %}

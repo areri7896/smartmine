@@ -1,0 +1,19 @@
+{% extends "account/email/base_message.txt" %}
+{% load i18n %}
+
+{% block content %}{% autoescape off %}{% blocktrans %}
+You are receiving this email because you or someone else tried to sign up for an account using the email address:
+
+{{ email }}
+
+However, an account with this email address already exists in our system.
+
+If you forgot your password, you can reset it using the link below:
+{{ password_reset_url }}
+
+If you did not attempt to create an account, you can safely ignore this email. Your account information remains secure.
+
+If you have any questions or need further assistance, please contact our support team.
+
+Thank you for using our service!
+{% endblocktrans %}{% endautoescape %}{% endblock content %}

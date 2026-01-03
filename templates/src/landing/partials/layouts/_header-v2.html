@@ -1,0 +1,92 @@
+{% load static %}
+
+<!-- Start::Navbar V2 -->
+<nav class="navbar navbar-expand-lg header-navbar header-navbar--v2">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'home' %}">
+      <!-- <img class="navbar-brand__icon" src="" alt="C" /> -->
+      <img
+        style="width: 200%; height: 150%"
+        class="navbar-brand__text"
+        src="{% static 'assets/media/images/icons/smrs.png' %}"
+        alt="SmartMine"
+      />
+    </a>
+    <button
+      class="navbar-toggler ml-auto"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <img src="{% static 'assets/media/images/icons/menu.svg' %}" alt="MENU" />
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="navbar-collapse__content">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <!-- <li class="nav-item">
+            <a class="nav-link {% if current == 'exchange' %}active{% endif %}" href="#">Exchange</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if current == 'pricing' %}active{% endif %}" href="#">Pricing</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if current == 'wallet' %}active{% endif %}" href="#">Wallet</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if current == 'company' %}active{% endif %}" href="#">Company</a>
+          </li> -->
+          <!-- <li class="nav-item">
+            <a class="nav-link {% if current == 'blog' %}active{% endif %}" href="#">Blog</a>
+          </li> -->
+        </ul>
+        <div class="navbar-buttons">
+          <a href="{% url 'account_login' %}" class="btn btn-secondary btn-sm"
+            >Sign in</a
+          >
+          <a href="{% url 'account_signup' %}" class="btn btn-primary btn-sm"
+            >Get Started</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+{% if messages %}
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div
+    id="liveToast"
+    class="toast bg-primary"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+  >
+    <div class="toast-header">
+      <strong class="me-auto" style="background-color: #fa2256">Alert</strong>
+      <small class="text-muted">Just now</small>
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+    <div class="toast-body" style="background-color: #246cf9" id="toastMessage">
+      {% for message in messages %} {{ message }} {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const toastEl = document.getElementById("liveToast");
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+  });
+</script>
+{% endif %}
+
+<!-- End::Navbar V2 -->

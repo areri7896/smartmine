@@ -1,0 +1,188 @@
+# models.py
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils import timezone
+
+class Referral(models.Model):
+    referrer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='referrals_made')
+    referred_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='referred_by')
+    referral_code = models.CharField(max_length=10, unique=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        unique_together = ('referrer', 'referred_user')
+
+class Investment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(default=timezone.now)
+    is_successful = models.BooleanField(default=False)
+
+class ReferralReward(models.Model):
+    referrer = models.ForeignKey(User, on_delete=models.CASCADE)
+    investment = models.ForeignKey(Investment, on_delete=models.CASCADE)
+    reward_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(default=timezone.now)
+
+# utils.py
+import random
+import string
+
+def generate_referral_code():
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Referral, Investment, ReferralReward
+from .utils import generate_referral_code
+from django.db import transaction
+
+@login_required
+def create_referral_code(request):
+    user = request.user
+    if not Referral.objects.filter(referrer=user).exists():
+        referral_code = generate_referral_code()
+        while Referral.objects.filter(referral_code=referral_code).exists():
+            referral_code = generate_referral_code()
+        Referral.objects.create(referrer=user, referral_code=referral_code)
+    return redirect('dashboard')
+
+@login_required
+def register_with_referral(request):
+    if request.method == 'POST':
+        referral_code = request.POST.get('referral_code')
+        if referral_code:
+            try:
+                referral = Referral.objects.get(referral_code=referral_code)
+                Referral.objects.create(
+                    referrer=referral.referrer,
+                    referred_user=request.user,
+                    referral_code=generate_referral_code()
+                )
+                messages.success(request, 'Successfully registered with referral code.')
+            except Referral.DoesNotExist:
+                messages.error(request, 'Invalid referral code.')
+        return redirect('dashboard')
+    return render(request, 'referral/register.html')
+
+@login_required
+def process_investment(request):
+    if request.method == 'POST':
+        amount = float(request.POST.get('amount'))
+        investment = Investment.objects.create(
+            user=request.user,
+            amount=amount,
+            is_successful=True  # Assuming investment is successful for demo
+        )
+        
+        # Check if user was referred and process reward
+        try:
+            referral = Referral.objects.get(referred_user=request.user)
+            reward_amount = investment.amount * 0.1  # 10% referral reward
+            ReferralReward.objects.create(
+                referrer=referral.referrer,
+                investment=investment,
+                reward_amount=reward_amount
+            )
+            messages.success(request, f'Investment successful! Referrer earned ${reward_amount:.2f}')
+        except Referral.DoesNotExist:
+            messages.success(request, 'Investment successful!')
+        
+        return redirect('dashboard')
+    return render(request, 'referral/invest.html')
+
+@login_required
+def dashboard(request):
+    user = request.user
+    referral_code = Referral.objects.filter(referrer=user).first()
+    referrals = Referral.objects.filter(referrer=user)
+    rewards = ReferralReward.objects.filter(referrer=user)
+    total_rewards = sum(reward.reward_amount for reward in rewards)
+    
+    context = {
+        'referral_code': referral_code.referral_code if referral_code else None,
+        'referrals': referrals,
+        'rewards': rewards,
+        'total_rewards': total_rewards
+    }
+    return render(request, 'referral/dashboard.html', context)
+
+# urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('referral/register/', views.register_with_referral, name='register_referral'),
+    path('investment/', views.process_investment, name='investment'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('create-referral/', views.create_referral_code, name='create_referral'),
+]
+
+# templates/referral/register.html
+"""
+{% extends 'base.html' %}
+{% block content %}
+<h2>Register with Referral Code</h2>
+<form method="post">
+    {% csrf_token %}
+    <input type="text" name="referral_code" placeholder="Enter referral code" required>
+    <button type="submit">Register</button>
+</form>
+{% if messages %}
+    {% for message in messages %}
+        <p class="{{ message.tags }}">{{ message }}</p>
+    {% endfor %}
+{% endif %}
+{% endblock %}
+"""
+
+# templates/referral/invest.html
+"""
+{% extends 'base.html' %}
+{% block content %}
+<h2>Make an Investment</h2>
+<form method="post">
+    {% csrf_token %}
+    <input type="number" name="amount" placeholder="Investment amount" step="0.01" required>
+    <button type="submit">Invest</button>
+</form>
+{% if messages %}
+    {% for message in messages %}
+        <p class="{{ message.tags }}">{{ message }}</p>
+    {% endfor %}
+{% endif %}
+{% endblock %}
+"""
+
+# templates/referral/dashboard.html
+"""
+{% extends 'base.html' %}
+{% block content %}
+<h2>Referral Dashboard</h2>
+{% if referral_code %}
+    <p>Your Referral Code: <strong>{{ referral_code }}</strong></p>
+{% else %}
+    <a href="{% url 'create_referral' %}">Generate Referral Code</a>
+{% endif %}
+<h3>Your Referrals</h3>
+<ul>
+{% for referral in referrals %}
+    <li>{{ referral.referred_user.username }} - {{ referral.created_at }}</li>
+{% empty %}
+    <li>No referrals yet.</li>
+{% endfor %}
+</ul>
+<h3>Your Rewards</h3>
+<p>Total Rewards: ${{ total_rewards|floatformat:2 }}</p>
+<ul>
+{% for reward in rewards %}
+    <li>Reward: ${{ reward.reward_amount|floatformat:2 }} from {{ reward.investment.user.username }}'s investment of ${{ reward.investment.amount|floatformat:2 }}</li>
+{% empty %}
+    <li>No rewards yet.</li>
+{% endfor %}
+</ul>
+<a href="{% url 'investment' %}">Make an Investment</a>
+{% endblock %}
+"""

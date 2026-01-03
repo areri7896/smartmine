@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>SmartMine</title>
+  <meta content="SmartMine" property="og:title">
+  <meta content="SmartMine" property="twitter:title">
+  <meta name="description" content="home Page" />
+
+  <link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+
+  <!-- Start::Global Styles (used by all pages) -->
+  <link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Global Styles -->
+  <!-- Start::Plugins (used by this page) -->
+  <link href="{% static 'assets/plugins/slick/slick.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Plugins -->
+  <!-- Start::Page Styles (used by this page) -->
+  <link href="{% static 'assets/css/pages/landing-page-v2.css' %}" rel="stylesheet" type="text/css" />
+  <!-- End::Page Styles -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  </head>
+
+
+<body>
+  {% block header %} {% include "src/landing/partials/layouts/_header-v2.html" %} {% endblock %}
+  {% block content %}
+
+  {% block cards %} {% include "src/landing/partials/components/_cards.html" %} {% endblock %}
+  {% if messages %}
+  {% for message in messages %}
+      <div class="toast align-items-center text-bg-primary border-0 alert alert-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+           {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+
+  {% endfor %}
+  {% endif %}
+  {% endblock %}
+  {% block cta %} {% include "src/landing/partials/components/_cta-section-v2.html" %} {% endblock %}
+  {% block footer %} {% include "src/landing/partials/layouts/_footer.html" %} {% endblock %}
+  <!-- Start::Global Bundle Scripts (used by all pages) -->
+  <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+  <!-- End::Global Bundle Scripts -->
+  <!-- Start::Plugins (used by this page) -->
+  <script src="{% static 'assets/plugins/slick/slick.min.js' %}"></script>
+  <!-- End::Plugins -->
+  <!-- Start::Page Scripts (used by this page) -->
+  <script src="{% static 'assets/js/custom/custom-select.js' %}"></script>
+  <script src="{% static 'assets/js/pages/landing-page-v2.js' %}"></script>
+  <!-- End::Page Scripts -->
+
+</body>
+</html>

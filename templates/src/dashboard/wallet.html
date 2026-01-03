@@ -1,0 +1,545 @@
+{% extends 'src/dashboard/basic.html' %}
+{% load static %}
+<title>{% block title %}Wallet {% endblock %}</title>
+{% block css_page %}
+<link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+
+<!-- Start::Global Styles (used by all pages) -->
+<link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
+<!-- End::Global Styles -->
+<!-- Start::Plugins (used by this page) -->
+<link href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}" rel="stylesheet" type="text/css" />
+<!-- End::Plugins -->
+<!-- Start::Page Styles (used by this page) -->
+<link href="{% static 'assets/css/pages/wallet-v1.css' %}" rel="stylesheet" type="text/css" />
+<!-- End::Page Styles -->
+<link href="{% static 'assets/css/pages/sign-in.css' %}" rel="stylesheet" type="text/css" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+{% endblock %}
+</head>
+{% block content %}
+
+<!-- base.html or any template -->
+
+<div class="wallet wallet--v1">
+  <div class="container container--dashboard">
+    <div class="wallet-group">
+      <div class="wallet-group--left">
+        <!-- Start::Standard Card -->
+        {% for asset in extracted_data %}
+        <div class="standard-card standard-card--type-6-v1">
+          <div class="container">
+            <div class="standard-card__content">
+              <div class="standard-card__content-head">
+                <div class="standard-card__content-currency">
+                  <img src="{% static 'assets/media/images/icons/'|add:asset.icon %}" alt=""
+                    class="standard-card__content-currency-icon">
+                  <p class="standard-card__content-currency-name">{{ asset.asset }}</p>
+                </div>
+                <p class="standard-card__content-percentage text-bullish">0.25%</p>
+              </div>
+              <p class="standard-card__content-price-1">{{ asset.free }}</p>
+              <p class="standard-card__content-price-2">{{ asset.locked }}USD</p>
+              <div class="standard-card__content-chart-wrapper">
+                <!-- <div id="standard-card__content-chart-7" class="standard-card__content-chart-render"></div> -->
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="wallet-group--right">
+        <!-- Start::Advance Card -->
+        <div class="advance-card advance-card--type-3-v3">
+          <div class="advance-card-left">
+            <div class="advance-card__title">
+              <img src="{% static 'assets/media/images/mpesa.png' %}" alt="" class="advance-card__title-image">
+              <h6 class="advance-card__title-text">MPESA</h6>
+            </div>
+            <div class="advance-card__balance-wrapper">
+              <div class="advance-card__balance">
+                <p class="advance-card__balance-title">Total Balance</p>
+                <p class="advance-card__balance-crypto-value">{{ bal_usd.converted_amount }} usd</p>
+                <p class="advance-card__balance-currency-value">
+
+                  <span class="advance-card__balance-currency">{{ bal }} KSH</span>
+                </p>
+              </div>
+
+              <div class="advance-card__balance-chart">
+                <div class="advance-card__balance-chart-wrapper">
+                  <div id="advance-card__card-line-7" class="advance-card__balance-chart-render"></div>
+                </div>
+                <div class="advance-card__balance-chart-percent">
+                  <img src="{% static 'assets/media/images/icons/arrow-bearish.svg' %}" alt=""
+                    class="advance-card__balance-chart-percent-image">
+                  <p class="advance-card__balance-chart-percent-value text-bearish">2.36%</p>
+                </div>
+              </div>
+            </div>
+            <div class="advance-card__buttons">
+              <button class="btn btn-primary advance-card__button btn-sm btn-pill" data-bs-toggle="offcanvas"
+                data-bs-target="#withdrawCanvas" aria-controls="withdrawCanvas">Withdraw</button>
+              <button class="btn btn-secondary advance-card__button btn-sm" type="button" data-bs-toggle="modal"
+                data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Deposit</button>
+            </div>
+          </div>
+
+          <div class="advance-card-separator"></div>
+
+          <div class="advance-card-right">
+            <div class="advance-card__card">
+              <div class="advance-card__card-content">
+                <p class="advance-card__card-desc-title">Exchange Balance</p>
+                {% for asset in extracted_data %}
+                <div class="advance-card__card-desc">
+                  <p class="advance-card__card-desc-title">{{ asset.asset }}</p>
+                  <div class="advance-card__card-desc-value d-flex">
+                    <p class="advance-card__card-desc-value-crypto">{{ asset.free.btc }}</p>
+                    <p class="advance-card__card-desc-value-currency">{{ asset.locked }}</p>
+                  </div>
+                </div>
+                {% endfor %}
+                <div class="advance-card__card-data">
+                  <div class="advance-card__card-chart-wrapper">
+                    <div id="advance-card__card-line-3" class="advance-card__card-chart-render"></div>
+                  </div>
+                  <p class="advance-card__card-percent">+0.55%</p>
+                </div>
+              </div>
+              <div class="advance-card__card-progress">
+                <div class="advance-card__card-progress-bar progress-bar--purple"></div>
+              </div>
+            </div>
+            <div class="advance-card__card">
+              <div class="advance-card__card-content">
+                <p class="advance-card__card-desc-title">Exchange Balance</p>
+                {% for asset in extracted_data %}
+                <div class="advance-card__card-desc">
+                  <p class="advance-card__card-desc-title">{{ asset.asset }}</p>
+                  <div class="advance-card__card-desc-value">
+                    <p class="advance-card__card-desc-value-crypto">{{ asset.free.btc }}</p>
+                    <p class="advance-card__card-desc-value-currency">{{ asset.locked }}</p>
+                  </div>
+                </div>
+                {% endfor %}
+                <div class="advance-card__card-data">
+                  <div class="advance-card__card-chart-wrapper">
+                    <div id="advance-card__card-line-4" class="advance-card__card-chart-render"></div>
+                  </div>
+                  <p class="advance-card__card-percent">+0.75%</p>
+                </div>
+              </div>
+              <div class="advance-card__card-progress">
+                <div class="advance-card__card-progress-bar progress-bar--green"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End::Advance Card -->
+
+        <!--modal start-->
+        <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Open modal for @getbootstrap</button> -->
+
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content complete-card complete-card--type-3">
+              <div class="modal-header">
+                <h3 class="modal-title fs-5" style="text-align: center;">DEPOSIT BY MPESA</h3>
+                <button type="button" class="btn-close" style="background-color: white;" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
+              </div>
+
+              <div class="modal-body">
+
+                <div class="bg-success text-white text-center py-3 fs-3 fw-bold">
+                  LIPA NA <span class="text-white">M<span class="text-danger">P</span>esa</span>
+                </div>
+
+                <div class="text-center mt-3 fw-bold fs-5">
+                  BUY GOODS TILL NUMBER
+
+                  <div class="d-flex justify-content-center flex-wrap my-3">
+                    <div class="border border-dark bg-light text-dark fs-4 fw-bold px-3 py-2 mx-1 rounded">3</div>
+                    <div class="border border-dark bg-light text-dark fs-4 fw-bold px-3 py-2 mx-1 rounded">5</div>
+                    <div class="border border-dark bg-light text-dark fs-4 fw-bold px-3 py-2 mx-1 rounded">4</div>
+                    <div class="border border-dark bg-light text-dark fs-4 fw-bold px-3 py-2 mx-1 rounded">8</div>
+                    <div class="border border-dark bg-light text-dark fs-4 fw-bold px-3 py-2 mx-1 rounded">1</div>
+                    <div class="border border-dark bg-light text-dark fs-4 fw-bold px-3 py-2 mx-1 rounded">9</div>
+                    <div class="border border-dark bg-light text-dark fs-4 fw-bold px-3 py-2 mx-1 rounded">2</div>
+                  </div>
+
+                  <div class="fs-5 fw-bold text-success mt-2">Peter Mose</div>
+                </div>
+                <hr class="advance-card-separator">
+                <div class="sign-in__break-or">
+                  <p class="fb-lg text-center">Or</p>
+                </div>
+                <hr class="advance-card-separator">
+                <div class="text-center">
+                  <div class="fs-5 fw-bold text-white mt-2">send money</div>
+                  <div class="fs-5 fw-bold text-success mt-2">0795559997</div>
+                  <div class="fs-5 fw-bold text-success mt-2">Eugine Mogaka</div>
+                </div>
+                <hr class="advance-card-separator">
+
+                <div class="text-center mt-4 fs-6">
+                  <form id="mpesa-form" method="post" action="{% url 'verify' %}">
+                    {% csrf_token %}
+                    <p class="text-danger">For confirmation purposes, Please !!! Share the following details</p>
+                    <!-- 
+                    <div class="mb-3">
+                      <label for="phone-number" class="col-form-label fd-md my-1" style="color: white;">Phone
+                        Number</label>
+                      <input type="text" class="form-control" id="phone-number" name="phone">
+                    </div> -->
+                    <div class="mb-3">
+                      <label for="phone-number" class="col-form-label fd-md my-1" style="color: white;">MPESA
+                        TRANSACTION CODE</label>
+                      <input type="text" class="form-control" id="phone-number" name="transaction">
+                    </div>
+                    <div class="mb-3">
+                      <label for="amount" class="col-form-label fd-md my-1" style="color: white;">Amount:</label>
+                      <input type="number" class="form-control" id="amount" name="amnt">
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <input type="submit" class="btn btn-primary" value="Share">
+                    </div>
+                  </form>
+                </div>
+
+
+
+
+                <!-- <form id="mpesa-form" method="post" action="">
+
+                  <div class="mb-3">
+                    <label for="phone-number" class="col-form-label fd-md my-1" style="color: white;">Phone
+                      Number</label>
+                    <input type="text" class="form-control" id="phone-number" name="phone">
+                  </div>
+                  <div class="mb-3">
+                    <label for="amount" class="col-form-label fd-md my-1" style="color: white;">Amount:</label>
+                    <input type="number" class="form-control" id="amount" name="amount">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <input type="submit" class="btn btn-primary" value="Send Payment">
+                  </div>
+                </form> -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--modal end-->
+
+        <!--modal start-->
+        <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@getbootstrap">Open modal for @getbootstrap</button> -->
+        <!-- Withdrawal Modal -->
+        <!-- Button to trigger offcanvas -->
+        <!-- <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#withdrawCanvas"
+        aria-controls="withdrawCanvas">
+        Initiate Withdrawal
+      </button>
+       -->
+        <!-- Offcanvas Component -->
+        <div class="offcanvas offcanvas-end" style="background: #1e1f25;" data-bs-backdrop="static" tabindex="-1"
+          id="withdrawCanvas" aria-labelledby="withdrawCanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="withdrawCanvasLabel">Initiate your Withdrawal Request</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+
+            <form id="mpesa-w-form" method="post" action="{% url 'withdrawal' %}">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="wphone" class="col-form-label fd-md my-1" style="color: white;">Phone Number</label>
+                <input type="text" class="form-control" id="wphone" name="wphone">
+              </div>
+              <div class="mb-3">
+                <label for="wamount" class="col-form-label fd-md my-1" style="color: white;">Amount:</label>
+                <input type="number" class="form-control" id="wamount" name="wamount">
+              </div>
+              <div class="d-flex justify-content-end mt-3">
+                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="offcanvas">Close</button>
+                <input type="submit" class="btn btn-primary" value="Withdraw">
+              </div>
+            </form>
+            <p class="text-danger">
+              Please!!! Upon request of withdrawal, Be patient while your request is being processed. Your request may
+              take upto 10 minutes to complete
+            </p>
+          </div>
+        </div>
+
+        <!--offcanvas end-->
+
+        <script>
+          // Attach click event to Withdraw button to open the withdrawal modal
+          document.addEventListener('DOMContentLoaded', function () {
+            const withdrawBtn = document.querySelector('.advance-card__button.btn-primary');
+            if (withdrawBtn) {
+              withdrawBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const withdrawModal = new bootstrap.Modal(document.getElementById('withdrawModal'));
+                withdrawModal.show();
+              });
+            }
+          });
+        </script>
+
+        <!-- Start::Table Section -->
+        <div class=" table-wrapper table--type-1">
+          <div class="table-container">
+            <table class="table table-content">
+              <thead>
+                <tr class="text-align">Deposit transactions</tr>
+                <tr>
+                  <!-- <th class="fb-regular table__head" colspan="2">Assets</th>
+                    <th class="fb-regular table__head">On Orders</th> -->
+                  <th class="fb-regular table__head">Amount</th>
+                  <th class="fb-regular table__head">Transaction code</th>
+                  <th class="fb-regular table__head">status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for depo in depos %}
+                <!-- <tr>
+                    <td class="table__assets">
+                      <div class="table__assets-crypto">
+                        <img src="{{ item.logo }}" alt="" class="table__assets-crypto-icon">
+                        <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">{{ item.symbol }}</p>
+                      </div>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__assets-name">{{ item.name }}</p>
+                    </td>
+                    <td>
+                      <p class="fb-regular table__order">USD {{ item.on_orders }}</p>
+                    </td> -->
+                <td>
+                  <p class="fb-regular table__available">KSH {{ depo.amount }}</p>
+                </td>
+                <td>
+                  <p class="fb-regular table__total">{{depo.verification_code}}</p>
+                </td>
+                <td>
+                  {% if depo.is_completed == 0 %}
+                  <p class="fb-regular table__market text-bullish">Pending</p>
+                  {% elif depo.is_completed == 1 %}
+                  <p class="fb-regular table__market text-success">completed</p>
+                  {% elif depo.is_completed == 3 %}
+                  <p class="fb-regular table__market text-danger">Failed</p>
+                  {% elif depo.is_completed == 4 %}
+                  <p class="fb-regular table__market text-warning">Cancelled</p>
+                  {% else %}
+                  <p class="fb-regular table__market text-warning">Unknown</p>
+                  {% endif %}
+
+                </td>
+                </tr>
+
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+
+        <!-- Start::Table Section -->
+        <div class=" table-wrapper table--type-1">
+          <div class="table-container">
+            <table class="table table-content">
+              <thead>
+                <tr class="">Withdrawal Requests</tr>
+                <tr>
+                  <!-- <th class="fb-regular table__head" colspan="2">Assets</th>
+                  <th class="fb-regular table__head">On Orders</th> -->
+                  <th class="fb-regular table__head">Amount</th>
+                  <th class="fb-regular table__head">phone number</th>
+                  <th class="fb-regular table__head">status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for withdrawal in withdrawals %}
+                <!-- <tr>
+                  <td class="table__assets">
+                    <div class="table__assets-crypto">
+                      <img src="{{ item.logo }}" alt="" class="table__assets-crypto-icon">
+                      <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">{{ item.symbol }}</p>
+                    </div>
+                  </td>
+                  <td>
+                    <p class="fb-regular table__assets-name">{{ item.name }}</p>
+                  </td>
+                  <td>
+                    <p class="fb-regular table__order">USD {{ item.on_orders }}</p>
+                  </td> -->
+                <td>
+                  <p class="fb-regular table__available">KSH {{ withdrawal.amount }}</p>
+                </td>
+                <td>
+                  <p class="fb-regular table__total">{{withdrawal.phone_number}}</p>
+                </td>
+                <td>
+                  {% if withdrawal.is_completed == 0 %}
+                  <p class="fb-regular table__market text-bullish">Pending</p>
+                  {% elif withdrawal.is_completed == 1 %}
+                  <p class="fb-regular table__market text-success">completed</p>
+                  {% elif withdrawal.is_completed == 3 %}
+                  <p class="fb-regular table__market text-danger">Failed</p>
+                  {% elif withdrawal.is_completed == 4 %}
+                  <p class="fb-regular table__market text-warning">Cancelled</p>
+                  {% else %}
+                  <p class="fb-regular table__market text-warning">Unknown</p>
+                  {% endif %}
+
+                </td>
+                </tr>
+
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Start::Table Section -->
+        <div class=" table-wrapper table--type-1">
+          <div class="table-container">
+            <table class="table table-content">
+              <thead>
+                <tr>
+                  <th class="fb-regular table__head" colspan="2">Assets</th>
+                  <th class="fb-regular table__head">On Orders</th>
+                  <th class="fb-regular table__head">Available Balance</th>
+                  <th class="fb-regular table__head">Total Balance</th>
+                  <th class="fb-regular table__head">24h Market</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in crypto_data %}
+                <tr>
+                  <td class="table__assets">
+                    <div class="table__assets-crypto">
+                      <img src="{{ item.logo }}" alt="" class="table__assets-crypto-icon">
+                      <p class="fb-regular fb-regular--bold table__assets-crypto-abbr">{{ item.symbol }}</p>
+                    </div>
+                  </td>
+                  <td>
+                    <p class="fb-regular table__assets-name">{{ item.name }}</p>
+                  </td>
+                  <td>
+                    <p class="fb-regular table__order">USD {{ item.on_orders }}</p>
+                  </td>
+                  <td>
+                    <p class="fb-regular table__available">USD {{ item.available_balance }}</p>
+                  </td>
+                  <td>
+                    <p class="fb-regular table__total">USD {{ item.total_balance }}</p>
+                  </td>
+                  <td>
+                    <p class="fb-regular table__market text-bullish">{{ item.market_change }}%</p>
+                  </td>
+                </tr>
+
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- End::Table Section -->
+      </div>
+    </div>
+  </div>
+</div>
+{% if messages %}
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+  <div id="liveToast" class="toast bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header text-dark">
+      <strong class="me-auto">Alert</strong>
+      <small class="text-muted text-dark">Just now</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body bg-primary" id="toastMessage">
+      {% for message in messages %} {{ message }} {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const toastEl = document.getElementById("liveToast");
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+  });
+</script>
+{% endif %}
+
+
+<script>
+
+  document.getElementById("mpesa-form" | "mpesa-w-form").addEventListener("submit", async function (event) {
+    event.preventDefault(); // Prevent default form submission
+
+    let phoneNumber = document.getElementById("phone-number").value;
+    let amount = document.getElementById("amount").value;
+    let csrftoken = document.querySelector("[name=csrfmiddlewaretoken]").value; // Get CSRF token
+
+    let formData = {
+      phone: phoneNumber,
+      amount: amount
+    };
+
+    try {
+      let response = await fetch("{% url 'wallet' %}" | "{% url 'wallet'%}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrftoken,
+        },
+        body: JSON.stringify(formData)  // Send JSON
+      });
+
+      let data = await response.json();
+
+      if (response.ok) {
+        alert(data.message);  // Show success message
+      } else {
+        alert("Error: " + data.error);  // Show error message
+      }
+
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Something went wrong!");
+    }
+  });
+
+</script>
+
+{% block js %}
+<!-- Start::Global Bundle Scripts (used by all pages) -->
+<!-- Bootstrap JS (place before closing </body>) -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> -->
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+<script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
+<!-- End::Global Bundle Scripts -->
+<!-- Start::Plugins (used by this page) -->
+<script src="{% static 'assets/plugins/apexcharts/apexcharts.min.js' %}"></script>
+<script src="{% static 'assets/plugins/slick/slick.min.js' %}"></script>
+<!-- End::Plugins -->
+<!-- Start::Page Scripts (used by this page) -->
+<script src="{% static 'assets/js/custom/chart.js' %}"></script>
+<script src="{% static 'assets/js/pages/wallet-page-v1.js' %}"></script>
+<script src="{% static 'assets/js/custom/navbar.js' %}"></script>
+<!-- End::Page Scripts -->
+{% endblock %}
+{% endblock %}

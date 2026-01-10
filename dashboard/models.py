@@ -13,13 +13,6 @@ from decimal import Decimal
 User = get_user_model()
 
 
-# class WithdrawStatusTextChoices(models.TextChoices):
-#     PENDING = "Processing"
-#     COMPLETED = "Completed"
-#     CANCELLED = "Cancelled"
-#     FAILED = "Failed" 
-
-
 class EmailSender(models.Model):
     receivers = models.ManyToManyField(User)
     subject = models.CharField(max_length=255)
@@ -456,18 +449,6 @@ class MpesaCallback(models.Model):
     def __str__(self):
         return f"{self.merchant_request_id} - {self.result_desc}"
 
-# class InvestmentPlan(models.Model):
-#     user = 
-#     name = models.Charfield(max_length = 50)
-#     daily_interest_rate = models.DecimalField(max_digits=5, decimal_places=2)
-#     available_balance = models.DecimalField(max_digits=5, decimal_places=2)
-#     purchase_limit = models.CharField(max_length = 100, default="no restrictions")
-#     purchase_quantity = models.IntegerField(default=1)
-#     rate = 
-#     cycle_days = 
-#     price = 
-
-
 class InvestmentPlan(models.Model):
     PLAN_CHOICES = [
         ("Alpha Return CFD", "Alpha Return CFD"),
@@ -494,67 +475,6 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
-
-# class Investment(models.Model):
-#     STATUS_CHOICES = [
-#         ("active", "Active"),
-#         ("completed", "Completed"),
-#     ]
-
-#     user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True, blank=True)
-#     plan = models.ForeignKey('InvestmentPlan', on_delete=models.CASCADE, null=True, blank=True)
-#     start_date = models.DateTimeField(auto_now_add=True, null=True)
-#     db_end_date = models.DateTimeField(null=True, blank=True)  # Renamed to avoid conflict
-#     created_at = models.DateTimeField(auto_now_add=True, null=True)
-#     duration_minutes = models.IntegerField(default=60)  # Consider using if needed
-#     is_completed = models.BooleanField(default=False)
-#     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
-
-#     def __str__(self):
-#         plan_name = self.plan.name if self.plan else 'No Plan'
-#         return f"Investment {self.start_date.strftime('%Y-%m-%d %H:%M')} - {plan_name}"
-
-#     @property
-#     def end_date(self):
-#         """Calculate the end date based on the plan's cycle days."""
-#         if self.plan and self.start_date:
-#             return self.start_date + timedelta(days=self.plan.cycle_days)
-        
-
-#     @property
-#     def time_remaining(self):
-#         """Calculate the time remaining until the investment ends."""
-#         if self.end_date:
-#             remaining = self.end_date - timezone.now()
-#             return max(timedelta(0), remaining)
-#         return timedelta(0)
-
-#     def process_completion(self):
-#         """Process the investment completion if the end date has been reached."""
-#         if self.is_completed or not self.end_date or not self.user or not self.plan:
-#             return  # Skip if already completed or required fields are missing
-
-#         if timezone.now() >= self.end_date:
-#             self.is_completed = True
-#             self.status = "completed"
-
-#             # Calculate profit using Decimal for precision
-#             plan_price = Decimal(str(self.plan.price))
-#             interest = Decimal(str(self.plan.daily_interest_rate))
-#             profit = plan_price * (interest / Decimal('100'))
-
-#             # Add to user's balance
-#             try:
-#                 wallet.user = self.user.profile
-#                 wallet.balance += plan_price + profit
-#                 wallet.save()
-#             except AttributeError:
-#                 # Handle missing profile gracefully
-#                 pass
-
-#             self.db_end_date = self.end_date  # Store the calculated end date
-#             self.save()
-
 
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -595,7 +515,8 @@ class DepositTransaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=15, decimal_places=2)
     phone_number = models.CharField(max_length=15)
-    transaction_id = models.CharField(max_length=50, unique=True)
+    transaction_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    checkout_request_id = models.CharField(max_length=100, null=True, blank=True, db_index=True)
     status = models.CharField(
         max_length=20,
         choices=[('Pending', 'Pending'), ('Completed', 'Completed'), ('Failed', 'Failed')],

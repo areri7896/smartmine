@@ -143,21 +143,32 @@
               </div>
             </div>
             <div class="standard-card__content" id="transactionContainer">
-              <div class="standard-card__content__list" id="transactionList">
+              {% for txn in binance_transactions %}
+              <div class="standard-card__content__list">
                 <div class="standard-card__content__list-currency">
-                  <img src="{% static 'assets/media/images/icons/Bitcoin.svg' %}" alt="Bitcoin Icon"
-                    class="standard-card__content__list-currency-icon">
-                  <p class="standard-card__content__list-currency-name">BTC</p>
+                  <!-- <img src="{% static 'assets/media/images/icons/' %}{{ txn.asset }}.svg" alt="{{ txn.asset }}" class="standard-card__content__list-currency-icon"> -->
+                  <!-- Fallback to generic icon or try to match asset name if you have icons -->
+                  <p class="fb-bold standard-card__content__list-currency-name">{{ txn.asset }}</p>
                 </div>
                 <div class="standard-card__content__list-status">
-                  <p class="standard-card__content__list-status-name">Receive</p>
-                  <img src="{% static 'assets/media/images/icons/transaction-arrow-green.svg' %}" alt="Green Arrow"
+                  <p class="standard-card__content__list-status-name">{{ txn.type }}</p>
+                  {% if txn.type == 'Deposit' %}
+                  <img src="{% static 'assets/media/images/icons/green-arrow-up.svg' %}" alt="Deposit"
                     class="standard-card__content__list-status-icon">
+                  {% else %}
+                  <img src="{% static 'assets/media/images/icons/transaction-arrow-green.svg' %}" alt="Withdraw"
+                    class="standard-card__content__list-status-icon" style="transform: rotate(180deg);">
+                  {% endif %}
                 </div>
                 <div class="standard-card__content__list-price">
-                  <p class="standard-card__content__list-price-value">$0.143,21</p>
+                  <p class="standard-card__content__list-price-value">{{ txn.amount }}</p>
                 </div>
               </div>
+              {% empty %}
+              <div class="standard-card__content__list">
+                <p class="text-center w-100">No recent transactions found.</p>
+              </div>
+              {% endfor %}
             </div>
             <div class="standard-card__vignette"></div>
           </div>

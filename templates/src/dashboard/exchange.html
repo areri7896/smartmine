@@ -3,26 +3,10 @@
 <title>{% block title %}Exchange{% endblock %}</title>
 
 {% block css_links %}
-<link
-  href="{% static 'assets/media/images/icons/logo.svg' %}"
-  rel="shortcut icon"
-  type="image/x-icon"
-/>
-<link
-  href="{% static 'assets/css/styles.bundle.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
-<link
-  href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
-<link
-  href="{% static 'assets/css/pages/exchange-v1.css' %}"
-  rel="stylesheet"
-  type="text/css"
-/>
+<link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+<link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
+<link href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}" rel="stylesheet" type="text/css" />
+<link href="{% static 'assets/css/pages/exchange-v1.css' %}" rel="stylesheet" type="text/css" />
 {% endblock %} {% block content %}
 <div class="container container--dashboard container--dashboard--exchange-v1">
   <div class="dashboard__group dashboard__group--exchange-v1">
@@ -30,22 +14,11 @@
       <!-- Messages -->
       {% if messages %}
       <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-        <div
-          id="liveToast"
-          class="toast bg-primary"
-          role="alert"
-          aria-live="assertive"
-          aria-atomic="true"
-        >
+        <div id="liveToast" class="toast bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
           <div class="toast-header">
             <strong class="me-auto">Alert</strong>
             <small class="text-muted">Just now</small>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="toast"
-              aria-label="Close"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
           </div>
           <div class="toast-body bg-primary" id="toastMessage">
             {% for message in messages %} {{ message }} {% endfor %}
@@ -68,12 +41,9 @@
           <div class="standard-card__items">
             <div class="standard-card__item standard-card__item--1">
               <div class="standard-card__item-left">
-                <img
-                  src="{% static 'assets/media/images/icons/logo-'|add:ticker.baseAsset|lower|add:'.svg' %}"
-                  alt="{{ ticker.baseAsset }}"
-                  class="standard-card__item-image"
-                  onerror="this.src='{% static 'assets/media/images/icons/logo-btc.svg' %}'"
-                />
+                <img src="{% static 'assets/media/images/icons/logo-'|add:ticker.baseAsset|lower|add:'.svg' %}"
+                  alt="{{ ticker.baseAsset }}" class="standard-card__item-image"
+                  onerror="this.src='{% static 'assets/media/images/icons/logo-btc.svg' %}'" />
                 <div class="standard-card__item-desc">
                   <p class="fb-regular standard-card__item-title">
                     {{ ticker.baseAsset }}
@@ -82,11 +52,8 @@
                     {{ ticker.symbol }}
                   </p>
                 </div>
-                <img
-                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
-                  alt=""
-                  class="standard-card__item-arrow"
-                />
+                <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt=""
+                  class="standard-card__item-arrow" />
               </div>
               <div class="standard-card__item-collapse">
                 <div class="item-collapse__group-1">
@@ -95,35 +62,30 @@
                     <div class="item-collapse__title-influsion">
                       <img
                         src="{% static 'assets/media/images/icons/arrow-'|add:'bullish' if ticker.priceChangePercent|floatformat:2 > 0 else 'bearish'|add:'.svg' %}"
-                        alt=""
-                        class="item-collapse__title-influsion-icon"
-                      />
+                        alt="" class="item-collapse__title-influsion-icon" />
                       <p
-                        class="fb-regular fb-regular--bold item-collapse__title-influsion-value {% if ticker.priceChangePercent|floatformat:2 > 0 %}text-bullish{% else %}text-bearish{% endif %}"
-                      >
+                        class="fb-regular fb-regular--bold item-collapse__title-influsion-value {% if ticker.priceChangePercent|floatformat:2 > 0 %}text-bullish{% else %}text-bearish{% endif %}">
                         {{ ticker.priceChangePercent|floatformat:2 }}%
                       </p>
                     </div>
                   </div>
                   <div class="item-collapse__chart-wrapper">
-                    <div
-                      id="item-collapse__chart-line-{{ forloop.counter }}"
-                      class="item-collapse__chart-render"
-                    ></div>
+                    <!-- Data for JS -->
+                    <div class="ticker-chart-data" data-id="{{ forloop.counter }}"
+                      data-series="{{ chart_data.series|safe }}" data-labels="{{ chart_data.labels|safe }}"
+                      style="display:none;"></div>
+                    <div id="item-collapse__chart-line-{{ forloop.counter }}" class="item-collapse__chart-render"></div>
                   </div>
                 </div>
                 <div class="item-collapse__group-2">
                   <p class="fb-sm item-collapse__price">
                     Last Price:
-                    <span class="item-collapse__price-value text-bullish"
-                      >USD {{ ticker.lastPrice|floatformat:2 }}</span
-                    >
+                    <span class="item-collapse__price-value text-bullish">USD {{ ticker.lastPrice|floatformat:2
+                      }}</span>
                   </p>
                   <p class="fb-sm item-collapse__price">
                     24h Low:
-                    <span class="item-collapse__price-value text-bearish"
-                      >{{ ticker.lowPrice|floatformat:2 }}</span
-                    >
+                    <span class="item-collapse__price-value text-bearish">{{ ticker.lowPrice|floatformat:2 }}</span>
                   </p>
                 </div>
               </div>
@@ -134,21 +96,15 @@
                 <div class="standard-card__item-influsion">
                   <img
                     src="{% static 'assets/media/images/icons/arrow-'|add:'bullish' if ticker.priceChangePercent|floatformat:2 > 0 else 'bearish'|add:'.svg' %}"
-                    alt=""
-                    class="standard-card__item-influsion-icon"
-                  />
+                    alt="" class="standard-card__item-influsion-icon" />
                   <p
-                    class="fd-sm fd-sm--bold standard-card__item-influsion-value {% if ticker.priceChangePercent|floatformat:2 > 0 %}text-bullish{% else %}text-bearish{% endif %}"
-                  >
+                    class="fd-sm fd-sm--bold standard-card__item-influsion-value {% if ticker.priceChangePercent|floatformat:2 > 0 %}text-bullish{% else %}text-bearish{% endif %}">
                     {{ ticker.priceChangePercent|floatformat:2 }}%
                   </p>
                 </div>
               </div>
               <div class="standard-card__item-chart-wrapper">
-                <div
-                  id="standard-card__item-line-{{ forloop.counter }}"
-                  class="standard-card__item-chart-render"
-                ></div>
+                <div id="standard-card__item-line-{{ forloop.counter }}" class="standard-card__item-chart-render"></div>
               </div>
             </div>
             <div class="standard-card__item standard-card__item--3">
@@ -172,9 +128,7 @@
         <ul class="pagination justify-content-center">
           {% if tickers.has_previous %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ tickers.previous_page_number }}"
-              >Previous</a
-            >
+            <a class="page-link" href="?page={{ tickers.previous_page_number }}">Previous</a>
           </li>
           {% endif %} {% for num in tickers.paginator.page_range %}
           <li class="page-item {% if tickers.number == num %}active{% endif %}">
@@ -182,9 +136,7 @@
           </li>
           {% endfor %} {% if tickers.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ tickers.next_page_number }}"
-              >Next</a
-            >
+            <a class="page-link" href="?page={{ tickers.next_page_number }}">Next</a>
           </li>
           {% endif %}
         </ul>
@@ -199,18 +151,10 @@
           <div class="complete-card__head-title-wrapper">
             <h5 class="complete-card__head-title">BTCUSDT</h5>
             <div class="dropdown complete-card__dropdown">
-              <button
-                class="btn btn-secondary dropdown-toggle"
-                type="button"
-                id="dropdownMenuButton3"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton3"
+                data-bs-toggle="dropdown" aria-expanded="false">
                 1 min
-                <img
-                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
-                  alt=""
-                />
+                <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="" />
               </button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
                 <li><a class="dropdown-item" href="#">1 min</a></li>
@@ -225,30 +169,16 @@
           </div>
           <ul class="complete-card__head-tabs" id="pills-tab" role="tablist">
             <li class="complete-card__head-tab">
-              <button
-                class="fb-regular fb-regular--bold complete-card__head-tab-text active"
-                id="chart-price-2-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#chart-price-2"
-                type="button"
-                role="tab"
-                aria-controls="chart-price-2"
-                aria-selected="true"
-              >
+              <button class="fb-regular fb-regular--bold complete-card__head-tab-text active" id="chart-price-2-tab"
+                data-bs-toggle="pill" data-bs-target="#chart-price-2" type="button" role="tab"
+                aria-controls="chart-price-2" aria-selected="true">
                 Price
               </button>
             </li>
             <li class="complete-card__head-tab">
-              <button
-                class="fb-regular fb-regular--bold complete-card__head-tab-text"
-                id="chart-depth-2-tab"
-                data-bs-toggle="pill"
-                data-bs-target="#chart-depth-2"
-                type="button"
-                role="tab"
-                aria-controls="chart-depth-2"
-                aria-selected="false"
-              >
+              <button class="fb-regular fb-regular--bold complete-card__head-tab-text" id="chart-depth-2-tab"
+                data-bs-toggle="pill" data-bs-target="#chart-depth-2" type="button" role="tab"
+                aria-controls="chart-depth-2" aria-selected="false">
                 Depth
               </button>
             </li>
@@ -256,178 +186,88 @@
           <div class="complete-card__head-values">
             <p class="fb-sm complete-card__head-menu">
               Open:
-              <span class="complete-card__head-value"
-                >{{ tickers.0.openPrice|floatformat:2|default:"N/A" }}</span
-              >
+              <span class="complete-card__head-value">{{ tickers.0.openPrice|floatformat:2|default:"N/A" }}</span>
             </p>
             <p class="fb-sm complete-card__head-menu">
               High:
-              <span class="complete-card__head-value"
-                >{{ tickers.0.highPrice|floatformat:2|default:"N/A" }}</span
-              >
+              <span class="complete-card__head-value">{{ tickers.0.highPrice|floatformat:2|default:"N/A" }}</span>
             </p>
             <p class="fb-sm complete-card__head-menu">
               Low:
-              <span class="complete-card__head-value"
-                >{{ tickers.0.lowPrice|floatformat:2|default:"N/A" }}</span
-              >
+              <span class="complete-card__head-value">{{ tickers.0.lowPrice|floatformat:2|default:"N/A" }}</span>
             </p>
             <p class="fb-sm complete-card__head-menu">
               Close:
-              <span class="complete-card__head-value"
-                >{{ tickers.0.closePrice|floatformat:2|default:"N/A" }}</span
-              >
+              <span class="complete-card__head-value">{{ tickers.0.closePrice|floatformat:2|default:"N/A" }}</span>
             </p>
           </div>
           <div class="complete-card__head-dropdown">
             <div class="dropdown complete-card__dropdown">
-              <button
-                class="btn btn-secondary dropdown-toggle"
-                type="button"
-                id="dropdownMenuButton4"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton4"
+                data-bs-toggle="dropdown" aria-expanded="false">
                 Price
-                <img
-                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
-                  alt=""
-                />
+                <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="" />
               </button>
-              <ul
-                class="dropdown-menu"
-                aria-labelledby="dropdownMenuButton4"
-                id="pills-tab"
-                role="tablist"
-              >
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton4" id="pills-tab" role="tablist">
                 <li>
-                  <a
-                    class="dropdown-item active"
-                    href="#"
-                    id="chart-price-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#chart-price"
-                    role="tab"
-                    aria-controls="chart-price"
-                    aria-selected="true"
-                    >Price</a
-                  >
+                  <a class="dropdown-item active" href="#" id="chart-price-tab" data-bs-toggle="pill"
+                    data-bs-target="#chart-price" role="tab" aria-controls="chart-price" aria-selected="true">Price</a>
                 </li>
                 <li>
-                  <a
-                    class="dropdown-item"
-                    href="#"
-                    id="chart-depth-tab"
-                    data-bs-toggle="pill"
-                    data-bs-target="#chart-depth"
-                    role="tab"
-                    aria-controls="chart-depth"
-                    aria-selected="false"
-                    >Depth</a
-                  >
+                  <a class="dropdown-item" href="#" id="chart-depth-tab" data-bs-toggle="pill"
+                    data-bs-target="#chart-depth" role="tab" aria-controls="chart-depth" aria-selected="false">Depth</a>
                 </li>
               </ul>
             </div>
             <div class="dropdown complete-card__dropdown">
-              <button
-                class="btn btn-secondary dropdown-toggle"
-                type="button"
-                id="dropdownMenuButton5"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                1 min
-                <img
-                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
-                  alt=""
-                />
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton5"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                {{ current_interval|default:"1h" }}
+                <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="" />
               </button>
-              <ul
-                class="dropdown-menu"
-                aria-labelledby="dropdownMenuButton5"
-                id="pills-tab"
-                role="tablist"
-              >
-                <li><a class="dropdown-item" href="#">1 min</a></li>
-                <li><a class="dropdown-item" href="#">3 min</a></li>
-                <li><a class="dropdown-item" href="#">30 min</a></li>
-                <li><a class="dropdown-item" href="#">1 hour</a></li>
-                <li><a class="dropdown-item" href="#">24 hour</a></li>
-                <li><a class="dropdown-item" href="#">1 day</a></li>
-                <li><a class="dropdown-item" href="#">1 week</a></li>
+              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton5" id="pills-tab" role="tablist">
+                <li><a class="dropdown-item" href="?interval=1m">1 min</a></li>
+                <li><a class="dropdown-item" href="?interval=3m">3 min</a></li>
+                <li><a class="dropdown-item" href="?interval=30m">30 min</a></li>
+                <li><a class="dropdown-item" href="?interval=1h">1 hour</a></li>
+                <li><a class="dropdown-item" href="?interval=4h">4 hours</a></li>
+                <li><a class="dropdown-item" href="?interval=1d">1 day</a></li>
+                <li><a class="dropdown-item" href="?interval=1w">1 week</a></li>
               </ul>
             </div>
           </div>
         </div>
         <div class="tab-content tab-content--desktop">
-          <div
-            class="tab-pane fade show active"
-            id="chart-price"
-            role="tabpanel"
-            aria-labelledby="chart-price-tab"
-          >
+          <div class="tab-pane fade show active" id="chart-price" role="tabpanel" aria-labelledby="chart-price-tab">
             <div class="complete-card__chart-wrapper">
-              <div
-                id="complete-card__chart-candlestick-1"
-                class="complete-card__chart-render"
-              ></div>
-              <img
-                src="{% static 'assets/media/images/background-bar.png' %}"
-                alt=""
-                class="complete-card__chart-candlestick-column-bar"
-              />
+              <div id="complete-card__chart-candlestick-1" class="complete-card__chart-render"></div>
+              <img src="{% static 'assets/media/images/background-bar.png' %}" alt=""
+                class="complete-card__chart-candlestick-column-bar" />
               <div class="complete-card__chart-area-vignette--left"></div>
               <div class="complete-card__chart-area-vignette--top"></div>
               <div class="complete-card__chart-area-vignette--right"></div>
             </div>
           </div>
-          <div
-            class="tab-pane fade"
-            id="chart-depth"
-            role="tabpanel"
-            aria-labelledby="chart-depth-tab"
-          >
+          <div class="tab-pane fade" id="chart-depth" role="tabpanel" aria-labelledby="chart-depth-tab">
             <div class="complete-card__chart-wrapper">
-              <div
-                id="complete-card__chart-depth-1"
-                class="complete-card__chart-render"
-              ></div>
+              <div id="complete-card__chart-depth-1" class="complete-card__chart-render"></div>
             </div>
           </div>
         </div>
         <div class="tab-content tab-content--mobile">
-          <div
-            class="tab-pane fade show active"
-            id="chart-price-2"
-            role="tabpanel"
-            aria-labelledby="chart-price-2-tab"
-          >
+          <div class="tab-pane fade show active" id="chart-price-2" role="tabpanel" aria-labelledby="chart-price-2-tab">
             <div class="complete-card__chart-wrapper">
-              <div
-                id="complete-card__chart-candlestick-2"
-                class="complete-card__chart-render"
-              ></div>
-              <img
-                src="{% static 'assets/media/images/background-bar.png' %}"
-                alt=""
-                class="complete-card__chart-candlestick-column-bar"
-              />
+              <div id="complete-card__chart-candlestick-2" class="complete-card__chart-render"></div>
+              <img src="{% static 'assets/media/images/background-bar.png' %}" alt=""
+                class="complete-card__chart-candlestick-column-bar" />
               <div class="complete-card__chart-area-vignette--left"></div>
               <div class="complete-card__chart-area-vignette--top"></div>
               <div class="complete-card__chart-area-vignette--right"></div>
             </div>
           </div>
-          <div
-            class="tab-pane fade"
-            id="chart-depth-2"
-            role="tabpanel"
-            aria-labelledby="chart-depth-2-tab"
-          >
+          <div class="tab-pane fade" id="chart-depth-2" role="tabpanel" aria-labelledby="chart-depth-2-tab">
             <div class="complete-card__chart-wrapper">
-              <div
-                id="complete-card__chart-depth-2"
-                class="complete-card__chart-render"
-              ></div>
+              <div id="complete-card__chart-depth-2" class="complete-card__chart-render"></div>
             </div>
           </div>
         </div>
@@ -440,115 +280,32 @@
           <nav class="navbar">
             <div class="table__title-tabs" id="pills-tab" role="tablist">
               <li class="nav-item">
-                <p
-                  class="fb-regular fb-regular--bold table__title-tab active"
-                  id="pills-market-trades-open-order-tab"
-                  data-bs-toggle="pill"
-                  data-bs-target="#pills-market-trades-open-order"
-                  role="tab"
-                  aria-controls="pills-market-trades-open-order"
-                  aria-selected="true"
-                >
+                <p class="fb-regular fb-regular--bold table__title-tab active" id="pills-market-trades-open-order-tab"
+                  data-bs-toggle="pill" data-bs-target="#pills-market-trades-open-order" role="tab"
+                  aria-controls="pills-market-trades-open-order" aria-selected="true">
                   Open Order
                 </p>
               </li>
               <li class="nav-item">
-                <p
-                  class="fb-regular fb-regular--bold table__title-tab"
-                  id="pills-market-trades-order-history-tab"
-                  data-bs-toggle="pill"
-                  data-bs-target="#pills-market-trades-order-history"
-                  role="tab"
-                  aria-controls="pills-market-trades-order-history"
-                  aria-selected="false"
-                >
+                <p class="fb-regular fb-regular--bold table__title-tab" id="pills-market-trades-order-history-tab"
+                  data-bs-toggle="pill" data-bs-target="#pills-market-trades-order-history" role="tab"
+                  aria-controls="pills-market-trades-order-history" aria-selected="false">
                   Order History
                 </p>
               </li>
               <li class="nav-item">
-                <p
-                  class="fb-regular fb-regular--bold table__title-tab"
-                  id="pills-market-trades-order-book-tab"
-                  data-bs-toggle="pill"
-                  data-bs-target="#pills-market-trades-order-book"
-                  role="tab"
-                  aria-controls="pills-market-trades-order-book"
-                  aria-selected="false"
-                >
+                <p class="fb-regular fb-regular--bold table__title-tab" id="pills-market-trades-order-book-tab"
+                  data-bs-toggle="pill" data-bs-target="#pills-market-trades-order-book" role="tab"
+                  aria-controls="pills-market-trades-order-book" aria-selected="false">
                   Order Book
                 </p>
               </li>
             </div>
           </nav>
-          <div class="dropdown table__dropdown">
-            <button
-              class="btn btn-secondary dropdown-toggle"
-              type="button"
-              id="dropdownMenuButton1"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              Open Orders
-              <img
-                src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
-                alt=""
-              />
-            </button>
-            <ul
-              class="dropdown-menu"
-              aria-labelledby="dropdownMenuButton1"
-              id="pills-tab"
-              role="tablist"
-            >
-              <li>
-                <a
-                  class="dropdown-item active"
-                  href="#"
-                  id="pills-market-trades-open-order-tab"
-                  data-bs-toggle="pill"
-                  data-bs-target="#pills-market-trades-open-order"
-                  role="tab"
-                  aria-controls="pills-market-trades-open-order"
-                  aria-selected="true"
-                  >Open Order</a
-                >
-              </li>
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  id="pills-market-trades-order-history-tab"
-                  data-bs-toggle="pill"
-                  data-bs-target="#pills-market-trades-order-history"
-                  role="tab"
-                  aria-controls="pills-market-trades-order-history"
-                  aria-selected="false"
-                  >Order History</a
-                >
-              </li>
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  id="pills-market-trades-order-book-tab"
-                  data-bs-toggle="pill"
-                  data-bs-target="#pills-market-trades-order-book"
-                  role="tab"
-                  aria-controls="pills-market-trades-order-book"
-                  aria-selected="false"
-                  >Order Book</a
-                >
-              </li>
-            </ul>
-          </div>
         </div>
         <div class="tab-content">
-          <div
-            class="tab-pane fade show active"
-            id="pills-market-trades-open-order"
-            role="tabpanel"
-            aria-labelledby="pills-market-trades-open-order-tab"
-          >
+          <div class="tab-pane fade show active" id="pills-market-trades-open-order" role="tabpanel"
+            aria-labelledby="pills-market-trades-open-order-tab">
             <div class="table-container">
               <table class="table table-content">
                 <thead>
@@ -590,294 +347,63 @@
               </table>
             </div>
           </div>
-          <div
-            class="tab-pane fade"
-            id="pills-market-trades-order-history"
-            role="tabpanel"
-            aria-labelledby="pills-market-trades-order-history-tab"
-          >
-            <div class="table-container">
-              <table class="table table-content">
-                <thead>
-                  <tr>
-                    <th class="fb-regular table__head">Time</th>
-                    <th class="fb-regular table__head">Price (USD)</th>
-                    <th class="fb-regular table__head">Amount (BTC)</th>
-                    <th class="fb-regular table__head">Total (USD)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colspan="4">
-                      <p class="fb-regular text-muted">
-                        Order history not implemented yet.
-                      </p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div
-            class="tab-pane fade"
-            id="pills-market-trades-order-book"
-            role="tabpanel"
-            aria-labelledby="pills-market-trades-order-book-tab"
-          >
-            <div class="table-container">
-              <table class="table table-content">
-                <thead>
-                  <tr>
-                    <th class="fb-regular table__head">Time</th>
-                    <th class="fb-regular table__head">Price (USD)</th>
-                    <th class="fb-regular table__head">Amount (BTC)</th>
-                    <th class="fb-regular table__head">Total (USD)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colspan="4">
-                      <p class="fb-regular text-muted">
-                        Order book not implemented yet.
-                      </p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
         </div>
         <div class="table__vignette"></div>
       </div>
     </div>
-    <!-- <div class="dashboard__group-right">-->
     <!-- Crypto Exchange Section -->
-    <!-- <form method="POST" action="{% url 'trade' %}">
-        {% csrf_token %}
-        <div class="advance-card advance-card--type-2">
-          <div class="advance-card__title">
-            <h6 class="advance-card__title-text">Bitcoin</h6>
-            <img src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="" class="advance-card__title-image" />
+    <form method="POST" action="{% url 'trade' %}">
+      {% csrf_token %}
+      <div class="advance-card advance-card--type-2">
+        <div class="advance-card__title">
+          <h6 class="advance-card__title-text">Bitcoin</h6>
+          <img src="{% static 'assets/media/images/icons/logo-btc.svg' %}" alt="" class="advance-card__title-image" />
+        </div>
+        <div class="advance-card__form">
+          <div class="advance-card__form-title">
+            <p class="advance-card__form-title-text">Enter your trade Amount</p>
           </div>
-          <div class="advance-card__form">
-            <div class="advance-card__form-title">
-              <p class="advance-card__form-title-text">Current Balance</p>
+          <div class="forms-purchase forms-purchase--advance-card">
+            <div class="forms-group forms-group--value">
+              <input type="number" min="0" name="balance_amount" value="4" class="form-control forms-purchase__value" />
             </div>
-            <div class="forms-purchase forms-purchase--advance-card">
-              <div class="forms-group forms-group--value">
-                <input type="number" min="0" name="balance_amount" value="4000"
-                  class="form-control forms-purchase__value" />
-              </div>
-              <div class="forms-group forms-group--purchase js-forms-group--purchase" id="custom-select-purchase3">
-                <select name="balance_currency" class="form-control">
-                  <option value="BTC" selected>BTC</option>
-                  <option value="USD">USD</option>
-                  <option value="ETH">ETH</option>
-                  <option value="BNB">BNB</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="advance-card__form">
-            <div class="advance-card__form-title">
-              <p class="advance-card__form-title-text">Volume (24h)</p>
-              <div class="advance-card__form-title-percent">
-                <img
-                  src="{% static 'assets/media/images/icons/arrow-'|add:'bullish' if tickers.0.priceChangePercent|floatformat:2 > 0 else 'bearish'|add:'.svg' %}"
-                  alt="" class="advance-card__form-title-percent-image" />
-                <p
-                  class="advance-card__form-title-percent-value {% if tickers.0.priceChangePercent|floatformat:2 > 0 %}text-bullish{% else %}text-bearish{% endif %}">
-                  {{ tickers.0.priceChangePercent|floatformat:2|default:"N/A" }}%
-                </p>
-              </div>
-            </div>
-            <div class="forms-purchase forms-purchase--advance-card">
-              <div class="forms-group forms-group--value">
-                <input type="number" min="0" name="volume_amount" value="4000"
-                  class="form-control forms-purchase__value" />
-              </div>
-              <div class="forms-group forms-group--purchase js-forms-group--purchase" id="custom-select-purchase4">
-                <select name="volume_currency" class="form-control">
-                  <option value="USD" selected>USD</option>
-                  <option value="BTC">BTC</option>
-                  <option value="ETH">ETH</option>
-                  <option value="BNB">BNB</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          <div class="advance-card__payment">
-            <div class="advance-card__payment-title">
-              <p class="advance-card__payment-title-text">Payment Method</p>
-            </div>
-            <div class="forms-group forms-select js-forms-select" id="custom-select-form-1">
-              <select name="payment_method" class="form-control">
-                <option value="Paywallet" selected>Paywallet</option>
-                <option value="BTC">BTC</option>
+            <div class="forms-group forms-group--purchase js-forms-group--purchase" id="custom-select-purchase3">
+              <select name="balance_currency" class="form-control">
+                <option value="BTC" selected>BTC</option>
+                <option value="USD">USD</option>
                 <option value="ETH">ETH</option>
                 <option value="BNB">BNB</option>
               </select>
             </div>
           </div>
-          <div class="advance-card__buttons">
-            <button type="submit" name="action" value="buy"
-              class="btn btn-secondary advance-card__button button--green">Buy</button>
-            <button type="submit" name="action" value="sell"
-              class="btn btn-secondary advance-card__button button--red">Sell</button>
+        </div>
+        <div class="advance-card__form">
+          <div class="advance-card__form-title">
+            <p class="advance-card__form-title-text">Volume (24h)</p>
+            <div class="advance-card__form-title-percent">
+              <img
+                src="{% static 'assets/media/images/icons/arrow-'|add:'bullish' if tickers.0.priceChangePercent|floatformat:2 > 0 else 'bearish'|add:'.svg' %}"
+                alt="" class="advance-card__form-title-percent-image" />
+              <p
+                class="advance-card__form-title-percent-value {% if tickers.0.priceChangePercent|floatformat:2 > 0 %}text-bullish{% else %}text-bearish{% endif %}">
+                {{ tickers.0.priceChangePercent|floatformat:2|default:"N/A" }}%
+              </p>
+            </div>
           </div>
         </div>
-      </form> -->
-    <!-- Exchange Form -->
-    <!-- <form method="POST" action="{% url 'exchange_trade' %}">
-        {% csrf_token %}
-        <div class="advance-card advance-card--type-1-v2">
-          <div class="advance-card__title">
-            <h6 class="advance-card__title-text">Exchange</h6>
-            <img src="{% static 'assets/media/images/icons/exchange-white.svg' %}" alt=""
-              class="advance-card__title-icon" />
-          </div>
-          <div class="advance-card__price">
-            <div class="advance-card__price-crypto">
-              <p class="advance-card__price-crypto-value">1</p>
-              <p class="advance-card__price-crypto-name">BTC</p>
-            </div>
-            <img src="{% static 'assets/media/images/icons/arrow-right-white.svg' %}" alt=""
-              class="advance-card__price-arrow" />
-            <div class="advance-card__price-currency">
-              <p class="advance-card__price-currency-value">{{ tickers.0.lastPrice|floatformat:2|default:"N/A" }}</p>
-              <p class="advance-card__price-currency-name">USD</p>
-            </div>
-          </div>
-          <div class="advance-card__forms-currency">
-            <div class="advance-card__forms-currency--get">
-              <p class="advance-card__forms-currency__title">Get</p>
-              <div class="forms-purchase forms-purchase--advance-card">
-                <div class="forms-group forms-group--value">
-                  <input type="number" min="0" name="get_amount" value="4000"
-                    class="form-control forms-purchase__value" />
-                </div>
-                <div class="forms-purchase__line"></div>
-                <div class="forms-group forms-group--purchase js-forms-group--purchase" id="custom-select-purchase1">
-                  <select name="get_currency" class="form-control">
-                    <option value="USD" selected>USD</option>
-                    <option value="BTC">BTC</option>
-                    <option value="ETH">ETH</option>
-                    <option value="BNB">BNB</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-            <div class="advance-card__forms-currency--pay">
-              <p class="advance-card__forms-currency__title">Pay</p>
-              <div class="forms-purchase forms-purchase--advance-card">
-                <div class="forms-group forms-group--value">
-                  <input type="number" min="0" name="pay_amount" value="4000"
-                    class="form-control forms-purchase__value" />
-                </div>
-                <div class="forms-purchase__line"></div>
-                <div class="forms-group forms-group--purchase js-forms-group--purchase" id="custom-select-purchase2">
-                  <select name="pay_currency" class="form-control">
-                    <option value="BTC" selected>BTC</option>
-                    <option value="USD">USD</option>
-                    <option value="ETH">ETH</option>
-                    <option value="BNB">BNB</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-          <button type="submit" name="action" value="exchange"
-            class="advance-card__button btn btn-primary btn-pill">Exchange</button>
+        <div class="advance-card__buttons">
+          <button type="submit" name="action" value="buy"
+            class="btn btn-secondary advance-card__button button--green">Buy</button>
+          <button type="submit" name="action" value="sell"
+            class="btn btn-secondary advance-card__button button--red">Sell</button>
         </div>
-      </form>
-    </div> 
-  --></div>
+      </div>
+    </form>
+  </div>
 </div>
 
-<!-- ApexCharts Script -->
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    {% for ticker in tickers %}
-    // Chart for item-collapse__chart-line-{{ forloop.counter }}
-    var optionsLine{{ forloop.counter }
-  } = {
-    chart: { type: 'line', height: 100 },
-    series: {{ chart_data.series | safe }},
-    xaxis: { categories: {{ chart_data.labels | safe }} },
-    colors: ['#246cf9'],
-    stroke: { curve: 'smooth' }
-        };
-  var chartLine{{ forloop.counter }} = new ApexCharts(document.querySelector("#item-collapse__chart-line-{{ forloop.counter }}"), optionsLine{{ forloop.counter }});
-        chartLine{ { forloop.counter } }.render();
-
-  // Chart for standard-card__item-line-{{ forloop.counter }}
-  var optionsItemLine{{ forloop.counter }} = {
-    chart: { type: 'line', height: 100 },
-    series: { { chart_data.series | safe } },
-    xaxis: { categories: { { chart_data.labels | safe } } },
-    colors: ['#246cf9'],
-      stroke: { curve: 'smooth' }
-  };
-  var chartItemLine{{ forloop.counter }} = new ApexCharts(document.querySelector("#standard-card__item-line-{{ forloop.counter }}"), optionsItemLine{{ forloop.counter }});
-        chartItemLine{ { forloop.counter } }.render();
-  {% endfor %}
-
-  // Candlestick chart (sample)
-  var optionsCandlestick = {
-    chart: { type: 'candlestick', height: 350 },
-    series: [{
-      data: [
-        // Replace with real candlestick data
-        { x: new Date(), y: [10000, 10100, 9900, 10050] },
-        { x: new Date(Date.now() + 86400000), y: [10050, 10200, 9950, 10100] }
-      ]
-    }],
-    xaxis: { type: 'datetime' },
-    yaxis: { tooltip: { enabled: true } }
-  };
-  var chartCandlestick1 = new ApexCharts(document.querySelector("#complete-card__chart-candlestick-1"), optionsCandlestick);
-  chartCandlestick1.render();
-  var chartCandlestick2 = new ApexCharts(document.querySelector("#complete-card__chart-candlestick-2"), optionsCandlestick);
-  chartCandlestick2.render();
-
-  // Depth chart (sample)
-  var optionsDepth = {
-    chart: { type: 'area', height: 350 },
-    series: [
-      { name: 'Buy', data: [100, 200, 150, 300] },
-      { name: 'Sell', data: [50, 100, 75, 150] }
-    ],
-    xaxis: { categories: ['Price1', 'Price2', 'Price3', 'Price4'] },
-    colors: ['#27f7db', '#ff5733']
-  };
-  var chartDepth1 = new ApexCharts(document.querySelector("#complete-card__chart-depth-1"), optionsDepth);
-  chartDepth1.render();
-  var chartDepth2 = new ApexCharts(document.querySelector("#complete-card__chart-depth-2"), optionsDepth);
-  chartDepth2.render();
-    });
-</script>
-
-<!-- WebSocket (uncomment when ready) -->
-<!--
-<script>
-    const ws = new WebSocket("ws://localhost:8000/ws/trades/");
-    ws.onopen = () => { console.log("Connected to WebSocket"); };
-    ws.onmessage = (event) => {
-        const trade = JSON.parse(event.data);
-        const time = new Date(trade.time).toLocaleTimeString();
-        const row = `
-            <tr>
-                <td><p class="fb-regular">${time}</p></td>
-                <td><p class="fb-regular ${trade.side}">${trade.price}</p></td>
-                <td><p class="fb-regular">${trade.amount}</p></td>
-                <td><p class="fb-regular">${trade.total}</p></td>
-            </tr>`;
-        document.querySelector("#trade-table-body").insertAdjacentHTML("afterbegin", row);
-    };
-    ws.onerror = (error) => { console.error("WebSocket Error: ", error); };
-    ws.onclose = () => { console.log("WebSocket Disconnected"); };
-</script>
--->
+<!-- Candlestick data for JS -->
+<div id="candlestick-data" data-series="{{ candlestick_data|safe }}" style="display:none;"></div>
 
 {% block js %}
 <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
@@ -889,4 +415,63 @@
 <script src="{% static 'assets/js/custom/navbar.js' %}"></script>
 <script src="{% static 'assets/js/custom/custom-select.js' %}"></script>
 <script src="{% static 'assets/js/custom/dropdown.js' %}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof ApexCharts !== 'undefined') {
+      // Initialize small line charts
+      const dataDivs = document.querySelectorAll('.ticker-chart-data');
+      dataDivs.forEach(div => {
+        const i = div.dataset.id;
+        const series = JSON.parse(div.dataset.series);
+        const labels = JSON.parse(div.dataset.labels);
+
+        const options = {
+          chart: { type: 'line', height: 100, sparkline: { enabled: true } },
+          series: series,
+          xaxis: { categories: labels },
+          colors: ['#246cf9'],
+          stroke: { curve: 'smooth' }
+        };
+
+        const el1 = document.querySelector("#item-collapse__chart-line-" + i);
+        if (el1) new ApexCharts(el1, options).render();
+
+        const el2 = document.querySelector("#standard-card__item-line-" + i);
+        if (el2) new ApexCharts(el2, options).render();
+      });
+
+      // Initialize candlestick charts
+      const candDiv = document.querySelector('#candlestick-data');
+      if (candDiv) {
+        const candSeries = JSON.parse(candDiv.dataset.series);
+        const candOptions = {
+          chart: { type: 'candlestick', height: 350 },
+          series: [{ data: candSeries }],
+          xaxis: { type: 'datetime' },
+          yaxis: { tooltip: { enabled: true } }
+        };
+
+        const candEl1 = document.querySelector("#complete-card__chart-candlestick-1");
+        if (candEl1) new ApexCharts(candEl1, candOptions).render();
+
+        const candEl2 = document.querySelector("#complete-card__chart-candlestick-2");
+        if (candEl2) new ApexCharts(candEl2, candOptions).render();
+      }
+
+      // Initialize depth charts (sample)
+      const depthOptions = {
+        chart: { type: 'area', height: 350 },
+        series: [
+          { name: 'Buy', data: [100, 200, 150, 300] },
+          { name: 'Sell', data: [50, 100, 75, 150] }
+        ],
+        xaxis: { categories: ['Price1', 'Price2', 'Price3', 'Price4'] },
+        colors: ['#27f7db', '#ff5733']
+      };
+
+      const depthEl1 = document.querySelector("#complete-card__chart-depth-1");
+      if (depthEl1) new ApexCharts(depthEl1, depthOptions).render();
+    }
+  });
+</script>
 {% endblock %} {% endblock %}

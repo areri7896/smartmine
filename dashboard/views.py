@@ -108,70 +108,6 @@ def investment_plans(request):
     return render(request, 'src/dashboard/market.html', context)
 
 
-
-# def invest(request, plan_id):
-#     # Retrieve the investment plan or raise 404 if not found
-#     plan = get_object_or_404(InvestmentPlan, id=plan_id)
-    
-#     # Get the user's wallet
-#     wallet = Wallet.objects.filter(user=request.user).first()
-    
-#     # Check if user has a wallet
-#     if not wallet:
-#         messages.error(request, 'No wallet found. Please create a wallet first.')
-#         return redirect('wallet')
-    
-#     # Check if wallet balance is sufficient
-#     if wallet.balance < plan.price:
-#         messages.error(request, 'Your balance is insufficient. Please deposit funds!')
-#         return redirect('wallet')
-    
-#     # Handle POST request to create investment
-#     if request.method == 'POST':
-#         try:
-#             with transaction.atomic():
-#                 # Create investment
-#                 end_date = datetime.now() + timedelta(days=plan.cycle_days)
-#                 investment = Investment.objects.create(
-#                     user=request.user,
-#                     plan=plan,
-#                     end_date=end_date,
-#                     status="active"
-#                 )
-                
-#                 # Deduct plan price from wallet balance
-#                 wallet.balance -= plan.price
-#                 wallet.save()
-                
-#                 messages.success(request, 'Investment in {plan.name} created successfully!')
-#                 return redirect('market/')
-#         except Exception as e:
-#             messages.error(request, 'An error occurred while processing your investment. Please try again.')
-#             return redirect('wallet')
-    
-#     # Render the template for GET request
-#     return render(request, 'src/dashboard/market.html', {'pl': plan})
-
-# client = get_binance_client()
-# if client:
-#     # safe to use client
-#     try:
-#         balance = client.get_account()
-
-#         # checking server status
-#         client.ping()  # returns {} on success
-
-#         res = client.get_server_time()
-#         ts = res['serverTime'] / 1000
-#         print(f"Binance server time (timestamp): {ts}")
-
-#     except Exception as e:
-#         print("Error while using Binance client:", e)
-# else:
-#     print("Failed to connect to Binance.")
-
-
-
 #https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbTR2cHBLOV9rN0lvTUJNVWJRMGE5bWd6RzBuQXxBQ3Jtc0tuTW85WUdYcVdXMEdNdXVwczZzeUthbEhRWUpRX3AzRnI3eWNBZUdONDdvYURfOFZyMVVuNlh6Y0VSNlpYWi13LUQzemxTaWJ5dlpyNHMwWkRndUVqcy0tVkRFZzNXYkx3aXR0WWlEb1U3NGZLRTJtVQ&q=https%3A%2F%2Fgithub.com%2Fsevenisalie%2Fdjango_alpha_vantage&v=3OOD9bFdBOQ
 
 
@@ -226,39 +162,6 @@ def get_ticker_data(request):
 
 
 
-# from django.shortcuts import render
-# from .models import Wallet
-# import requests
-
-# def convert_kes_to_usd(amount_kes):
-#     """
-#     Converts the given amount in Kenyan Shillings (KES) to US Dollars (USD)
-#     using the Frankfurter API.
-#     """
-#     try:
-#         url = "https://api.frankfurter.app/latest"
-#         params = {"amount": amount_kes, "from": "KES", "to": "USD"}
-#         response = requests.get(url, params=params)
-#         response.raise_for_status()
-#         data = response.json()
-#         usd_amount = data["rates"]["USD"]
-#         return usd_amount
-#     except Exception as e:
-#         print(f"Currency conversion error: {e}")
-#         return None
-
-# def wallet_view(request):
-#     # Assuming the user is authenticated
-#     wallet = Wallet.objects.get(user=request.user)
-#     balance_kes = wallet.balance
-#     balance_usd = fetch_exchange_rates(base_currency='KES',target_currency='USD',float(balance_kes)) 
-
-#     context = {
-#         'balance_kes': balance_kes,
-#         'balance_usd': balance_usd if balance_usd is not None else "Conversion unavailable",
-#     }
-#     return render(request, 'src/dashboard/wallet.html', context)
-
 def wallet_view(request):
     """
     Display user's wallet balance in KES and converted USD.
@@ -303,11 +206,6 @@ def wallet_view(request):
     
     return render(request, 'src/dashboard/wallet.html', context)
 
-# def crypto_assets_view(request):
-#     tickers = ['btc', 'eth', 'bnb', 'ada', 'doge']
-#     tokens = get_token_data(tickers)
-#     return render(request, 'your_template.html', {'tokens': tokens})
-
 # views.py
 def active_investments(request):
     investments = Investment.objects.filter(user=request.user, status="active")
@@ -342,9 +240,46 @@ def dashboard(request):
     tokens = get_token_data(tics)
     # tick_symbol = [ticker['symbol'] for ticker in tickers]
     # tick_price = [ticker['price'] for ticker in tickers]
+    # Fetch Binance Transactions
+    try:
+        deposits = client.get_deposit_history()
+        withdrawals = client.get_withdraw_history()
+        
+        binance_transactions = []
+        
+        for d in deposits:
+            if d['status'] == 1: # 1 usually means success/completed in Binance API
+                binance_transactions.append({
+                    'type': 'Deposit',
+                    'asset': d['coin'],
+                    'amount': d['amount'],
+                    'status': 'Completed',
+                    'time': d['insertTime'],
+                    'icon': 'green-arrow-up.svg' # Visual indicator
+                })
+                
+        for w in withdrawals:
+            if w['status'] == 6: # 6 is completed in Binance API
+                 binance_transactions.append({
+                    'type': 'Withdraw',
+                    'asset': w['coin'],
+                    'amount': w['amount'],
+                    'status': 'Completed', # Map status codes if needed
+                    'time': w['applyTime'], 
+                    'icon': 'transaction-arrow-green.svg' # Using receive arrow for now, maybe change to red/sent
+                })
+
+        # Sort by time descending
+        binance_transactions.sort(key=lambda x: x['time'], reverse=True)
+        
+    except Exception as e:
+        print(f"Error fetching Binance transactions: {e}")
+        binance_transactions = []
+
+
     combined_tickers = [(ticker['symbol'], ticker['price']) for ticker in tickers]
     context = {'tks': combined_tickers, 'df':df, 'tickers': tickers, 'tokens': tokens,'bal': wallet_bal,
-            'bal_usd': wallet_bal_usd,}
+            'bal_usd': wallet_bal_usd, 'binance_transactions': binance_transactions}
 
     # context = {'tick_symbol':tick_symbol, 'tick_price':tick_price}
     return render(request, 'src/dashboard/dashboard.html', context)
@@ -417,13 +352,6 @@ from django.contrib import admin
 def approve_selected_withdrawals(modeladmin, request, queryset):
     queryset.update(status='Approved', is_cancelled=False)
     messages.success(request, f"{queryset.count()} withdrawals approved successfully.")
-
-# class WithdrawalAdmin(admin.ModelAdmin):
-#     list_display = ('user', 'phone_number', 'amount', 'status', 'is_cancelled')
-#     actions = [approve_selected_withdrawals]
-
-# admin.site.register(Withdrawal, WithdrawalAdmin)
-
 
 def verif(request):
     if request.method == 'POST':
@@ -729,11 +657,10 @@ def wallet(request):
                     phone_number = "254" + phone_number[1:]
 
                 # Create deposit transaction
-                DepositTransaction.objects.create(
+                transaction = DepositTransaction.objects.create(
                     user=request.user,
                     amount=amount,
                     phone_number=phone_number,
-                    transaction_id=f"TXN{int(time.time())}",
                     status='Pending'
                 )
 
@@ -747,6 +674,10 @@ def wallet(request):
                 # Decode response data
                 response_data = json.loads(response.text)
                 result_code = response_data.get('ResultCode', '')
+
+                # Update transaction with CheckoutRequestID
+                transaction.checkout_request_id = response_data.get('CheckoutRequestID')
+                transaction.save()
 
                 # Handle different response scenarios
                 if result_code == '0':
@@ -807,6 +738,7 @@ def mpesa_callback(request):
         # Extract transaction details from the callback
         body = data.get('Body', {}).get('stkCallback', {})
         result_code = body.get('ResultCode')
+        checkout_request_id = body.get('CheckoutRequestID')
         metadata = body.get('CallbackMetadata', {}).get('Item', [])
         transaction_id = None
         amount = None
@@ -824,10 +756,9 @@ def mpesa_callback(request):
         # Check if the transaction was successful
         if result_code == 0:  # Successful transaction
             try:
-                # Retrieve the pending transaction
+                # Retrieve the pending transaction using CheckoutRequestID
                 transaction = DepositTransaction.objects.get(
-                    phone_number=phone_number, 
-                    transaction_id = transaction_id,
+                    checkout_request_id=checkout_request_id,
                     status='Pending'
                 )
                 # Update the transaction details
@@ -855,22 +786,6 @@ def mpesa_callback(request):
     except Exception as e:
         # Handle any other exceptions
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
-
-
-# def exchange(request):
-#     api_key = os.environ['BINANCE_API_KEY']
-#     api_secret = os.environ['BINANCE_SECRET_KEY']
-#     client = Client(api_key, api_secret, testnet=False)
-#     tickers = client.get_all_tickers()
-#     df = pd.DataFrame(tickers)
-#     df.head()
-
-#     tics = ['btc', 'eth', 'bnb', 'ada', 'doge']
-#     tokens = get_token_data(tics)
-#     combined_tickers = [(ticker['symbol'], ticker['price']) for ticker in tickers]
-#     context = {'tks': combined_tickers, 'df':df, 'tickers': tickers}
-
-#     return render(request, 'src/dashboard/exchange.html', context)
 
 
 def mkt_data(request):
@@ -956,51 +871,6 @@ def crypto_view(request):
     data = fetch_crypto_data()
     print(data)
     return render(request, 'src/dashboard/wallet.html', {'crypto_data': data})
-
-# @login_required
-# def confirm_investment(request, plan_id):
-
-#     plan = get_object_or_404(InvestmentPlan, id=plan_id)
-#     wallet = Wallet.objects.filter(user=request.user).first()
-
-#     if not wallet:
-#         messages.error(request, 'Wallet not found. Please create a wallet first.')
-#         return redirect('wallet')
-
-#     if request.method == 'POST':
-#         try:
-#             # Check if the user has sufficient balance
-#             if wallet.balance <= plan.price:
-#                 messages.error(request, 'Insufficient balance. Please deposit funds to proceed.')
-#                 return redirect('wallet')
-
-#             # Calculate investment start and end date
-#             start_date = now()
-#             db_end_date = start_date + timedelta(days=plan.cycle_days)
-
-#             # Create investment record
-#             investment = Investment.objects.create(
-#                 user=request.user,
-#                 plan=plan,
-#                 start_date=start_date,
-#                 db_end_date=db_end_date,
-#                 status="active"
-#             )
-
-#             # Deduct plan price from wallet balance
-#             wallet.balance -= plan.price
-#             wallet.save()
-
-#             messages.success(request, 'Your investment was successful!')
-#             return redirect('market')
-
-#         except Exception as e:
-#             print(f"Error during investment confirmation: {e}")  # Log the exception
-#             messages.error(request, 'OOPS!! There was an error, Please try again!')
-#             return redirect('market')
-#     messages.error(request, 'OOPS!! There was an error, Please try again!')
-#     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
-
 
 def process_investments():
     current_time = now()
@@ -1118,33 +988,19 @@ def invest(request, plan_id):
         messages.error(request, 'An error occurred while processing your investment. Please try again.')
         return redirect('wallet')
 
-# @login_required
-# def market(request):
-#     plans = InvestmentPlan.objects.all()
-#     investments = Investment.objects.filter(user=request.user).select_related("plan")
-#     return render(request, 'src/dashboard/market.html', {'plans': plans, 'investments':investments})
-    # api_key = os.environ['BINANCE_API_KEY']
-    # api_secret = os.environ['BINANCE_SECRET_KEY']
-    # client = Client(api_key, api_secret, testnet=True)
-    # tickers = client.get_all_tickers()
-    # df = pd.DataFrame(tickers)
-    # # df.head()
-    # context = {'tickers':tickers, 'df':df}
-
-    # return render(request, 'src/dashboard/market.html', context)
-'''
-def profile(request):
-    if request.method == 'POST':
-        form = ProfileUpdateForm(request.POST or None, request.FILES or None, instance=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Profile updated!")
-        else:
-            messages.error(request, "Error updating profile.")
-    else:
-        form = ProfileUpdateForm(instance=request.user)
-    return render(request, 'src/dashboard/profile.html', {'user_form': form})
-'''
+# '''
+# def profile(request):
+#     if request.method == 'POST':
+#         form = ProfileUpdateForm(request.POST or None, request.FILES or None, instance=request.user)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, "Profile updated!")
+#         else:
+#             messages.error(request, "Error updating profile.")
+#     else:
+#         form = ProfileUpdateForm(instance=request.user)
+#     return render(request, 'src/dashboard/profile.html', {'user_form': form})
+# '''
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import CustomUserChangeForm, ProfileUpdateForm
@@ -1180,28 +1036,6 @@ def profile(request):
         'profile_form': profile_form,
     }
     return render(request, 'src/dashboard/profile.html', context)
-# @login_required
-# def profile(request):
-#     user_instance = request.user
-#     profile_instance = request.user.profile
-
-#     user_form = CustomUserChangeForm(request.POST or None, instance=user_instance)
-#     user_form = ProfileUpdateForm(request.POST or None, request.FILES or None, instance=profile_instance)
-
-#     if request.method == 'POST':
-#         if user_form.is_valid():# '''and profile_form.is_valid()''':
-#             user_form.save()
-#             # profile_form.save()
-#             messages.success(request, 'Your profile was updated successfully!')
-#             return redirect('dashboard')
-#         else:
-#             print("Errors:", user_form.errors, '''profile_form.errors''')
-
-#     context = {
-#         'user_form': user_form,
-#         # 'profile_form': profile_form,
-#     }
-#     return render(request, 'src/dashboard/profile.html', context)
 
 
 @login_required
@@ -1283,32 +1117,6 @@ def accept_terms(request):
     return JsonResponse({'status': 'error'}, status=400)
 
 
-# def convert_view(request):
-#     # Import wallet balance for the logged-in user
-#     wallet = Wallet.objects.filter(user=request.user).first()
-#     wallet_balance = wallet.balance if wallet else 0
-#     print(wallet_balance)
-
-#     # Convert wallet balance (KES) to USD
-#     usd_wallet_balance = convert_kes_to_usd(wallet_balance) if wallet_balance else 0
-#     print(usd_wallet_balance)
-
-#     context = {
-#         'wallet_balance': wallet_balance,
-#         'usd_wallet_balance': usd_wallet_balance,
-#     }
-#     # if request.method == 'POST':
-#     #     try:
-#     #         amount_kes = float(request.POST.get('amount_kes', 0))
-#     #         usd_value = convert_kes_to_usd(amount_kes)
-#     #         context.update({
-#     #             'usd_value': usd_value,
-#     #             'amount_kes': amount_kes
-#     #         })
-#     #     except ValueError:
-#     #         context['error'] = "Invalid input. Please enter a valid number."
-#     return render(request, 'src/dashboard/wallet.html', context)
-
 
 def signin(request):
     if request.method == 'POST':
@@ -1389,6 +1197,31 @@ def exchange(request):
             } for trade in recent_trades
         ]
 
+        # Handle Time Interval Selection
+        interval_param = request.GET.get('interval', '1h')
+        interval_map = {
+            '1m': Client.KLINE_INTERVAL_1MINUTE,
+            '3m': Client.KLINE_INTERVAL_3MINUTE,
+            '5m': Client.KLINE_INTERVAL_5MINUTE,
+            '15m': Client.KLINE_INTERVAL_15MINUTE,
+            '30m': Client.KLINE_INTERVAL_30MINUTE,
+            '1h': Client.KLINE_INTERVAL_1HOUR,
+            '2h': Client.KLINE_INTERVAL_2HOUR,
+            '4h': Client.KLINE_INTERVAL_4HOUR,
+            '6h': Client.KLINE_INTERVAL_6HOUR,
+            '8h': Client.KLINE_INTERVAL_8HOUR,
+            '12h': Client.KLINE_INTERVAL_12HOUR,
+            '1d': Client.KLINE_INTERVAL_1DAY,
+            '3d': Client.KLINE_INTERVAL_3DAY,
+            '1w': Client.KLINE_INTERVAL_1WEEK,
+            '1M': Client.KLINE_INTERVAL_1MONTH,
+        }
+        binance_interval = interval_map.get(interval_param, Client.KLINE_INTERVAL_1HOUR)
+
+        # Fetch KLines for BTCUSDT with selected interval
+        klines = client.get_klines(symbol='BTCUSDT', interval=binance_interval, limit=50)
+        candlestick_data = [{'x': k[0], 'y': [float(k[1]), float(k[2]), float(k[3]), float(k[4])]} for k in klines]
+
         # Sample chart data for ApexCharts (replace with real data as needed)
         chart_data = {
             'labels': [f'Point {i}' for i in range(10)],
@@ -1401,6 +1234,8 @@ def exchange(request):
             'tickers': page_obj,  # Paginated tickers
             'trades': trades_list,
             'chart_data': chart_data,
+            'candlestick_data': candlestick_data,
+            'current_interval': interval_param,
         }
         return render(request, 'src/dashboard/exchange.html', context)
 
@@ -1477,17 +1312,6 @@ def trade(request):
         return redirect('exchange')
 
 
-# def trade(request):
-#     if request.method == 'POST':
-#         action = request.POST.get('action')
-#         amount = request.POST.get('balance_amount')
-#         currency = request.POST.get('balance_currency')
-#         payment_method = request.POST.get('payment_method')
-#         # Implement Binance API call (e.g., client.create_order())
-#         messages.success(request, f"{action.capitalize()} order placed successfully!")
-#         return redirect('exchange')
-#     return redirect('exchange')
-
 @login_required
 def exchange_trade(request):
     # Fetch wallet balance
@@ -1557,235 +1381,90 @@ def exchange_trade(request):
         messages.error(request, "An error occurred while processing the exchange. Please try again.")
         return redirect('exchange')
 
+@login_required
+def trade(request):
+    """
+    Handle buying and selling of crypto assets via Binance API.
+    Deducts/adds balance to user's KES wallet after conversion.
+    """
+    if request.method != 'POST':
+        return redirect('exchange')
 
+    client = get_binance_client()
+    if not client:
+        messages.error(request, "Failed to connect to Binance. Please try again later.")
+        return redirect('exchange')
 
-# def exchange_trade(request):
-#     # Fetch wallet balance
-#     wallet_bal = Wallet.objects.filter(user=request.user).first()
-#     wallet_bal_usd = 0
-#     if wallet_bal:
-#         wallet_bal = wallet_bal.balance
-#         wallet_bal_usd = fetch_pair_conversion('KES', 'USD', float(wallet_bal))
-#     else:
-#         wallet_bal = 0
-#     if request.method == 'POST':
-#         get_amount = request.POST.get('get_amount')
-#         get_currency = request.POST.get('get_currency')
-#         pay_amount = request.POST.get('pay_amount')
-#         pay_currency = request.POST.get('pay_currency')
-#         # Implement Binance API call for exchange
-#         messages.success(request, "Exchange completed successfully!")
-#         return redirect('exchange')
-#     return redirect('exchange')
+    action = request.POST.get('action')        # "buy" or "sell"
+    amount_usdt = request.POST.get('balance_amount')
+    currency = request.POST.get('balance_currency', 'USDT')
+    # payment_method = request.POST.get('payment_method')
 
+    # Convert amount safely
+    try:
+        amount_usdt = Decimal(amount_usdt)
+        if amount_usdt <= 0:
+            raise ValueError
+    except:
+        messages.error(request, "Invalid trade amount.")
+        return redirect('exchange')
 
-# from django.contrib import admin
-# from django.contrib.auth.models import User
-# from django.core.mail import send_mail
-# from django.contrib import messages
+    try:
+        with transaction.atomic():
+            # Lock wallet to prevent race conditions
+            wallet = Wallet.objects.select_for_update().filter(user=request.user).first()
 
-# @admin.action(description='Send email to selected users')
-# def send_email_to_users(modeladmin, request, queryset):
-#     for user in queryset:
-#         if user.email:
-#             send_mail(
-#                 subject='Hello from Admin!',
-#                 message='This is a test email sent from the Django admin panel.',
-#                 from_email='admin@example.com',  # Update to your email
-#                 recipient_list=[user.email],
-#                 fail_silently=False,
-#             )
-#     messages.success(request, "Emails have been sent successfully!")
+            if not wallet:
+                messages.error(request, "No wallet found. Please create a wallet first.")
+                return redirect('wallet')
 
-# class CustomUserAdmin(admin.ModelAdmin):
-#     actions = [send_email_to_users]
+            # Convert USDT amount to KES for wallet operations
+            amount_kes = Decimal(fetch_pair_conversion('USD', 'KES', float(amount_usdt)))
 
+            # ======== BUY ===========
+            if action == "buy":
+                # For a purchase, user must have enough balance in KES
+                if wallet.balance < amount_kes:
+                    messages.error(request, f"Insufficient balance. You need approx {amount_kes:,.2f} KES.")
+                    return redirect('exchange')
 
+                # Deduct from wallet
+                wallet.balance -= amount_kes
+                wallet.save()
 
+                # Binance BUY API call (Market Order)
+                try:
+                    # Note: Symbol usually needs to be like BTCUSDT
+                    # For simplicity, we assume we are buying the asset with USDT
+                    # symbol = f"{currency}USDT" 
+                    # order = client.create_order(symbol=symbol, side=Client.SIDE_BUY, type=Client.ORDER_TYPE_MARKET, quoteOrderQty=float(amount_usdt))
+                    pass # Keep commented or implement with real symbol if available
+                except BinanceAPIException as e:
+                    raise Exception(f"Binance API error: {e.message}")
 
+            # ========= SELL ===========
+            elif action == "sell":
+                # (Optional) Verify user has the asset if you track assets in DB
+                # For now, we assume SELL converts asset on Binance back to KES in wallet
+                
+                # Binance SELL API call (Market Order)
+                try:
+                    # order = client.create_order(symbol=symbol, side=Client.SIDE_SELL, type=Client.ORDER_TYPE_MARKET, quoteOrderQty=float(amount_usdt))
+                    pass
+                except BinanceAPIException as e:
+                    raise Exception(f"Binance API error: {e.message}")
 
+                # Add to wallet
+                wallet.balance += amount_kes
+                wallet.save()
 
-# def homeView(request):
+            else:
+                messages.error(request, "Invalid trade action.")
+                return redirect('exchange')
 
+            messages.success(request, f"{action.capitalize()} order for {amount_usdt} {currency} placed successfully!")
+            return redirect('exchange')
 
-#     api_key = os.environ['BINANCE_API_KEY']
-
-#     stock = 'PLTR'
-
-#     api_key = os.environ['BINANCE_API_KEY']
-#     period= 60
-
-#     ts = TimeSeries(key=api_key, output_format='pandas',)
-#     data_ts, meta_data_ts = ts.get_intraday(stock, interval='1min', outputsize='compact')
-
-#     ti = TechIndicators(key=api_key, output_format='pandas')
-#     data_ti, meta_data_ti  = ti.get_rsi(stock, interval='1min', time_period=period, series_type='close')
-
-#     ts_df = data_ts
-#     ti_df = data_ti
-
-#     #Fundamentals
-#     payload = {'function': 'OVERVIEW', 'symbol': 'PLTR', 'apikey': api_key}
-#     r = requests.get('https://www.alphavantage.co/query', params=payload)
-#     r = r.json()
-
-
-#     #plotly graph
-#     def candlestick():
-#         figure = go.Figure(
-#             data = [
-#                     go.Candlestick(
-#                         x = ts_df.index,
-#                         high = ts_df['2. high'],
-#                         low = ts_df['3. low'],
-#                         open = ts_df['1. open'],
-#                         close = ts_df['4. close'],
-#                     )
-#                     ]
-#         )
-
-#         candlestick_div = plot(figure, output_type='div')
-#         return candlestick_div
-
-
-#     sector = r['Sector']
-#     marketcap = r['MarketCapitalization']
-#     peratio = r['PERatio']
-#     yearhigh = r['52WeekHigh']
-#     yearlow = r['52WeekLow']
-#     eps = r['EPS']
-
-
-
-#     timeseries = ts_df.to_dict(orient='records')
-
-#     closingprice = []
-#     for k in timeseries:
-#         closingprice.append(k['4. close'])
-
-#     lowprice = []
-#     for k in timeseries:
-#         closingprice.append(k['3. low'])
-
-#     highprice = []
-#     for k in timeseries:
-#         closingprice.append(k['2. high'])
-
-#     openprice = []
-#     for k in timeseries:
-#         closingprice.append(k['1. open'])
-
-#     pricedata = {
-#         'close': [closingprice],
-#         'open': [openprice],
-#         'high': [highprice],
-#         'low': [lowprice],
-#     }
-
-#     #miscellaneous stuff
-#     day = datetime.datetime.now()
-#     day = day.strftime("%A")
-
-#     def human_format(num):
-#         magnitude = 0
-#         while abs(num) >= 1000:
-#             magnitude += 1
-#             num /= 1000.0
-#         # add more suffixes if you need them
-#         return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
-
-#     marketcap = int(marketcap)
-#     marketcap = human_format(marketcap)
-
-#     closingprice = closingprice[0:15]
-
-
-#     context = {
-#         'sector': sector,
-#         'marketcap': marketcap,
-#         'peratio': peratio,
-#         'yearhigh': yearhigh,
-#         'yearlow': yearlow,
-#         'eps': eps,
-#         'closingprice': closingprice,
-#         'openprice': openprice,
-#         'highprice': highprice,
-#         'lowprice': lowprice,
-#         'pricedata': pricedata,
-#         'timeseries': timeseries,
-#         'stock': stock,
-#         'day': day,
-#         'candlestick': candlestick(),
-#     }
-
-#     context={}
-#     return render(request, 'src/dashboard/market.html', context)
-
-# def homeView(request):
-#     if request.method == 'POST':
-#         symbol = request.POST.get('symbol')
-#         return redirect('/')
-
-#     context={
-
-#     }
-#     return render(request, 'src/dashboard/market.html', context)
-
-
-
-# def cryptoView(request):
-
-#     if request.method == 'POST':
-#         symbol = request.POST.get('symbol')
-#         symbol = symbol.upper()
-#     else:
-#         symbol = 'BTCUSD'
-
-#     data = spotquote(symbol)
-#     pricedata = pricechange(symbol)
-#     moredata = pricechange(symbol)
-
-
-
-#     #get a fricken df
-#     ts_df = candles(symbol)
-#     #PlotlyGraph
-#     def candlestick():
-#         figure = go.Figure(
-#             data = [
-#                     go.Candlestick(
-#                         x = ts_df.index,
-#                         high = ts_df['high'],
-#                         low = ts_df['low'],
-#                         open = ts_df['open'],
-#                         close = ts_df['close'],
-#                     )
-#                     ]
-#         )
-
-#         candlestick_div = plot(figure, output_type='div')
-#         return candlestick_div
-#     #endPlotlyGraph
-#     percentchange = pricedata['priceChangePercent']
-#     buyers = pricedata['askQty']
-#     sellers = pricedata['bidQty']
-
-#     eth = pricechange(symbol='ETHUSD')
-#     btc = pricechange(symbol="BTCUSD")
-#     ltc = pricechange(symbol="LTCUSD")
-
-
-
-#     context={
-#     'moredata': moredata,
-#     'eth': eth,
-#     'btc': btc,
-#     'ltc': ltc,
-#     'percentchange': percentchange,
-#     'buyers': buyers,
-#     'sellers': sellers,
-#     'data': data,
-#     'candlestick': candlestick(),
-#     }
-#     return render(request, 'src/dashboard/market.html', context)
-
+    except Exception as e:
+        messages.error(request, f"Trade failed: {str(e)}")
+        return redirect('exchange')

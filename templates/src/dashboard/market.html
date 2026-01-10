@@ -64,20 +64,21 @@
             <table class="table table-content w-75">
               <thead class="table__head">
                 <tr>
-                  <th class="fb-regular w-25 table__head" >Investment Plan</th>
-                  <th class="fb-regular w-25 table__head" >Start Date</th>
-                  <th class="fb-regular w-25 table__head" >End Date</th>
-                  <th class="fb-regular w-25 table__head" >Status</th>
+                  <th class="fb-regular w-20 table__head">Investment Plan</th>
+                  <th class="fb-regular w-20 table__head">Start Date</th>
+                  <th class="fb-regular w-20 table__head">End Date</th>
+                  <th class="fb-regular w-20 table__head">Remaining Time</th>
+                  <th class="fb-regular w-20 table__head">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {% for investment in investments %}
-                <tr>
+                <tr id="investment-row-{{ investment.id }}">
                   <td>
                     <p class="fb-regular table__assets-crypto-abbr">{{ investment.plan.name }}</p>
                   </td>
                   <td>
-                    <p class="fb-regular table__order" >{{ investment.start_date|date:"Y-m-d H:i"}}
+                    <p class="fb-regular table__order">{{ investment.start_date|date:"Y-m-d H:i"}}
                     </p>
                   </td>
                   <td>
@@ -85,12 +86,18 @@
                     </p>
                   </td>
                   <td>
+                    <p class="fb-regular countdown-timer text-primary" data-endtime="{{ investment.end_date|date:'c' }}"
+                      id="timer-{{ investment.id }}">
+                      Calculating...
+                    </p>
+                  </td>
+                  <td>
                     {% if investment.status == 'active' %}
-                    <p class="fb-regular table__status text-success">
+                    <p class="fb-regular table__status text-success" id="status-{{ investment.id }}">
                       {{ investment.status }}
                     </p>
                     {% else %}
-                    <p class="fb-regular table__status text-danger">
+                    <p class="fb-regular table__status text-danger" id="status-{{ investment.id }}">
                       {{ investment.status }}
                     </p>
                     {% endif %}
@@ -99,7 +106,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                  <td colspan="4" class="text-center">You have not invested yet! <span class="text-danger"> Please
+                  <td colspan="5" class="text-center">You have not invested yet! <span class="text-danger"> Please
                       Invest </span></td>
                 </tr>
                 {% endfor %}
@@ -161,5 +168,55 @@
 <script src="{% static 'assets/js/pages/wallet-page-v1.js' %}"></script>
 <script src="{% static 'assets/js/custom/navbar.js' %}"></script>
 <!-- End::Page Scripts -->
+
+<script>
+  function updateCountdowns() {
+    const now = new Date().getTime();
+    const timers = document.querySelectorAll('.countdown-timer');
+
+    timers.forEach(timer => {
+      const endTimeStr = timer.getAttribute('data-endtime');
+      if (!endTimeStr) return;
+
+      const endTime = new Date(endTimeStr).getTime();
+      const distance = endTime - now;
+      const timerId = timer.id.split('-')[1];
+      const statusEl = document.getElementById('status-' + timerId);
+
+      if (distance < 0) {
+        timer.innerHTML = "Expired";
+        timer.classList.remove('text-primary');
+        timer.classList.add('text-danger');
+
+        // Update status text if it's currently "active"
+        if (statusEl && statusEl.innerHTML.trim().toLowerCase() === 'active') {
+          statusEl.innerHTML = 'Completed/Processing';
+          statusEl.classList.remove('text-success');
+          statusEl.classList.add('text-info');
+          // Optional: reload page to sync with backend after a small delay
+          // setTimeout(() => { window.location.reload(); }, 5000);
+        }
+      } else {
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        let displayStr = "";
+        if (days > 0) displayStr += days + "d ";
+        displayStr += (hours < 10 ? "0" + hours : hours) + "h " +
+          (minutes < 10 ? "0" + minutes : minutes) + "m " +
+          (seconds < 10 ? "0" + seconds : seconds) + "s";
+
+        timer.innerHTML = displayStr;
+      }
+    });
+  }
+
+  // Run every second
+  setInterval(updateCountdowns, 1000);
+  // Initial run
+  document.addEventListener('DOMContentLoaded', updateCountdowns);
+</script>
 {% endblock %}
 {% endblock %}

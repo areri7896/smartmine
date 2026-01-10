@@ -81,17 +81,16 @@ from .models import Investment
 
 def check_investments():
     current_time = now()
-    investments = Investment.objects.filter(status="active", end_date__lte=current_time)
+    investments = Investment.objects.filter(status="active", db_end_date__lte=current_time)
 
-    for invest in investments:
-        invest.status = "completed"
-        invest.save()
+    # Logic moved to cron job (process_daily_profits)
+    pass
 
 
 
 def investment_detail(request, investment_id):
     investment = Investment.objects.get(id=investment_id, user=request.user)
-    investment.check_and_update_status()  # Check on access
+    # investment.process_completion()  # Removed side effect
     return render(request, 'investment_detail.html', {'investment': investment})
 
 def investment_plans(request):
@@ -311,13 +310,12 @@ def wallet_view(request):
 
 # views.py
 def active_investments(request):
-    investments = Investment.objects.filter(user=request.user, is_active=True)
-    for inv in investments:
-        inv.process_completion()  # ensures expired investments are updated
+    investments = Investment.objects.filter(user=request.user, status="active")
+    #     inv.process_completion()  # Removed side effect
     return render(request, 'src/dashboard/market.html', {'investments': investments})
 
 def completed_investments(request):
-    investments = Investment.objects.filter(user=request.user, is_completed=True)
+    investments = Investment.objects.filter(user=request.user, status__in=["completed", "paid"])
     return render(request, 'src/dashboard/market.html', {'investments': investments})
 
 
@@ -700,7 +698,7 @@ def wallet(request):
 
         # Fetch withdrawal and deposit history
         withdrawals = Withdrawal.objects.filter(user=request.user).order_by('-id')
-        depos = Depo_Verification.objects.filter(user=request.user).order_by('-id')
+        depos = DepositTransaction.objects.filter(user=request.user).order_by('-id')
         
         # Prepare context for rendering the template
         context = {
@@ -1080,25 +1078,14 @@ def confirm_investment(request, plan_id):
 
     if request.method == 'POST':
         try:
-            with transaction.atomic():
-                # Create investment
-                start_date = now()
-                end_date = start_date + timedelta(days=plan.cycle_days)
-                investment = Investment.objects.create(
-                    user=request.user,
-                    plan=plan,
-                    db_start_date=start_date,
-                    db_end_date=end_date,
-                    status="active"
-                )
-                investment.save()
-
-                # Deduct plan price from wallet balance
-                wallet.balance -= plan.price
-                wallet.save()
-
-                messages.success(request, f'Investment in {plan.name} created successfully!')
-                return redirect('market')
+            # Create investment using centralized logic (handles transaction & wallet deduction atomicly)
+            Investment.create_investment(request.user, plan)
+            
+            messages.success(request, f'Investment in {plan.name} created successfully!')
+            return redirect('market')
+        except ValueError as e:
+            messages.error(request, str(e))
+            return redirect('wallet')
         except Exception as e:
             messages.error(request, 'An error occurred while processing your investment. Please try again.')
             return redirect('wallet')
@@ -1118,40 +1105,15 @@ def invest(request, plan_id):
         return redirect('confirm_investment', plan_id=plan_id)
 
     try:
-        with transaction.atomic():
+        # Create investment using centralized logic
+        Investment.create_investment(request.user, plan)
 
-            # Lock the wallet row to prevent race conditions (double spending)
-            wallet = Wallet.objects.select_for_update().filter(user=request.user).first()
+        messages.success(request, f'Investment in {plan.name} created successfully!')
+        return redirect('market')
 
-            if not wallet:
-                messages.error(request, 'No wallet found. Please create a wallet first.')
-                return redirect('wallet')
-
-            # Balance check INSIDE the atomic block (safest)
-            if wallet.balance < plan.price:
-                messages.error(request, 'Your balance is insufficient. Please deposit funds!')
-                return redirect('wallet')
-
-            # Create investment
-            start_date = now()
-            end_date = start_date + timedelta(days=plan.cycle_days)
-
-            Investment.objects.create(
-                user=request.user,
-                plan=plan,
-                db_start_date=start_date,
-                end_date=end_date,
-                status="active",
-                total_days=plan.cycle_days
-            )
-
-            # Deduct plan price
-            wallet.balance -= plan.price
-            wallet.save()
-
-            messages.success(request, f'Investment in {plan.name} created successfully!')
-            return redirect('market')
-
+    except ValueError as e:
+        messages.error(request, str(e))
+        return redirect('wallet')
     except Exception as e:
         messages.error(request, 'An error occurred while processing your investment. Please try again.')
         return redirect('wallet')
@@ -1201,7 +1163,10 @@ def profile(request):
         
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
-            profile_form.save()
+            profile = profile_form.save(commit=False)
+            profile.is_complete = True
+            profile.save()
+            
             messages.success(request, 'Congratulations! Your profile was updated successfully.')
             return redirect('dashboard')
         else:

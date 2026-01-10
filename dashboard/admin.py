@@ -9,8 +9,8 @@ class KlineAdmin(admin.ModelAdmin):
 #     pass
     
 class WithdrawalAdmin(admin.ModelAdmin):
-    list_display = ('user', 'phone_number', 'amount', 'is_completed', 'created_at')
-    # list_filter = ('is_completed')
+    list_display = ('user', 'phone_number', 'amount', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
     search_fields = ('user__username', 'phone_number')
 
 class Depo_VerificationAdmin(admin.ModelAdmin):

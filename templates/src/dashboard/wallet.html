@@ -326,19 +326,17 @@
                   <p class="fb-regular table__available">KSH {{ depo.amount }}</p>
                 </td>
                 <td>
-                  <p class="fb-regular table__total">{{depo.verification_code}}</p>
+                  <p class="fb-regular table__total">{{depo.transaction_id}}</p>
                 </td>
                 <td>
-                  {% if depo.is_completed == 0 %}
+                  {% if depo.status == 'Pending' %}
                   <p class="fb-regular table__market text-bullish">Pending</p>
-                  {% elif depo.is_completed == 1 %}
-                  <p class="fb-regular table__market text-success">completed</p>
-                  {% elif depo.is_completed == 3 %}
+                  {% elif depo.status == 'Completed' %}
+                  <p class="fb-regular table__market text-success">Completed</p>
+                  {% elif depo.status == 'Failed' %}
                   <p class="fb-regular table__market text-danger">Failed</p>
-                  {% elif depo.is_completed == 4 %}
-                  <p class="fb-regular table__market text-warning">Cancelled</p>
                   {% else %}
-                  <p class="fb-regular table__market text-warning">Unknown</p>
+                  <p class="fb-regular table__market text-warning">{{ depo.status }}</p>
                   {% endif %}
 
                 </td>
@@ -387,16 +385,16 @@
                   <p class="fb-regular table__total">{{withdrawal.phone_number}}</p>
                 </td>
                 <td>
-                  {% if withdrawal.is_completed == 0 %}
+                  {% if withdrawal.status == 'pending' %}
                   <p class="fb-regular table__market text-bullish">Pending</p>
-                  {% elif withdrawal.is_completed == 1 %}
-                  <p class="fb-regular table__market text-success">completed</p>
-                  {% elif withdrawal.is_completed == 3 %}
+                  {% elif withdrawal.status == 'approved' or withdrawal.status == 'completed' %}
+                  <p class="fb-regular table__market text-success">Completed</p>
+                  {% elif withdrawal.status == 'failed' %}
                   <p class="fb-regular table__market text-danger">Failed</p>
-                  {% elif withdrawal.is_completed == 4 %}
+                  {% elif withdrawal.status == 'cancelled' %}
                   <p class="fb-regular table__market text-warning">Cancelled</p>
                   {% else %}
-                  <p class="fb-regular table__market text-warning">Unknown</p>
+                  <p class="fb-regular table__market text-warning">{{ withdrawal.status }}</p>
                   {% endif %}
 
                 </td>

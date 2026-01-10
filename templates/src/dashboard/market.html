@@ -64,7 +64,7 @@
             <table class="table table-content w-75">
               <thead class="table__head">
                 <tr>
-                  <th class="fb-regular w-25 table__head" >Plan</th>
+                  <th class="fb-regular w-25 table__head" >Investment Plan</th>
                   <th class="fb-regular w-25 table__head" >Start Date</th>
                   <th class="fb-regular w-25 table__head" >End Date</th>
                   <th class="fb-regular w-25 table__head" >Status</th>
@@ -77,11 +77,11 @@
                     <p class="fb-regular table__assets-crypto-abbr">{{ investment.plan.name }}</p>
                   </td>
                   <td>
-                    <p class="fb-regular table__order" >{{ investment.db_start_date|date:"Y-m-d H:i" }}
+                    <p class="fb-regular table__order" >{{ investment.start_date|date:"Y-m-d H:i"}}
                     </p>
                   </td>
                   <td>
-                    <p class="fb-regular table__available">{{ investment.db_end_date|date:"Y-m-d H:i"}}
+                    <p class="fb-regular table__available">{{ investment.end_date|date:"Y-m-d H:i"}}
                     </p>
                   </td>
                   <td>

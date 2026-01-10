@@ -34,15 +34,14 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 # SECRET_KEY = os.environ["SECRET_KEY"]
 # DEBUG = os.environ["DEBUG", default=False, cast=bool]
 
-ALLOWED_HOSTS = ['2qd-talented-lyell.circumeo-apps.net',
-    'localhost',
-    '127.0.0.1',
-    'https://www.smrtmine.com',
-    'https://smrtmine.com',
-    'http://127.0.0.1:8000',
-    'http://127.0.0.1',
-    'https://127.0.0.1:8000',
-    '*',]
+if DEBUG:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+else:
+    ALLOWED_HOSTS = [
+        '2qd-talented-lyell.circumeo-apps.net',
+        'www.smrtmine.com',
+        'smrtmine.com',
+    ]
 
 
 CSRF_TRUSTED_ORIGINS = [
@@ -90,8 +89,7 @@ INSTALLED_APPS = [
 ]
 
 CRONJOBS = [
-    ('0 */24 * * *', 'dashboard.cron.daily_profit'),
-    ('*/1 * * * *', 'dashboard.cron.process_investments'),
+    ('0 0 * * *', 'dashboard.cron.process_daily_profits'),  # Daily at midnight
 ]
 
 
@@ -105,6 +103,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'dashboard.middleware.ProfileCompletionMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
@@ -347,11 +346,13 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Nairobi'
 
-# SECURE_SSL_REDIRECT = True
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SECURE_HSTS_SECONDS = 31536000  # 1 year
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
+# Security settings - only enforce in production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # django_heroku.settings(locals())

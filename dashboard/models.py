@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.db.models import CASCADE
+from decimal import Decimal
 
 
 User = get_user_model()
@@ -48,33 +49,312 @@ class EmailSender(models.Model):
         if is_new:
             self.send_emails()
     
-from django.db import models
-from django.contrib.auth.models import User
-from decimal import Decimal
-
 class Investment(models.Model):
     STATUS_CHOICES = [
-        ("active", "Active"),
-        ("completed", "Completed"),
-        ("paid", "Paid Out"),
+        ("pending", "Pending"),      # Created but not yet started
+        ("active", "Active"),         # Currently earning
+        ("completed", "Completed"),   # Finished, principal returned
+        ("cancelled", "Cancelled"),   # User cancelled before start
+        ("failed", "Failed"),         # System error
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    plan = models.ForeignKey('InvestmentPlan', on_delete=models.CASCADE, null=True)
-
+    # Core fields
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='investments')
+    plan = models.ForeignKey('InvestmentPlan', on_delete=models.PROTECT, null=True)
+    
+    # Investment amount (principal invested)
+    principal_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    
+    # Dates
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    # Profit tracking
+    expected_daily_profit = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    total_profit_paid = models.DecimalField(max_digits=20, decimal_places=2, default=0)
+    days_profit_paid = models.IntegerField(default=0)
+    last_profit_date = models.DateField(null=True, blank=True)
+    
+    # Status
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    
+    # Metadata
+    notes = models.TextField(blank=True)
+    
+    # Legacy fields (kept for backward compatibility, will be removed later)
     db_start_date = models.DateTimeField(null=True, blank=True)
     db_end_date = models.DateTimeField(null=True, blank=True)
-
     profit_amount = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     total_payout = models.DecimalField(max_digits=20, decimal_places=2, default=0)
-
-    # Daily profit tracking
     days_paid = models.IntegerField(default=0)
     total_days = models.IntegerField(default=0)
-    last_profit_date = models.DateField(null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'status']),
+            models.Index(fields=['status', 'end_date']),
+            models.Index(fields=['last_profit_date']),
+        ]
+    
+    @property
+    def is_active(self):
+        """Check if investment is currently active."""
+        return self.status == "active"
+    
+    @property
+    def is_completed(self):
+        """Check if investment is completed."""
+        return self.status in ["completed", "cancelled"]
+    
+    @property
+    def time_remaining(self):
+        """Calculate time remaining until investment ends."""
+        if self.end_date and self.status == "active":
+            remaining = self.end_date - timezone.now()
+            return max(timedelta(0), remaining)
+        return timedelta(0)
+    
+    @property
+    def progress_percentage(self):
+        """Calculate investment progress as percentage."""
+        if not self.plan:
+            return 0
+        if self.days_profit_paid >= self.plan.cycle_days:
+            return 100
+        return (self.days_profit_paid / self.plan.cycle_days) * 100
+    
+    @classmethod
+    def create_investment(cls, user, plan, quantity=1):
+        """
+        Create a new investment with proper validation and wallet deduction.
+        
+        Args:
+            user: User making the investment
+            plan: InvestmentPlan to invest in
+            quantity: Number of plan units to purchase (default: 1)
+        
+        Returns:
+            Investment instance
+        
+        Raises:
+            ValueError: If validation fails
+        """
+        from django.db import transaction as db_transaction
+        from decimal import Decimal
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        principal = plan.price * quantity
+        
+        # Validate
+        if principal <= 0:
+            raise ValueError("Investment amount must be positive")
+        
+        if quantity < 1:
+            raise ValueError("Quantity must be at least 1")
+        
+        try:
+            with db_transaction.atomic():
+                # Lock wallet
+                wallet = Wallet.objects.select_for_update().get(user=user)
+                
+                # Check balance
+                if wallet.balance < principal:
+                    raise ValueError(
+                        f"Insufficient balance. Required: {principal}, Available: {wallet.balance}"
+                    )
+                
+                # Calculate expected profit
+                total_roi_percent = plan.daily_interest_rate * plan.cycle_days
+                total_expected_profit = principal * (total_roi_percent / Decimal('100'))
+                daily_profit = total_expected_profit / plan.cycle_days
+                
+                # Deduct from wallet
+                balance_before = wallet.balance
+                wallet.balance -= principal
+                wallet.save()
+                
+                # Create investment
+                start_date = timezone.now()
+                end_date = start_date + timedelta(days=plan.cycle_days)
+                
+                investment = cls.objects.create(
+                    user=user,
+                    plan=plan,
+                    principal_amount=principal,
+                    start_date=start_date,
+                    end_date=end_date,
+                    expected_daily_profit=daily_profit,
+                    status="active",
+                    # Legacy fields for backward compatibility
+                    db_start_date=start_date,
+                    db_end_date=end_date,
+                    total_days=plan.cycle_days
+                )
+                
+                # Record transaction
+                Transaction.objects.create(
+                    user=user,
+                    wallet=wallet,
+                    transaction_type='investment',
+                    amount=principal,
+                    balance_before=balance_before,
+                    balance_after=wallet.balance,
+                    reference_id=f"INV-{investment.id}-START",
+                    status='success'
+                )
+                
+                logger.info(
+                    f"Investment created: ID={investment.id}, User={user.username}, "
+                    f"Principal={principal}, Daily Profit={daily_profit}"
+                )
+                
+                return investment
+                
+        except Wallet.DoesNotExist:
+            raise ValueError("User wallet not found. Please create a wallet first.")
+        except Exception as e:
+            logger.error(f"Error creating investment: {e}")
+            raise
+    
+    def process_daily_profit(self):
+        """
+        Process daily profit for this investment.
+        Returns True if profit was paid, False if skipped.
+        """
+        from django.db import transaction as db_transaction
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        today = timezone.now().date()
+        
+        # Validations
+        if self.status != "active":
+            return False
+        
+        if not self.start_date or not self.end_date:
+            logger.error(f"Investment {self.id} missing dates")
+            return False
+        
+        # Check if already paid today
+        if self.last_profit_date == today:
+            return False
+        
+        # Check if investment period has started
+        if timezone.now() < self.start_date:
+            return False
+        
+        # Check if all profits already paid
+        if self.days_profit_paid >= self.plan.cycle_days:
+            logger.info(f"Investment {self.id} already paid all profits")
+            return False
+        
+        try:
+            with db_transaction.atomic():
+                # Lock wallet
+                wallet = Wallet.objects.select_for_update().get(user=self.user)
+                balance_before = wallet.balance
+                
+                # Add daily profit
+                wallet.balance += self.expected_daily_profit
+                wallet.save()
+                
+                # Record transaction
+                Transaction.objects.create(
+                    user=self.user,
+                    wallet=wallet,
+                    transaction_type='investment',
+                    amount=self.expected_daily_profit,
+                    balance_before=balance_before,
+                    balance_after=wallet.balance,
+                    reference_id=f"INV-{self.id}-PROFIT-DAY-{self.days_profit_paid + 1}",
+                    status='success'
+                )
+                
+                # Update investment
+                self.total_profit_paid += self.expected_daily_profit
+                self.days_profit_paid += 1
+                self.last_profit_date = today
+                
+                # Update legacy fields
+                self.profit_amount = self.total_profit_paid
+                self.days_paid = self.days_profit_paid
+                
+                self.save()
+                
+                logger.info(
+                    f"Paid daily profit for investment {self.id}: {self.expected_daily_profit} "
+                    f"(Day {self.days_profit_paid}/{self.plan.cycle_days})"
+                )
+                
+                # Check if should complete
+                if self.days_profit_paid >= self.plan.cycle_days:
+                    self.complete_investment()
+                
+                return True
+                
+        except Exception as e:
+            logger.error(f"Error processing daily profit for investment {self.id}: {e}")
+            raise
+    
+    def complete_investment(self):
+        """
+        Complete the investment and return principal to user.
+        """
+        from django.db import transaction as db_transaction
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        if self.status != "active":
+            logger.warning(f"Investment {self.id} already {self.status}")
+            return
+        
+        try:
+            with db_transaction.atomic():
+                # Lock wallet
+                wallet = Wallet.objects.select_for_update().get(user=self.user)
+                balance_before = wallet.balance
+                
+                # Return principal
+                wallet.balance += self.principal_amount
+                wallet.save()
+                
+                # Record transaction
+                Transaction.objects.create(
+                    user=self.user,
+                    wallet=wallet,
+                    transaction_type='investment',
+                    amount=self.principal_amount,
+                    balance_before=balance_before,
+                    balance_after=wallet.balance,
+                    reference_id=f"INV-{self.id}-COMPLETE",
+                    status='success'
+                )
+                
+                # Update investment
+                self.status = "completed"
+                self.completed_at = timezone.now()
+                self.total_payout = self.principal_amount + self.total_profit_paid
+                self.save()
+                
+                logger.info(
+                    f"Completed investment {self.id}. Principal returned: {self.principal_amount}, "
+                    f"Total profit: {self.total_profit_paid}, Total payout: {self.total_payout}"
+                )
+                
+        except Exception as e:
+            logger.error(f"Error completing investment {self.id}: {e}")
+            self.status = "failed"
+            self.notes = f"Completion error: {str(e)}"
+            self.save()
+            raise
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.plan.name if self.plan else 'No Plan'} - {self.status}"
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
 class Transaction(models.Model):
 
@@ -129,19 +409,23 @@ class Transaction(models.Model):
 
 
 class Withdrawal(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('cancelled', 'Cancelled'),
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     phone_number = models.CharField(max_length=15)
     amount = models.DecimalField(max_digits=15, decimal_places=2)
-    is_completed = models.IntegerField(default=0) 
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    # status = models.CharField(max_length=20, choices=WithdrawStatusTextChoices, default="PENDING")
-
-    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-    #     if self.is_completed:
-    #         self.is_cancelled = False
-    #     else:
-    #         self.is_cancelled = True
-    #     super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.amount} ({self.status})"
 
 class Depo_Verification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -274,7 +558,7 @@ from decimal import Decimal
 
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    balance = models.DecimalField(max_digits=15, decimal_places=2, default='0.00')
+    balance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     balance_usd = models.CharField(max_length=20, default='0.00', null=True, blank=True)  # Assuming this is a string for USD balance
 
     def __str__(self):
@@ -290,10 +574,21 @@ class Wallet(models.Model):
             raise ValueError("Balance cannot be negative")
         super().save(*args, **kwargs)
 
-        def deposit(self, amount):
-            """Increase wallet balance by the deposit amount."""
-            self.balance += amount
-            self.save()
+    def deposit(self, amount):
+        """Increase wallet balance by the deposit amount."""
+        if amount <= 0:
+            raise ValueError("Deposit amount must be positive")
+        self.balance += Decimal(str(amount))
+        self.save()
+    
+    def withdraw(self, amount):
+        """Decrease wallet balance by the withdrawal amount."""
+        if amount <= 0:
+            raise ValueError("Withdrawal amount must be positive")
+        if self.balance < amount:
+            raise ValueError("Insufficient balance")
+        self.balance -= Decimal(str(amount))
+        self.save()
 
 
 class DepositTransaction(models.Model):
@@ -330,6 +625,7 @@ class Profile(models.Model):
     first_name = models.CharField(max_length=100, default='')
     last_name = models.CharField(max_length=100, default='')
     dob = models.DateField(null=True, blank=True)
+    is_complete = models.BooleanField(default=False)
     show_terms_modal = models.BooleanField(default=True)
     COUNTRY_CHOICES = [
       ("AD", "Andorra (+376)"),

@@ -26,9 +26,8 @@ def process_expired_investments():
     Check all active investments and process those that have expired.
     """
     try:
-        # Filter investments that are not completed and have passed their end_date
+        # Filter investments that are active and have passed their end_date
         investments = Investment.objects.filter(
-            is_completed=False,
             status="active",
             db_end_date__lte=timezone.now()
         ).select_related("user", "plan")  # Optimize query with related fields

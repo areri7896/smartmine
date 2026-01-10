@@ -1,32 +1,54 @@
-{% extends 'src/dashboard/basic.html' %}
-{% load static %}
+{% extends 'src/dashboard/basic.html' %} {% load static %}
 
 <title>{% block title %}Exchange{% endblock %}</title>
 
 {% block css_links %}
-<link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
-<link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
-<link href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}" rel="stylesheet" type="text/css" />
-<link href="{% static 'assets/css/pages/exchange-v1.css' %}" rel="stylesheet" type="text/css" />
-{% endblock %}
-
-{% block content %}
+<link
+  href="{% static 'assets/media/images/icons/logo.svg' %}"
+  rel="shortcut icon"
+  type="image/x-icon"
+/>
+<link
+  href="{% static 'assets/css/styles.bundle.css' %}"
+  rel="stylesheet"
+  type="text/css"
+/>
+<link
+  href="{% static 'assets/plugins/apexcharts/apexcharts.css' %}"
+  rel="stylesheet"
+  type="text/css"
+/>
+<link
+  href="{% static 'assets/css/pages/exchange-v1.css' %}"
+  rel="stylesheet"
+  type="text/css"
+/>
+{% endblock %} {% block content %}
 <div class="container container--dashboard container--dashboard--exchange-v1">
   <div class="dashboard__group dashboard__group--exchange-v1">
     <div class="dashboard__group-left">
       <!-- Messages -->
       {% if messages %}
       <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-        <div id="liveToast" class="toast bg-primary" role="alert" aria-live="assertive" aria-atomic="true">
+        <div
+          id="liveToast"
+          class="toast bg-primary"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+        >
           <div class="toast-header">
             <strong class="me-auto">Alert</strong>
             <small class="text-muted">Just now</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="toast"
+              aria-label="Close"
+            ></button>
           </div>
           <div class="toast-body bg-primary" id="toastMessage">
-            {% for message in messages %}
-            {{ message }}
-            {% endfor %}
+            {% for message in messages %} {{ message }} {% endfor %}
           </div>
         </div>
       </div>
@@ -40,22 +62,31 @@
       {% endif %}
 
       <!-- Crypto Card Info Section -->
-      {% if tickers %}
-      {% for ticker in tickers %}
+      {% if tickers %} {% for ticker in tickers %}
       <div class="standard-card standard-card--type-8-v2">
         <div class="standard-card__container">
           <div class="standard-card__items">
             <div class="standard-card__item standard-card__item--1">
               <div class="standard-card__item-left">
-                <img src="{% static 'assets/media/images/icons/logo-'|add:ticker.baseAsset|lower|add:'.svg' %}"
-                  alt="{{ ticker.baseAsset }}" class="standard-card__item-image"
-                  onerror="this.src='{% static 'assets/media/images/icons/logo-btc.svg' %}'" />
+                <img
+                  src="{% static 'assets/media/images/icons/logo-'|add:ticker.baseAsset|lower|add:'.svg' %}"
+                  alt="{{ ticker.baseAsset }}"
+                  class="standard-card__item-image"
+                  onerror="this.src='{% static 'assets/media/images/icons/logo-btc.svg' %}'"
+                />
                 <div class="standard-card__item-desc">
-                  <p class="fb-regular standard-card__item-title">{{ ticker.baseAsset }}</p>
-                  <p class="fd-sm fd-sm--bold standard-card__item-crypto">{{ ticker.symbol }}</p>
+                  <p class="fb-regular standard-card__item-title">
+                    {{ ticker.baseAsset }}
+                  </p>
+                  <p class="fd-sm fd-sm--bold standard-card__item-crypto">
+                    {{ ticker.symbol }}
+                  </p>
                 </div>
-                <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt=""
-                  class="standard-card__item-arrow" />
+                <img
+                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+                  alt=""
+                  class="standard-card__item-arrow"
+                />
               </div>
               <div class="standard-card__item-collapse">
                 <div class="item-collapse__group-1">
@@ -64,23 +95,36 @@
                     <div class="item-collapse__title-influsion">
                       <img
                         src="{% static 'assets/media/images/icons/arrow-'|add:'bullish' if ticker.priceChangePercent|floatformat:2 > 0 else 'bearish'|add:'.svg' %}"
-                        alt="" class="item-collapse__title-influsion-icon" />
+                        alt=""
+                        class="item-collapse__title-influsion-icon"
+                      />
                       <p
-                        class="fb-regular fb-regular--bold item-collapse__title-influsion-value {% if ticker.priceChangePercent|floatformat:2 > 0 %}text-bullish{% else %}text-bearish{% endif %}">
+                        class="fb-regular fb-regular--bold item-collapse__title-influsion-value {% if ticker.priceChangePercent|floatformat:2 > 0 %}text-bullish{% else %}text-bearish{% endif %}"
+                      >
                         {{ ticker.priceChangePercent|floatformat:2 }}%
                       </p>
                     </div>
                   </div>
                   <div class="item-collapse__chart-wrapper">
-                    <div id="item-collapse__chart-line-{{ forloop.counter }}" class="item-collapse__chart-render"></div>
+                    <div
+                      id="item-collapse__chart-line-{{ forloop.counter }}"
+                      class="item-collapse__chart-render"
+                    ></div>
                   </div>
                 </div>
                 <div class="item-collapse__group-2">
-                  <p class="fb-sm item-collapse__price">Last Price: <span
-                      class="item-collapse__price-value text-bullish">USD {{ ticker.lastPrice|floatformat:2 }}</span>
+                  <p class="fb-sm item-collapse__price">
+                    Last Price:
+                    <span class="item-collapse__price-value text-bullish"
+                      >USD {{ ticker.lastPrice|floatformat:2 }}</span
+                    >
                   </p>
-                  <p class="fb-sm item-collapse__price">24h Low: <span
-                      class="item-collapse__price-value text-bearish">{{ ticker.lowPrice|floatformat:2 }}</span></p>
+                  <p class="fb-sm item-collapse__price">
+                    24h Low:
+                    <span class="item-collapse__price-value text-bearish"
+                      >{{ ticker.lowPrice|floatformat:2 }}</span
+                    >
+                  </p>
                 </div>
               </div>
             </div>
@@ -90,24 +134,34 @@
                 <div class="standard-card__item-influsion">
                   <img
                     src="{% static 'assets/media/images/icons/arrow-'|add:'bullish' if ticker.priceChangePercent|floatformat:2 > 0 else 'bearish'|add:'.svg' %}"
-                    alt="" class="standard-card__item-influsion-icon" />
+                    alt=""
+                    class="standard-card__item-influsion-icon"
+                  />
                   <p
-                    class="fd-sm fd-sm--bold standard-card__item-influsion-value {% if ticker.priceChangePercent|floatformat:2 > 0 %}text-bullish{% else %}text-bearish{% endif %}">
+                    class="fd-sm fd-sm--bold standard-card__item-influsion-value {% if ticker.priceChangePercent|floatformat:2 > 0 %}text-bullish{% else %}text-bearish{% endif %}"
+                  >
                     {{ ticker.priceChangePercent|floatformat:2 }}%
                   </p>
                 </div>
               </div>
               <div class="standard-card__item-chart-wrapper">
-                <div id="standard-card__item-line-{{ forloop.counter }}" class="standard-card__item-chart-render"></div>
+                <div
+                  id="standard-card__item-line-{{ forloop.counter }}"
+                  class="standard-card__item-chart-render"
+                ></div>
               </div>
             </div>
             <div class="standard-card__item standard-card__item--3">
               <p class="fb-regular standard-card__item-title">Last Price</p>
-              <p class="fd-sm fd-sm--bold standard-card__item-value">{{ ticker.lastPrice|floatformat:2 }} USD</p>
+              <p class="fd-sm fd-sm--bold standard-card__item-value">
+                {{ ticker.lastPrice|floatformat:2 }} USD
+              </p>
             </div>
             <div class="standard-card__item standard-card__item--4">
               <p class="fb-regular standard-card__item-title">24h Low</p>
-              <p class="fd-sm fd-sm--bold standard-card__item-value">{{ ticker.lowPrice|floatformat:2 }} USD</p>
+              <p class="fd-sm fd-sm--bold standard-card__item-value">
+                {{ ticker.lowPrice|floatformat:2 }} USD
+              </p>
             </div>
           </div>
         </div>
@@ -118,17 +172,19 @@
         <ul class="pagination justify-content-center">
           {% if tickers.has_previous %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ tickers.previous_page_number }}">Previous</a>
+            <a class="page-link" href="?page={{ tickers.previous_page_number }}"
+              >Previous</a
+            >
           </li>
-          {% endif %}
-          {% for num in tickers.paginator.page_range %}
+          {% endif %} {% for num in tickers.paginator.page_range %}
           <li class="page-item {% if tickers.number == num %}active{% endif %}">
             <a class="page-link" href="?page={{ num }}">{{ num }}</a>
           </li>
-          {% endfor %}
-          {% if tickers.has_next %}
+          {% endfor %} {% if tickers.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ tickers.next_page_number }}">Next</a>
+            <a class="page-link" href="?page={{ tickers.next_page_number }}"
+              >Next</a
+            >
           </li>
           {% endif %}
         </ul>
@@ -143,10 +199,18 @@
           <div class="complete-card__head-title-wrapper">
             <h5 class="complete-card__head-title">BTCUSDT</h5>
             <div class="dropdown complete-card__dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton3"
-                data-bs-toggle="dropdown" aria-expanded="false">
+              <button
+                class="btn btn-secondary dropdown-toggle"
+                type="button"
+                id="dropdownMenuButton3"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
                 1 min
-                <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="" />
+                <img
+                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+                  alt=""
+                />
               </button>
               <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
                 <li><a class="dropdown-item" href="#">1 min</a></li>
@@ -161,53 +225,129 @@
           </div>
           <ul class="complete-card__head-tabs" id="pills-tab" role="tablist">
             <li class="complete-card__head-tab">
-              <button class="fb-regular fb-regular--bold complete-card__head-tab-text active" id="chart-price-2-tab"
-                data-bs-toggle="pill" data-bs-target="#chart-price-2" type="button" role="tab"
-                aria-controls="chart-price-2" aria-selected="true">
+              <button
+                class="fb-regular fb-regular--bold complete-card__head-tab-text active"
+                id="chart-price-2-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#chart-price-2"
+                type="button"
+                role="tab"
+                aria-controls="chart-price-2"
+                aria-selected="true"
+              >
                 Price
               </button>
             </li>
             <li class="complete-card__head-tab">
-              <button class="fb-regular fb-regular--bold complete-card__head-tab-text" id="chart-depth-2-tab"
-                data-bs-toggle="pill" data-bs-target="#chart-depth-2" type="button" role="tab"
-                aria-controls="chart-depth-2" aria-selected="false">
+              <button
+                class="fb-regular fb-regular--bold complete-card__head-tab-text"
+                id="chart-depth-2-tab"
+                data-bs-toggle="pill"
+                data-bs-target="#chart-depth-2"
+                type="button"
+                role="tab"
+                aria-controls="chart-depth-2"
+                aria-selected="false"
+              >
                 Depth
               </button>
             </li>
           </ul>
           <div class="complete-card__head-values">
-            <p class="fb-sm complete-card__head-menu">Open: <span
-                class="complete-card__head-value">{{ tickers.0.openPrice|floatformat:2|default:"N/A" }}</span></p>
-            <p class="fb-sm complete-card__head-menu">High: <span
-                class="complete-card__head-value">{{ tickers.0.highPrice|floatformat:2|default:"N/A" }}</span></p>
-            <p class="fb-sm complete-card__head-menu">Low: <span
-                class="complete-card__head-value">{{ tickers.0.lowPrice|floatformat:2|default:"N/A" }}</span></p>
-            <p class="fb-sm complete-card__head-menu">Close: <span
-                class="complete-card__head-value">{{ tickers.0.closePrice|floatformat:2|default:"N/A" }}</span></p>
+            <p class="fb-sm complete-card__head-menu">
+              Open:
+              <span class="complete-card__head-value"
+                >{{ tickers.0.openPrice|floatformat:2|default:"N/A" }}</span
+              >
+            </p>
+            <p class="fb-sm complete-card__head-menu">
+              High:
+              <span class="complete-card__head-value"
+                >{{ tickers.0.highPrice|floatformat:2|default:"N/A" }}</span
+              >
+            </p>
+            <p class="fb-sm complete-card__head-menu">
+              Low:
+              <span class="complete-card__head-value"
+                >{{ tickers.0.lowPrice|floatformat:2|default:"N/A" }}</span
+              >
+            </p>
+            <p class="fb-sm complete-card__head-menu">
+              Close:
+              <span class="complete-card__head-value"
+                >{{ tickers.0.closePrice|floatformat:2|default:"N/A" }}</span
+              >
+            </p>
           </div>
           <div class="complete-card__head-dropdown">
             <div class="dropdown complete-card__dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton4"
-                data-bs-toggle="dropdown" aria-expanded="false">
+              <button
+                class="btn btn-secondary dropdown-toggle"
+                type="button"
+                id="dropdownMenuButton4"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
                 Price
-                <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="" />
+                <img
+                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+                  alt=""
+                />
               </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton4" id="pills-tab" role="tablist">
-                <li><a class="dropdown-item active" href="#" id="chart-price-tab" data-bs-toggle="pill"
-                    data-bs-target="#chart-price" role="tab" aria-controls="chart-price" aria-selected="true">Price</a>
+              <ul
+                class="dropdown-menu"
+                aria-labelledby="dropdownMenuButton4"
+                id="pills-tab"
+                role="tablist"
+              >
+                <li>
+                  <a
+                    class="dropdown-item active"
+                    href="#"
+                    id="chart-price-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#chart-price"
+                    role="tab"
+                    aria-controls="chart-price"
+                    aria-selected="true"
+                    >Price</a
+                  >
                 </li>
-                <li><a class="dropdown-item" href="#" id="chart-depth-tab" data-bs-toggle="pill"
-                    data-bs-target="#chart-depth" role="tab" aria-controls="chart-depth" aria-selected="false">Depth</a>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="#"
+                    id="chart-depth-tab"
+                    data-bs-toggle="pill"
+                    data-bs-target="#chart-depth"
+                    role="tab"
+                    aria-controls="chart-depth"
+                    aria-selected="false"
+                    >Depth</a
+                  >
                 </li>
               </ul>
             </div>
             <div class="dropdown complete-card__dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton5"
-                data-bs-toggle="dropdown" aria-expanded="false">
+              <button
+                class="btn btn-secondary dropdown-toggle"
+                type="button"
+                id="dropdownMenuButton5"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
                 1 min
-                <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="" />
+                <img
+                  src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+                  alt=""
+                />
               </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton5" id="pills-tab" role="tablist">
+              <ul
+                class="dropdown-menu"
+                aria-labelledby="dropdownMenuButton5"
+                id="pills-tab"
+                role="tablist"
+              >
                 <li><a class="dropdown-item" href="#">1 min</a></li>
                 <li><a class="dropdown-item" href="#">3 min</a></li>
                 <li><a class="dropdown-item" href="#">30 min</a></li>
@@ -220,36 +360,74 @@
           </div>
         </div>
         <div class="tab-content tab-content--desktop">
-          <div class="tab-pane fade show active" id="chart-price" role="tabpanel" aria-labelledby="chart-price-tab">
+          <div
+            class="tab-pane fade show active"
+            id="chart-price"
+            role="tabpanel"
+            aria-labelledby="chart-price-tab"
+          >
             <div class="complete-card__chart-wrapper">
-              <div id="complete-card__chart-candlestick-1" class="complete-card__chart-render"></div>
-              <img src="{% static 'assets/media/images/background-bar.png' %}" alt=""
-                class="complete-card__chart-candlestick-column-bar" />
+              <div
+                id="complete-card__chart-candlestick-1"
+                class="complete-card__chart-render"
+              ></div>
+              <img
+                src="{% static 'assets/media/images/background-bar.png' %}"
+                alt=""
+                class="complete-card__chart-candlestick-column-bar"
+              />
               <div class="complete-card__chart-area-vignette--left"></div>
               <div class="complete-card__chart-area-vignette--top"></div>
               <div class="complete-card__chart-area-vignette--right"></div>
             </div>
           </div>
-          <div class="tab-pane fade" id="chart-depth" role="tabpanel" aria-labelledby="chart-depth-tab">
+          <div
+            class="tab-pane fade"
+            id="chart-depth"
+            role="tabpanel"
+            aria-labelledby="chart-depth-tab"
+          >
             <div class="complete-card__chart-wrapper">
-              <div id="complete-card__chart-depth-1" class="complete-card__chart-render"></div>
+              <div
+                id="complete-card__chart-depth-1"
+                class="complete-card__chart-render"
+              ></div>
             </div>
           </div>
         </div>
         <div class="tab-content tab-content--mobile">
-          <div class="tab-pane fade show active" id="chart-price-2" role="tabpanel" aria-labelledby="chart-price-2-tab">
+          <div
+            class="tab-pane fade show active"
+            id="chart-price-2"
+            role="tabpanel"
+            aria-labelledby="chart-price-2-tab"
+          >
             <div class="complete-card__chart-wrapper">
-              <div id="complete-card__chart-candlestick-2" class="complete-card__chart-render"></div>
-              <img src="{% static 'assets/media/images/background-bar.png' %}" alt=""
-                class="complete-card__chart-candlestick-column-bar" />
+              <div
+                id="complete-card__chart-candlestick-2"
+                class="complete-card__chart-render"
+              ></div>
+              <img
+                src="{% static 'assets/media/images/background-bar.png' %}"
+                alt=""
+                class="complete-card__chart-candlestick-column-bar"
+              />
               <div class="complete-card__chart-area-vignette--left"></div>
               <div class="complete-card__chart-area-vignette--top"></div>
               <div class="complete-card__chart-area-vignette--right"></div>
             </div>
           </div>
-          <div class="tab-pane fade" id="chart-depth-2" role="tabpanel" aria-labelledby="chart-depth-2-tab">
+          <div
+            class="tab-pane fade"
+            id="chart-depth-2"
+            role="tabpanel"
+            aria-labelledby="chart-depth-2-tab"
+          >
             <div class="complete-card__chart-wrapper">
-              <div id="complete-card__chart-depth-2" class="complete-card__chart-render"></div>
+              <div
+                id="complete-card__chart-depth-2"
+                class="complete-card__chart-render"
+              ></div>
             </div>
           </div>
         </div>
@@ -262,50 +440,115 @@
           <nav class="navbar">
             <div class="table__title-tabs" id="pills-tab" role="tablist">
               <li class="nav-item">
-                <p class="fb-regular fb-regular--bold table__title-tab active" id="pills-market-trades-open-order-tab"
-                  data-bs-toggle="pill" data-bs-target="#pills-market-trades-open-order" role="tab"
-                  aria-controls="pills-market-trades-open-order" aria-selected="true">
+                <p
+                  class="fb-regular fb-regular--bold table__title-tab active"
+                  id="pills-market-trades-open-order-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-market-trades-open-order"
+                  role="tab"
+                  aria-controls="pills-market-trades-open-order"
+                  aria-selected="true"
+                >
                   Open Order
                 </p>
               </li>
               <li class="nav-item">
-                <p class="fb-regular fb-regular--bold table__title-tab" id="pills-market-trades-order-history-tab"
-                  data-bs-toggle="pill" data-bs-target="#pills-market-trades-order-history" role="tab"
-                  aria-controls="pills-market-trades-order-history" aria-selected="false">
+                <p
+                  class="fb-regular fb-regular--bold table__title-tab"
+                  id="pills-market-trades-order-history-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-market-trades-order-history"
+                  role="tab"
+                  aria-controls="pills-market-trades-order-history"
+                  aria-selected="false"
+                >
                   Order History
                 </p>
               </li>
               <li class="nav-item">
-                <p class="fb-regular fb-regular--bold table__title-tab" id="pills-market-trades-order-book-tab"
-                  data-bs-toggle="pill" data-bs-target="#pills-market-trades-order-book" role="tab"
-                  aria-controls="pills-market-trades-order-book" aria-selected="false">
+                <p
+                  class="fb-regular fb-regular--bold table__title-tab"
+                  id="pills-market-trades-order-book-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-market-trades-order-book"
+                  role="tab"
+                  aria-controls="pills-market-trades-order-book"
+                  aria-selected="false"
+                >
                   Order Book
                 </p>
               </li>
             </div>
           </nav>
           <div class="dropdown table__dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1"
-              data-bs-toggle="dropdown" aria-expanded="false">
+            <button
+              class="btn btn-secondary dropdown-toggle"
+              type="button"
+              id="dropdownMenuButton1"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
               Open Orders
-              <img src="{% static 'assets/media/images/icons/arrow-down.svg' %}" alt="" />
+              <img
+                src="{% static 'assets/media/images/icons/arrow-down.svg' %}"
+                alt=""
+              />
             </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1" id="pills-tab" role="tablist">
-              <li><a class="dropdown-item active" href="#" id="pills-market-trades-open-order-tab" data-bs-toggle="pill"
-                  data-bs-target="#pills-market-trades-open-order" role="tab"
-                  aria-controls="pills-market-trades-open-order" aria-selected="true">Open Order</a></li>
-              <li><a class="dropdown-item" href="#" id="pills-market-trades-order-history-tab" data-bs-toggle="pill"
-                  data-bs-target="#pills-market-trades-order-history" role="tab"
-                  aria-controls="pills-market-trades-order-history" aria-selected="false">Order History</a></li>
-              <li><a class="dropdown-item" href="#" id="pills-market-trades-order-book-tab" data-bs-toggle="pill"
-                  data-bs-target="#pills-market-trades-order-book" role="tab"
-                  aria-controls="pills-market-trades-order-book" aria-selected="false">Order Book</a></li>
+            <ul
+              class="dropdown-menu"
+              aria-labelledby="dropdownMenuButton1"
+              id="pills-tab"
+              role="tablist"
+            >
+              <li>
+                <a
+                  class="dropdown-item active"
+                  href="#"
+                  id="pills-market-trades-open-order-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-market-trades-open-order"
+                  role="tab"
+                  aria-controls="pills-market-trades-open-order"
+                  aria-selected="true"
+                  >Open Order</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  id="pills-market-trades-order-history-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-market-trades-order-history"
+                  role="tab"
+                  aria-controls="pills-market-trades-order-history"
+                  aria-selected="false"
+                  >Order History</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  id="pills-market-trades-order-book-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#pills-market-trades-order-book"
+                  role="tab"
+                  aria-controls="pills-market-trades-order-book"
+                  aria-selected="false"
+                  >Order Book</a
+                >
+              </li>
             </ul>
           </div>
         </div>
         <div class="tab-content">
-          <div class="tab-pane fade show active" id="pills-market-trades-open-order" role="tabpanel"
-            aria-labelledby="pills-market-trades-open-order-tab">
+          <div
+            class="tab-pane fade show active"
+            id="pills-market-trades-open-order"
+            role="tabpanel"
+            aria-labelledby="pills-market-trades-open-order-tab"
+          >
             <div class="table-container">
               <table class="table table-content">
                 <thead>
@@ -323,7 +566,9 @@
                       <p class="fb-regular">{{ trade.time }}</p>
                     </td>
                     <td>
-                      <p class="fb-regular {{ trade.side }}">{{ trade.price|floatformat:2 }}</p>
+                      <p class="fb-regular {{ trade.side }}">
+                        {{ trade.price|floatformat:2 }}
+                      </p>
                     </td>
                     <td>
                       <p class="fb-regular">{{ trade.amount|floatformat:4 }}</p>
@@ -335,7 +580,9 @@
                   {% empty %}
                   <tr>
                     <td colspan="4">
-                      <p class="fb-regular text-muted">No recent trades available.</p>
+                      <p class="fb-regular text-muted">
+                        No recent trades available.
+                      </p>
                     </td>
                   </tr>
                   {% endfor %}
@@ -343,8 +590,12 @@
               </table>
             </div>
           </div>
-          <div class="tab-pane fade" id="pills-market-trades-order-history" role="tabpanel"
-            aria-labelledby="pills-market-trades-order-history-tab">
+          <div
+            class="tab-pane fade"
+            id="pills-market-trades-order-history"
+            role="tabpanel"
+            aria-labelledby="pills-market-trades-order-history-tab"
+          >
             <div class="table-container">
               <table class="table table-content">
                 <thead>
@@ -358,15 +609,21 @@
                 <tbody>
                   <tr>
                     <td colspan="4">
-                      <p class="fb-regular text-muted">Order history not implemented yet.</p>
+                      <p class="fb-regular text-muted">
+                        Order history not implemented yet.
+                      </p>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
-          <div class="tab-pane fade" id="pills-market-trades-order-book" role="tabpanel"
-            aria-labelledby="pills-market-trades-order-book-tab">
+          <div
+            class="tab-pane fade"
+            id="pills-market-trades-order-book"
+            role="tabpanel"
+            aria-labelledby="pills-market-trades-order-book-tab"
+          >
             <div class="table-container">
               <table class="table table-content">
                 <thead>
@@ -380,7 +637,9 @@
                 <tbody>
                   <tr>
                     <td colspan="4">
-                      <p class="fb-regular text-muted">Order book not implemented yet.</p>
+                      <p class="fb-regular text-muted">
+                        Order book not implemented yet.
+                      </p>
                     </td>
                   </tr>
                 </tbody>
@@ -391,9 +650,9 @@
         <div class="table__vignette"></div>
       </div>
     </div>
-    <div class="dashboard__group-right">
-      <!-- Crypto Exchange Section -->
-      <form method="POST" action="{% url 'trade' %}">
+    <!-- <div class="dashboard__group-right">-->
+    <!-- Crypto Exchange Section -->
+    <!-- <form method="POST" action="{% url 'trade' %}">
         {% csrf_token %}
         <div class="advance-card advance-card--type-2">
           <div class="advance-card__title">
@@ -467,9 +726,9 @@
               class="btn btn-secondary advance-card__button button--red">Sell</button>
           </div>
         </div>
-      </form>
-      <!-- Exchange Form -->
-      <form method="POST" action="{% url 'exchange_trade' %}">
+      </form> -->
+    <!-- Exchange Form -->
+    <!-- <form method="POST" action="{% url 'exchange_trade' %}">
         {% csrf_token %}
         <div class="advance-card advance-card--type-1-v2">
           <div class="advance-card__title">
@@ -531,8 +790,8 @@
             class="advance-card__button btn btn-primary btn-pill">Exchange</button>
         </div>
       </form>
-    </div>
-  </div>
+    </div> 
+  --></div>
 </div>
 
 <!-- ApexCharts Script -->
@@ -630,5 +889,4 @@
 <script src="{% static 'assets/js/custom/navbar.js' %}"></script>
 <script src="{% static 'assets/js/custom/custom-select.js' %}"></script>
 <script src="{% static 'assets/js/custom/dropdown.js' %}"></script>
-{% endblock %}
-{% endblock %}
+{% endblock %} {% endblock %}

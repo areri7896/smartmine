@@ -1,18 +1,30 @@
 {% load allauth socialaccount %}
+{% load static %}
+
 {% get_providers as socialaccount_providers %}
 {% if socialaccount_providers %}
-    {% element provider_list %}
-        {% for provider in socialaccount_providers %}
-            {% if provider.id == "openid" %}
-                {% for brand in provider.get_brands %}
-                    {% provider_login_url provider openid=brand.openid_url process=process as href %}
-                    {% element provider name=brand.name provider_id=provider.id href=href %}
-                    {% endelement %}
-                {% endfor %}
-            {% endif %}
-            {% provider_login_url provider process=process scope=scope auth_params=auth_params as href %}
-            {% element provider name=provider.name provider_id=provider.id href=href %}
-            {% endelement %}
-        {% endfor %}
-    {% endelement %}
+<div class="socialaccount_providers">
+    {% for provider in socialaccount_providers %}
+    {% if provider.id == "openid" %}
+    {% for brand in provider.get_brands %}
+    {% provider_login_url provider openid=brand.openid_url process=process as href %}
+    <a href="{{ href }}" class="btn btn-secondary btn-pill w-100 mb-3">
+        {{ brand.name }}
+    </a>
+    {% endfor %}
+    {% endif %}
+
+    {% provider_login_url provider process=process scope=scope auth_params=auth_params as href %}
+    {% if provider.id == "google" %}
+    <a href="{{ href }}" class="btn btn-google-signin w-100 mb-3">
+        <img src="{% static 'assets/media/images/icons/google.svg' %}" alt="" class="logo" />
+        <p class="fb-lg">Log in with {{ provider.name }}</p>
+    </a>
+    {% else %}
+    <a href="{{ href }}" class="btn btn-secondary btn-pill w-100 mb-3">
+        {{ provider.name }}
+    </a>
+    {% endif %}
+    {% endfor %}
+</div>
 {% endif %}

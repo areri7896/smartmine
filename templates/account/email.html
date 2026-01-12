@@ -1,78 +1,147 @@
-{% extends "account/base_manage_email.html" %}
-{% load allauth i18n %}
-{% block head_title %}
-{% trans "Email Addresses" %}
-{% endblock head_title %}
+{% extends 'src/dashboard/basic.html' %}
+{% load static %}
+{% load i18n %}
+{% load allauth account %}
+{% load widget_tweaks %}
+
+<title>{% block title %}{% trans "Email Addresses" %}{% endblock %}</title>
+
+{% block css_links %}
+<link href="{% static 'assets/media/images/icons/logo.svg' %}" rel="shortcut icon" type="image/x-icon" />
+<link href="{% static 'assets/css/styles.bundle.css' %}" rel="stylesheet" type="text/css" />
+<link href="{% static 'assets/css/pages/profile-v1.css' %}" rel="stylesheet" type="text/css" />
+<style>
+    .email-item {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 12px;
+        border-radius: 12px;
+        transition: background 0.2s;
+    }
+
+    .email-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .form-check-input:checked {
+        background-color: #246cf9;
+        border-color: #246cf9;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-{% element h1 %}
-{% trans "Email Addresses" %}
-{% endelement %}
-{% if emailaddresses %}
-{% element p %}
-{% trans 'The following email addresses are associated with your account:' %}
-{% endelement %}
-{% url 'account_email' as email_url %}
-{% element form form=form action=email_url method="post" tags="email,list" %}
-{% slot body %}
-{% csrf_token %}
-{% for radio in emailaddress_radios %}
-{% with emailaddress=radio.emailaddress %}
-{% element field type="radio" checked=radio.checked name="email" value=emailaddress.email id=radio.id %}
-{% slot label %}
-{{ emailaddress.email }}
-{% if emailaddress.verified %}
-{% element badge tags="success,email,verified" %}
-{% translate "Verified" %}
-{% endelement %}
-{% else %}
-{% element badge tags="warning,email,unverified" %}
-{% translate "Unverified" %}
-{% endelement %}
+<div class="profile profile-v1">
+    <div class="container container--dashboard">
+        <div class="profile__title">
+            <div class="profile__title-icon-wrapper">
+                <img src="{% static 'assets/media/images/icons/logo.svg' %}" alt="Email" class="profile__title-icon" />
+            </div>
+            <div class="profile__title-text">
+                <h3 class="profile__title-text-1">{% trans "Email Addresses" %}</h3>
+                <p class="fd-md profile__title-text-2">{% trans "Manage your associated email addresses" %}</p>
+            </div>
+        </div>
+
+        <div class="profile__container">
+            <div class="profile__content">
+                {% if emailaddresses %}
+                <p class="fb-regular mb-4">{% trans 'The following email addresses are associated with your account:' %}
+                </p>
+
+                <form action="{% url 'account_email' %}" method="post">
+                    {% csrf_token %}
+                    <div class="email-list mb-4">
+                        {% for radio in emailaddress_radios %}
+                        {% with emailaddress=radio.emailaddress %}
+                        <div class="email-item d-flex align-items-center justify-content-between p-3">
+                            <div class="form-check d-flex align-items-center">
+                                <input class="form-check-input" type="radio" name="email"
+                                    value="{{ emailaddress.email }}" id="{{ radio.id }}" {% if radio.checked %}checked{%
+                                    endif %}>
+                                <label class="form-check-label ms-3 text-white fb-regular" for="{{ radio.id }}">
+                                    {{ emailaddress.email }}
+                                </label>
+                            </div>
+                            <div class="d-flex gap-2">
+                                {% if emailaddress.verified %}
+                                <span class="badge rounded-pill bg-success">{% translate "Verified" %}</span>
+                                {% else %}
+                                <span class="badge rounded-pill bg-warning text-dark">{% translate "Unverified"
+                                    %}</span>
+                                {% endif %}
+
+                                {% if emailaddress.primary %}
+                                <span class="badge rounded-pill bg-primary">{% translate "Primary" %}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endwith %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-5 mt-4">
+                        <button class="btn btn-primary btn-pill btn-sm" type="submit" name="action_primary">
+                            {% trans 'Make Primary' %}
+                        </button>
+                        <button class="btn btn-secondary btn-pill btn-sm" type="submit" name="action_send">
+                            {% trans 'Re-send Verification' %}
+                        </button>
+                        <button class="btn btn-danger btn-pill btn-sm" type="submit" name="action_remove">
+                            {% trans 'Remove' %}
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                {% include "account/snippets/warn_no_email.html" %}
+                {% endif %}
+
+                {% if can_add_email %}
+                <div class="profile__personal-info mt-5 pt-4" style="border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                    <h3 class="profile__title-text-1 mb-4">{% trans "Add Email Address" %}</h3>
+                    <form method="post" action="{% url 'account_email' %}" class="contact-info__form">
+                        {% csrf_token %}
+                        <div class="personal-info__name-form mb-4" style="width: 100%; max-width: 400px;">
+                            <p class="fb-regular fb-regular--bold mb-2">{% trans "New Email Address" %}</p>
+                            <div class="mini-form-sm__box">
+                                {% render_field form.email class="form-control form-control-sm mini-form__input"
+                                placeholder="email@example.com" %}
+                            </div>
+                            {% if form.email.errors %}
+                            <div class="text-danger mt-2 small">
+                                {{ form.email.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <input type="submit" name="action_add" class="btn btn-primary btn-lg btn-pill"
+                            value="{% trans 'Add Email' %}" />
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header" style="background-color: #27f7db">
+            <strong class="me-auto">Alert</strong>
+            <small class="text-muted">Just now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" style="background-color: #246cf9" id="toastMessage">
+            {% for message in messages %}
+            {{ message }}
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endif %}
-{% if emailaddress.primary %}
-{% element badge tags="email,primary" %}
-{% translate "Primary" %}
-{% endelement %}
-{% endif %}
-{% endslot %}
-{% endelement %}
-{% endwith %}
-{% endfor %}
-{% endslot %}
-{% slot actions %}
-{% element button type="submit" name="action_primary" %}
-{% trans 'Make Primary' %}
-{% endelement %}
-{% element button tags="secondary" type="submit" name="action_send" %}
-{% trans 'Re-send Verification' %}
-{% endelement %}
-{% element button tags="danger,delete" type="submit" name="action_remove" %}
-{% trans 'Remove' %}
-{% endelement %}
-{% endslot %}
-{% endelement %}
-{% else %}
-{% include "account/snippets/warn_no_email.html" %}
-{% endif %}
-{% if can_add_email %}
-{% element h2 %}
-{% trans "Add Email Address" %}
-{% endelement %}
-{% url 'account_email' as action_url %}
-{% element form form=form method="post" action=action_url tags="email,add" %}
-{% slot body %}
-{% csrf_token %}
-{% element fields form=form %}
-{% endelement %}
-{% endslot %}
-{% slot actions %}
-{% element button name="action_add" type="submit" %}
-{% trans "Add Email" %}
-{% endelement %}
-{% endslot %}
-{% endelement %}
-{% endif %}
+
 {% endblock content %}
+
 {% block extra_body %}
 <script>
     (function () {
@@ -86,5 +155,20 @@
             });
         }
     })();
+
+    window.addEventListener("DOMContentLoaded", () => {
+        const toastEl = document.getElementById("liveToast");
+        if (toastEl) {
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+    });
 </script>
 {% endblock extra_body %}
+
+{% block js %}
+<script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
+<script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
+<script src="{% static 'assets/js/custom/navbar.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock js %}

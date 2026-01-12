@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.db.models import CASCADE
 from decimal import Decimal
+from PIL import Image
 
 
 User = get_user_model()
@@ -802,6 +803,21 @@ class Profile(models.Model):
     ]
     country = models.CharField(max_length=100, choices=COUNTRY_CHOICES, default="KE")
     
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if self.profile_pic:
+            try:
+                img = Image.open(self.profile_pic.path)
+
+                if img.height > 300 or img.width > 300:
+                    output_size = (300, 300)
+                    img.thumbnail(output_size)
+                    img.save(self.profile_pic.path)
+            except Exception as e:
+                # Log error or handle gracefully if image cannot be processed
+                pass
+
     def __str__(self):
         return f'{self.user.username} Profile'
     

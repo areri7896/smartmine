@@ -159,12 +159,12 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # DATABASES = {
@@ -177,16 +177,16 @@ DATABASES = {
 #         'PORT': config('POSTGRES_PORT'),
 #     }}
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'your_database_name',  # e.g., 'mydatabase'
-#         'USER': 'your_database_user',  # e.g., 'myuser'
-#         'PASSWORD': 'your_database_password',  # e.g., 'mypassword'
-#         'HOST': 'localhost',  # or your hosting provider’s MySQL host (e.g., 'mysql.example.com')
-#         'PORT': '3306',  # Default MySQL port
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='3306'),
+    }
+}
 
 SITE_ID = 1
 
@@ -288,6 +288,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # settings.py
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+SILENCED_SYSTEM_CHECKS = ["models.W036"]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

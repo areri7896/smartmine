@@ -431,10 +431,10 @@ class Kline(models.Model):
     pair = models.CharField(max_length=30, default= 'BTCUSDC')
     open_time = models.DateTimeField()
     close_time = models.DateTimeField()
-    open_amount = models.DecimalField(decimal_places=50, max_digits=200)
-    high = models.DecimalField(decimal_places=50, max_digits=200)
-    low = models.DecimalField(decimal_places=50, max_digits=200)
-    close_amount = models.DecimalField(decimal_places=50, max_digits=200)
+    open_amount = models.DecimalField(decimal_places=30, max_digits=65)
+    high = models.DecimalField(decimal_places=30, max_digits=65)
+    low = models.DecimalField(decimal_places=30, max_digits=65)
+    close_amount = models.DecimalField(decimal_places=30, max_digits=65)
 
 
 class MpesaCallback(models.Model):

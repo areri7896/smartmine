@@ -80,8 +80,7 @@
                 <div class="item-collapse__group-2">
                   <p class="fb-sm item-collapse__price">
                     Last Price:
-                    <span class="item-collapse__price-value text-bullish">USD {{ ticker.lastPrice|floatformat:2
-                      }}</span>
+                    <span class="item-collapse__price-value text-bullish">USD {{ ticker.lastPrice|floatformat:2 }}</span>
                   </p>
                   <p class="fb-sm item-collapse__price">
                     24h Low:
@@ -320,10 +319,10 @@
                   {% for trade in trades %}
                   <tr>
                     <td>
-                      <p class="fb-regular">{{ trade.time }}</p>
+                      <p class="fb-regular">{{ trade.created_at|date:"H:i:s" }}</p>
                     </td>
                     <td>
-                      <p class="fb-regular {{ trade.side }}">
+                      <p class="fb-regular {% if trade.side == 'BUY' %}text-bullish{% else %}text-bearish{% endif %}">
                         {{ trade.price|floatformat:2 }}
                       </p>
                     </td>
@@ -365,16 +364,26 @@
           </div>
           <div class="forms-purchase forms-purchase--advance-card">
             <div class="forms-group forms-group--value">
-              <input type="number" min="0" name="balance_amount" value="4" class="form-control forms-purchase__value" />
+              <input type="number" min="0" step="0.000001" name="balance_amount" placeholder="Quantity" class="form-control forms-purchase__value" required />
             </div>
             <div class="forms-group forms-group--purchase js-forms-group--purchase" id="custom-select-purchase3">
               <select name="balance_currency" class="form-control">
                 <option value="BTC" selected>BTC</option>
-                <option value="USD">USD</option>
+                <option value="HOM">HOM</option>
                 <option value="ETH">ETH</option>
                 <option value="BNB">BNB</option>
               </select>
             </div>
+          </div>
+          <div class="mt-2">
+             <small class="text-muted">Available USD: ${{ wallet_usd|floatformat:2 }}</small><br>
+             {% if portfolio %}
+             <small class="text-muted">Your Assets: 
+                {% for sym, amt in portfolio.items %}
+                    {{ sym }}: {{ amt|floatformat:4 }} &nbsp;
+                {% endfor %}
+             </small>
+             {% endif %}
           </div>
         </div>
         <div class="advance-card__form">
@@ -408,7 +417,7 @@
 {% block js %}
 <script src="{% static 'assets/js/scripts.bundle.js' %}"></script>
 <script src="{% static 'assets/js/custom/sidebar.js' %}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'assets/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'assets/plugins/apexcharts/apexcharts.min.js' %}"></script>
 <script src="{% static 'assets/plugins/slick/slick.min.js' %}"></script>
 <script src="{% static 'assets/js/custom/chart.js' %}"></script>

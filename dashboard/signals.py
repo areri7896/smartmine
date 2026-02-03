@@ -1,36 +1,36 @@
-from django.db.models.signals import m2m_changed
+from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.dispatch import receiver
-from .models import EmailSender
-from django.core.mail import send_mail
-from django.db.models.signals import post_save
-from django.contrib.auth.models import User
-from django.dispatch import receiver
-from .models import Profile, Wallet
+from .models import SecurityLog
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
-@receiver(post_save, sender=User)
-def create_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-        Wallet.objects.create(user=instance)
+@receiver(user_logged_in)
+def log_user_login(sender, request, user, **kwargs):
+    ip = get_client_ip(request)
+    user_agent = request.META.get('HTTP_USER_AGENT', '')
+    SecurityLog.objects.create(
+        user=user,
+        action='login',
+        ip_address=ip,
+        user_agent=user_agent,
+        details="User logged in successfully"
+    )
 
-
-@receiver(post_save, sender=User)
-def save_profile(sender, instance, **kwargs):
-    instance.profile.save()
-
-# This signal ensures that a Profile instance is created whenever a new User is created,
-# and that the Profile instance is saved whenever the User instance is saved.
-
-@receiver(m2m_changed, sender=EmailSender.receivers.through)
-def send_email_on_creation(sender, instance, action, **kwargs):
-    if action == "post_add":
-        for user in instance.receivers.all():
-            if user.email:
-                send_mail(
-                    subject=instance.subject,
-                    message=instance.message,
-                    from_email='ssmartmine@gmail.com',
-                    recipient_list=[user.email],
-                    fail_silently=False,
-                )
+@receiver(user_logged_out)
+def log_user_logout(sender, request, user, **kwargs):
+    if user:
+        ip = get_client_ip(request)
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        SecurityLog.objects.create(
+            user=user,
+            action='logout',
+            ip_address=ip,
+            user_agent=user_agent,
+            details="User logged out"
+        )

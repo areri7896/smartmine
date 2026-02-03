@@ -1,0 +1,7 @@
+{% load i18n %}
+
+{% if wizard.steps.prev %}
+<button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-secondary my-3">
+  {% trans "Back"%}</button>
+{% endif %}
+<button class="btn btn-primary btn-pill btn-submit w-75 m-auto" type="submit">{% trans "Sign In Now"%}</button>

@@ -107,3 +107,10 @@ class EmailSenderAdmin(admin.ModelAdmin):
                     )
 
         self.message_user(request, "Emails sent successfully.")
+
+@admin.register(SecurityLog)
+class SecurityLogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'action', 'ip_address', 'timestamp')
+    list_filter = ('action', 'timestamp')
+    search_fields = ('user__username', 'ip_address', 'details')
+    readonly_fields = ('user', 'action', 'ip_address', 'user_agent', 'details', 'timestamp')

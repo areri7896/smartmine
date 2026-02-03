@@ -9,6 +9,9 @@ from django.core.mail import send_mail
 from django.db.models import CASCADE
 from decimal import Decimal
 from PIL import Image
+from datetime import timedelta
+from django.utils import timezone
+from decimal import Decimal
 
 
 User = get_user_model()
@@ -417,6 +420,8 @@ class Withdrawal(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    is_email_verified = models.BooleanField(default=False)
+    email_verification_token = models.CharField(max_length=100, null=True, blank=True)
     
     def __str__(self):
         return f"{self.user.username} - {self.amount} ({self.status})"
@@ -472,10 +477,6 @@ class InvestmentPlan(models.Model):
     def __str__(self):
         return f"{self.name} - {self.price} USDT"
     
-from django.db import models
-from django.utils import timezone
-from datetime import timedelta
-from decimal import Decimal
 
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -820,4 +821,71 @@ class Profile(models.Model):
 
     def __str__(self):
         return f'{self.user.username} Profile'
+
+class SecurityLog(models.Model):
+    ACTION_CHOICES = [
+        ('login_success', 'Login Success'),
+        ('login_failed', 'Login Failed'),
+        ('logout', 'Logout'),
+        ('password_change', 'Password Change'),
+        ('withdrawal_request', 'Withdrawal Request'),
+        ('profile_update', 'Profile Update'),
+        ('wallet_update', 'Wallet Update'),
+        ('2fa_enable', '2FA Enabled'),
+        ('2fa_disable', '2FA Disabled'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='security_logs')
+    action = models.CharField(max_length=50, choices=ACTION_CHOICES)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+    details = models.TextField(null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.action} - {self.timestamp}"
+
+class Trade(models.Model):
+    SIDE_CHOICES = [
+        ('BUY', 'Buy'),
+        ('SELL', 'Sell'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    symbol = models.CharField(max_length=20)  # e.g., BTC/USD
+    side = models.CharField(max_length=4, choices=SIDE_CHOICES)
+    amount = models.DecimalField(max_digits=20, decimal_places=8)  # Crypto amount
+    price = models.DecimalField(max_digits=20, decimal_places=8)   # Price at execution
+    total = models.DecimalField(max_digits=20, decimal_places=2)   # USD Total
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.side} {self.amount} {self.symbol} @ {self.price}"
+
+class SecurityLog(models.Model):
+    ACTION_CHOICES = [
+        ('login', 'Login Success'),
+        ('login_failed', 'Login Failed'),
+        ('logout', 'Logout'),
+        ('password_change', 'Password Change'),
+        ('2fa_enabled', '2FA Enabled'),
+        ('2fa_disabled', '2FA Disabled'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='security_logs')
+    action = models.CharField(max_length=50, choices=ACTION_CHOICES)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=255, blank=True, null=True)
+    details = models.TextField(blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
     
+    def __str__(self):
+        return f"{self.user} - {self.action} - {self.timestamp}"

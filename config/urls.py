@@ -15,18 +15,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
+from django.views.generic import RedirectView
 from . import settings
 from django.conf.urls.static import static
-from django.urls import re_path
 from django.views.static import serve
+from two_factor.urls import urlpatterns as tf_urls
 
 urlpatterns = [
     path('maze/clearcache/', include('clearcache.urls')),
     path('maze/', admin.site.urls),
-    path('', include('smartmine.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('accounts/', include('allauth.urls')),
+    path('', include('smartmine.urls')),
+    # Handle two_factor.urls being a tuple in some versions/environments
+    path('', include(tf_urls)),
     # path('payment/', include('payment.urls')),
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
@@ -34,4 +37,5 @@ urlpatterns += [
     re_path(r'^media/(?P<path>.*)$', serve, {
         'document_root': settings.MEDIA_ROOT,
     }),
+    re_path(r'^.*$', RedirectView.as_view(pattern_name='signin', permanent=False)),
 ]

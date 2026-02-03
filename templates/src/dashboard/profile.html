@@ -94,6 +94,21 @@
               </div>
             </div>
           </div>
+          <div class="profile__personal-info mt-4 pt-4 border-top">
+            <h4 class="text-white mb-3 w-100">Security Settings</h4>
+            <div class="personal-info__name-form">
+              <p class="fb-regular fb-regular--bold personal-info__name-form-text">Two-Factor Auth</p>
+              <div class="d-block mt-2">
+                <a href="{% url 'two_factor:profile' %}" class="btn btn-outline-info btn-sm btn-pill">Configure 2FA</a>
+              </div>
+            </div>
+            <div class="personal-info__name-form">
+              <p class="fb-regular fb-regular--bold personal-info__name-form-text">Security History</p>
+              <div class="d-block mt-2">
+                <a href="{% url 'security_logs' %}" class="btn btn-outline-info btn-sm btn-pill">View Activity Logs</a>
+              </div>
+            </div>
+          </div>
           <input type="submit" class="btn btn-primary btn-lg btn-pill profile__save-btn" value="Save Changes" />
         </form>
       </div>

@@ -35,7 +35,7 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 # DEBUG = os.environ["DEBUG", default=False, cast=bool]
 
 if DEBUG:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1:8000']
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 else:
     ALLOWED_HOSTS = [
         '2qd-talented-lyell.circumeo-apps.net',
@@ -47,6 +47,7 @@ else:
 CSRF_TRUSTED_ORIGINS = [
     'https://www.smrtmine.com',
     'https://smrtmine.com',
+    
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -80,10 +81,15 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'django_daraja',
 
+    'axes',
+    'django_otp',
+    'django_otp.plugins.otp_static',
+    'django_otp.plugins.otp_totp',
+    'two_factor',
+
     #installed apps
     'smartmine',
     'dashboard.apps.DashboardConfig',
-    # 'dashboard',
     'binapi',
     # 'payment',
 ]
@@ -103,6 +109,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'django_otp.middleware.OTPMiddleware',
+    'axes.middleware.AxesMiddleware',
     'dashboard.middleware.ProfileCompletionMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
@@ -223,7 +231,7 @@ AUTHENTICATION_BACKENDS = [
 
     # `allauth` specific authentication methods, such as login by email
     'allauth.account.auth_backends.AuthenticationBackend',
-
+    'axes.backends.AxesStandaloneBackend',
 ]
 
 ASGI_APPLICATION = "config.asgi.application"
@@ -314,7 +322,12 @@ ACCOUNT_SIGNUP_FIELDS= ['email*', 'password1*', 'password2*']
 # ACCOUNT_SIGNUP_FORM_CLASS = 'main.forms.CustomSignupForm'
 
 LOGIN_REDIRECT_URL = 'dashboard'
-LOGOUT_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = '/dashboard/signin/'
+AUTO_LOGOUT = 5
+
+# Auto Logout Settings
+SESSION_COOKIE_AGE = 300  # 5 minutes
+SESSION_SAVE_EVERY_REQUEST = True
 
 # ACCOUNT_AUTHENTICATION_METHOD = 'email'
 DEFAULT_FROM_EMAIL = 'info@smrtmine.com'
@@ -355,4 +368,12 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
-# django_heroku.settings(locals())
+# Axes Settings
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # 1 hour
+AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
+AXES_RESET_ON_SUCCESS = True
+
+# Two Factor Settings
+LOGIN_URL = 'signin'
+TWO_FACTOR_REMEMBER_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days

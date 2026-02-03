@@ -1,0 +1,13 @@
+{% extends "two_factor/_base_focus.html" %}
+{% load i18n %}
+
+{% block content %}
+  <h1 class="my-3">{% block title %}{% trans "Disable Two-factor Authentication" %}{% endblock %}</h1>
+  <p class="fb-regular my-3">{% blocktrans trimmed %}You are about to disable two-factor authentication. This
+    weakens your account security, are you sure?{% endblocktrans %}</p>
+  <form class="sign-in__forms" method="post">
+    {% csrf_token %}
+    <table>{{ form.as_table }}</table>
+    <button class="btn btn-danger mini-form__submit" type="submit">{% trans "Disable" %}</button>
+  </form>
+{% endblock %}

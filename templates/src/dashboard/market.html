@@ -59,57 +59,45 @@
         <!-- Start::Table Section -->
         <div class="table-wrapper table--type-1">
           {% if investments %}
-          <div class="table-container">
+          <div class="table-container" style="overflow-x: auto; max-width: 100%;">
             <h6 class="component__title mb-3 text-center">My Investments</h6>
-            <table class="table table-content w-75">
+            <table class="table table-content" style="width: 100%; min-width: 600px;">
               <thead class="table__head">
                 <tr>
-                  <th class="fb-regular w-20 table__head">Investment Plan</th>
-                  <th class="fb-regular w-20 table__head">Start Date</th>
-                  <th class="fb-regular w-20 table__head">End Date</th>
-                  <th class="fb-regular w-20 table__head">Remaining Time</th>
-                  <th class="fb-regular w-20 table__head">Status</th>
+                  <th class="fb-regular table__head" style="white-space: nowrap;">Investment Plan</th>
+                  <th class="fb-regular table__head" style="white-space: nowrap;">Start Date</th>
+                  <th class="fb-regular table__head" style="white-space: nowrap;">End Date</th>
+                  <th class="fb-regular table__head" style="white-space: nowrap;">Remaining Time</th>
+                  <th class="fb-regular table__head" style="white-space: nowrap;">Status</th>
                 </tr>
               </thead>
-              <tbody>
-                {% for investment in investments %}
+              <tbody>{% for investment in investments %}
                 <tr id="investment-row-{{ investment.id }}">
-                  <td>
-                    <p class="fb-regular table__assets-crypto-abbr">{{ investment.plan.name }}</p>
+                  <td style="padding: 10px 5px;">
+                    <p class="fb-regular table__assets-crypto-abbr" style="margin: 0; font-size: 0.9rem;">
+                      {{investment.plan.name }}</p>
                   </td>
-                  <td>
-                    <p class="fb-regular table__order">{{ investment.start_date|date:"Y-m-d H:i"}}
-                    </p>
+                  <td style="padding: 10px 5px;">
+                    <p class="fb-regular table__order" style="margin: 0; font-size: 0.85rem;">
+                      {{investment.start_date|date:"Y-m-d H:i" }}</p>
                   </td>
-                  <td>
-                    <p class="fb-regular table__available">{{ investment.end_date|date:"Y-m-d H:i"}}
-                    </p>
+                  <td style="padding: 10px 5px;">
+                    <p class="fb-regular table__available" style="margin: 0; font-size: 0.85rem;">
+                      {{investment.end_date|date:"Y-m-d H:i" }}</p>
                   </td>
-                  <td>
+                  <td style="padding: 10px 5px;">
                     <p class="fb-regular countdown-timer text-primary" data-endtime="{{ investment.end_date|date:'c' }}"
-                      id="timer-{{ investment.id }}">
-                      Calculating...
-                    </p>
+                      id="timer-{{ investment.id }}" style="margin: 0; font-size: 0.85rem;">Calculating...</p>
                   </td>
-                  <td>
-                    {% if investment.status == 'active' %}
-                    <p class="fb-regular table__status text-success" id="status-{{ investment.id }}">
-                      {{ investment.status }}
-                    </p>
-                    {% else %}
-                    <p class="fb-regular table__status text-danger" id="status-{{ investment.id }}">
-                      {{ investment.status }}
-                    </p>
-                    {% endif %}
-
-                  </td>
-                </tr>
-                {% empty %}
-                <tr>
-                  <td colspan="5" class="text-center">You have not invested yet! <span class="text-danger"> Please
-                      Invest </span></td>
-                </tr>
-                {% endfor %}
+                  <td style="padding: 10px 5px;">{% if investment.status == 'active' %}<p
+                      class="fb-regular table__status text-success" id="status-{{ investment.id }}"
+                      style="margin: 0; font-size: 0.85rem;">{{ investment.status }}</p>{% else %}<p
+                      class="fb-regular table__status text-danger" id="status-{{ investment.id }}"
+                      style="margin: 0; font-size: 0.85rem;">{{ investment.status }}</p>{% endif %}</td>
+                </tr>{% empty %}<tr>
+                  <td colspan="5" class="text-center">You have not invested yet! <span class="text-danger">Please
+                      Invest</span></td>
+                </tr>{% endfor %}
               </tbody>
             </table>
           </div>

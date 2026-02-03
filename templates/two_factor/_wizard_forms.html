@@ -1,0 +1,48 @@
+{% load i18n widget_tweaks %}
+
+{{ wizard.management_form }}
+
+{% if wizard.form.non_field_errors %}
+<div class="alert alert-danger">
+  {% for error in wizard.form.non_field_errors %}
+  <p class="mb-0 fb-regular my-3">{{ error }}</p>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% for hidden in wizard.form.hidden_fields %}
+{{ hidden }}
+{% endfor %}
+
+{% for field in wizard.form.visible_fields %}
+<div class="forms-group mb-3 d-block mini-form-sm__box">
+  {% with WIDGET_TYPE=field.field.widget.input_type %}
+  {% if WIDGET_TYPE == 'checkbox' %}
+  <div class="form-check">
+    {% render_field field class="form-check-input" %}
+    <label class="form-check-label fb-sm" for="{{ field.id_for_label }}">
+      {{ field.label }}
+    </label>
+  </div>
+  {% else %}
+  {% render_field field class="form-control form-control-sm mini-form__input" placeholder=field.label %}
+  {% if WIDGET_TYPE == 'password' %}
+  <span class="form-group__password-toggle js-form-group__password-toggle"
+    data-password="{{ field.id_for_label }}"></span>
+  {% endif %}
+  {% endif %}
+  {% endwith %}
+
+  {% if field.errors %}
+  {% for error in field.errors %}
+  <div class="invalid-feedback d-block">
+    {{ error }}
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  {% if field.help_text %}
+  <small class="form-text text-muted">{{ field.help_text|safe }}</small>
+  {% endif %}
+</div>
+{% endfor %}

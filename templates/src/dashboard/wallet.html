@@ -15,7 +15,6 @@
 <!-- End::Page Styles -->
 <link href="{% static 'assets/css/pages/sign-in.css' %}" rel="stylesheet" type="text/css" />
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
 {% endblock %}
@@ -41,8 +40,10 @@
                 </div>
                 <p class="standard-card__content-percentage text-bullish">0.25%</p>
               </div>
-              <p class="standard-card__content-price-1">{{ asset.free }}</p>
-              <p class="standard-card__content-price-2">{{ asset.locked }}USD</p>
+              <p class="standard-card__content-price-1">{% if request.session.balances_revealed %}{{ asset.free }}{%
+                else %}*******{% endif %}</p>
+              <p class="standard-card__content-price-2">{% if request.session.balances_revealed %}{{ asset.locked }}{%
+                else %}*******{% endif %}USD</p>
               <div class="standard-card__content-chart-wrapper">
                 <!-- <div id="standard-card__content-chart-7" class="standard-card__content-chart-render"></div> -->
               </div>
@@ -62,11 +63,25 @@
             <div class="advance-card__balance-wrapper">
               <div class="advance-card__balance">
                 <p class="advance-card__balance-title">Total Balance</p>
-                <p class="advance-card__balance-crypto-value">{{ bal_usd.converted_amount }} usd</p>
-                <p class="advance-card__balance-currency-value">
-
-                  <span class="advance-card__balance-currency">{{ bal }} KSH</span>
-                </p>
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <p class="advance-card__balance-crypto-value">
+                      {% if request.session.balances_revealed %}{{bal_usd.converted_amount }}
+                      {% else %}*******{% endif%} usd</p>
+                    <p class="advance-card__balance-currency-value">
+                      <span class="advance-card__balance-currency">
+                        {% if request.session.balances_revealed %}{{ bal }}{%else %}*******{% endif %} KSH</span>
+                    </p>
+                  </div>
+                  {% if not request.session.balances_revealed %}
+                  <button type="button" class="btn btn-outline-primary btn-sm btn-pill" data-bs-toggle="modal"
+                    data-bs-target="#revealModal">
+                    Reveal
+                  </button>
+                  {% else %}
+                  <a href="{% url 'hide_balances_session' %}" class="btn btn-outline-secondary btn-sm btn-pill">Hide</a>
+                  {% endif %}
+                </div>
               </div>
 
               <div class="advance-card__balance-chart">
@@ -98,8 +113,10 @@
                 <div class="advance-card__card-desc">
                   <p class="advance-card__card-desc-title">{{ asset.asset }}</p>
                   <div class="advance-card__card-desc-value d-flex">
-                    <p class="advance-card__card-desc-value-crypto">{{ asset.free.btc }}</p>
-                    <p class="advance-card__card-desc-value-currency">{{ asset.locked }}</p>
+                    <p class="advance-card__card-desc-value-crypto">
+                      {% if request.session.balances_revealed %}{{asset.free }}{% else %}*******{% endif %}</p>
+                    <p class="advance-card__card-desc-value-currency">
+                      {% if request.session.balances_revealed %}{{asset.locked }}{% else %}*******{% endif %}</p>
                   </div>
                 </div>
                 {% endfor %}
@@ -121,8 +138,10 @@
                 <div class="advance-card__card-desc">
                   <p class="advance-card__card-desc-title">{{ asset.asset }}</p>
                   <div class="advance-card__card-desc-value">
-                    <p class="advance-card__card-desc-value-crypto">{{ asset.free.btc }}</p>
-                    <p class="advance-card__card-desc-value-currency">{{ asset.locked }}</p>
+                    <p class="advance-card__card-desc-value-crypto">
+                      {% if request.session.balances_revealed %}{{asset.free }}{% else %}*******{% endif %}</p>
+                    <p class="advance-card__card-desc-value-currency">
+                      {% if request.session.balances_revealed %}{{asset.locked }}{% else %}*******{% endif %}</p>
                   </div>
                 </div>
                 {% endfor %}
@@ -326,17 +345,15 @@
                   <p class="fb-regular table__available">KSH {{ depo.amount }}</p>
                 </td>
                 <td>
-                  <p class="fb-regular table__total">{{depo.transaction_id}}</p>
+                  <p class="fb-regular table__total">{{depo.verification_code}}</p>
                 </td>
                 <td>
-                  {% if depo.status == 'Pending' %}
+                  {% if depo.is_completed == 0 %}
                   <p class="fb-regular table__market text-bullish">Pending</p>
-                  {% elif depo.status == 'Completed' %}
+                  {% elif depo.is_completed == 1 %}
                   <p class="fb-regular table__market text-success">Completed</p>
-                  {% elif depo.status == 'Failed' %}
-                  <p class="fb-regular table__market text-danger">Failed</p>
                   {% else %}
-                  <p class="fb-regular table__market text-warning">{{ depo.status }}</p>
+                  <p class="fb-regular table__market text-warning">{{ depo.is_completed }}</p>
                   {% endif %}
 
                 </td>
@@ -540,4 +557,25 @@
 <script src="{% static 'assets/js/custom/navbar.js' %}"></script>
 <!-- End::Page Scripts -->
 {% endblock %}
+
+<!-- Reveal Balance Modal -->
+<div class="modal fade" id="revealModal" tabindex="-1" aria-labelledby="revealModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title" id="revealModalLabel">Verify Identity to Reveal Balance</h5>
+        <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <img src="{% static 'assets/media/images/icons/security.svg' %}" alt="Security" style="width: 80px;"
+          class="mb-3">
+        <p class="mb-4">Click below to confirm your identity via your authenticator app.</p>
+        <form action="{% url 'verify_otp_reveal' %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-lg btn-pill w-100">Verify and Reveal</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

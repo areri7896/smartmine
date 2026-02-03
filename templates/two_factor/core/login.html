@@ -1,0 +1,67 @@
+{% extends "two_factor/_base_focus.html" %}
+{% load i18n %}
+{% load two_factor_tags %}
+
+{% block extra_media %}
+  {{ form.media }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="hero__content">
+    <div class="sign-in">
+      <div class="sign-in-card">
+  <h1 class="my-3">{% block title %}{% trans "Login" %}{% endblock %}</h1>
+
+  {% if wizard.steps.current == 'auth' %}
+    <p class="fb-regular my-3">{% blocktrans %}Enter your credentials.{% endblocktrans %}</p>
+  {% elif wizard.steps.current == 'token' %}
+    <p class="fb-regular my-3">{{ device|as_verbose_action }}</p>
+  {% elif wizard.steps.current == 'backup' %}
+    <p class="fb-regular my-3">{% blocktrans trimmed %}Use this form for entering backup tokens for logging in.
+      These tokens have been generated for you to print and keep safe. Please
+      enter one of these backup tokens to login to your account.{% endblocktrans %}</p>
+  {% endif %}
+
+  <form class="sign-in-form" action="" method="post">
+    {% block main_form_content %}
+    {% csrf_token %}
+    {% include "two_factor/_wizard_forms.html" %}
+
+    {# hidden submit button to enable [enter] key #}
+    <input class="btn btn-primary btn-sm mini-form__submit" type="submit" value="" hidden />
+
+    {% if other_devices %}
+      <p class="fb-regular my-3" >{% trans "Or, alternatively, use one of your other authentication methods:" %}</p>
+      <p class="fb-regular my-3">
+        {% for other in other_devices %}
+        <button name="challenge_device" value="{{ other.persistent_id }}"
+                class="btn btn-secondary btn-block" type="submit">
+          {{ other|as_action }}
+        </button>
+      {% endfor %}</p>
+    {% endif %}
+
+    {% include "two_factor/_wizard_actions.html" %}
+    {% endblock %}
+  </form>
+
+  {% block 'backup_tokens' %}
+    {% if backup_tokens %}
+       <hr>
+       <div class="backup_tokens_form">
+       <form class="sign-in-form" action="" method="post">
+           {% csrf_token %}
+            <p class="fb-regular my-3">{% trans "As a last resort, you can use a backup token:" %}</p>
+            <p class="fb-regular my-3">
+                <button name="wizard_goto_step" type="submit" value="backup"
+                    class="btn btn-sm btn-secondary btn-block">{% trans "Use Backup Token" %}</button>
+            </p>
+       </form>
+       </div>
+       </div>
+       </div>
+       </div>
+    {% endif %}
+  {% endblock %}
+{% endblock %}

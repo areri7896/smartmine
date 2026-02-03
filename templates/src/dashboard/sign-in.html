@@ -33,7 +33,9 @@
         <p class="fb-lg">Or</p>
         <div class="line"></div>
       </div>
-      <form action="#" class="sign-in__forms">
+      <form action="" method="POST" class="sign-in__forms">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.GET.next }}">
         <div class="forms-group">
           <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email address">
         </div>
@@ -49,7 +51,7 @@
           </div>
           <a href="#" class="forgot-password fb-sm">Forgot password</a>
         </div>
-        <input type="submmit" class="btn btn-primary btn-pill btn-submit" value="Sign In Now"></input>
+        <input type="submit" class="btn btn-primary btn-pill btn-submit" value="Sign In Now">
         <p class="fb-sm sign-up-info">
           Haven’t an account? <a href="#" class="sign-up-link">Sign up for free</a>
         </p>

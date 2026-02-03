@@ -242,6 +242,32 @@
   <script src="{% static 'assets/js/custom/navbar.js' %}"></script>
   <script src="{% static 'assets/js/custom/custom-select.js' %}"></script>
   <!-- End::Page Scripts -->
+  {% if request.user.is_authenticated %}
+  <script>
+      (function() {
+          const idleDuration = 300000; // 5 minutes in milliseconds
+          let idleTimer;
+
+          function resetTimer() {
+              clearTimeout(idleTimer);
+              idleTimer = setTimeout(() => {
+                  window.location.href = "{% url 'signin' %}";
+              }, idleDuration);
+          }
+
+          // Events to reset the timer
+          window.onload = resetTimer;
+          window.onmousemove = resetTimer;
+          window.onmousedown = resetTimer;
+          window.ontouchstart = resetTimer;
+          window.onclick = resetTimer;
+          window.onkeypress = resetTimer;
+          window.addEventListener('scroll', resetTimer, true);
+
+          resetTimer(); // Initialize on load
+      })();
+  </script>
+  {% endif %}
   {% endblock %} {% endblock %}
 </body>
 

@@ -1,0 +1,24 @@
+{% extends "two_factor/_base_focus.html" %}
+{% load i18n %}
+
+{% block content %}
+  <h1 class="my-3">{% block title %}{% trans "Enable Two-Factor Authentication" %}{% endblock %}</h1>
+
+  <p class="fb-regular my-3">{% blocktrans trimmed %}Congratulations, you've successfully enabled two-factor
+      authentication.{% endblocktrans %}</p>
+
+  {% if not phone_methods %}
+    <p class="fb-regular my-3"><a href="{% url 'two_factor:profile' %}"
+        class="btn btn-secondary btn-sm">{% trans "Back to Account Security" %}</a></p>
+  {% else %}
+    <p class="fb-regular my-3">{% blocktrans trimmed %}However, it might happen that you don't have access to
+      your primary token device. To enable account recovery, add a phone
+      number.{% endblocktrans %}</p>
+
+    <a href="{% url 'two_factor:profile' %}"
+        class="btn btn-primary btn-lg btn-pill mx-auto hero__button">{% trans "Back to Account Security" %}</a>
+    <p class="fb-regular my-3"><a href="{% url 'two_factor:phone_create' %}"
+        class="btn btn-success btn-sm">{% trans "Add Phone Number" %}</a></p>
+  {% endif %}
+
+{% endblock %}

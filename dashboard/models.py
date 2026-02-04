@@ -873,24 +873,4 @@ class Trade(models.Model):
     def __str__(self):
         return f"{self.side} {self.amount} {self.symbol} @ {self.price}"
 
-class SecurityLog(models.Model):
-    ACTION_CHOICES = [
-        ('login', 'Login Success'),
-        ('login_failed', 'Login Failed'),
-        ('logout', 'Logout'),
-        ('password_change', 'Password Change'),
-        ('2fa_enabled', '2FA Enabled'),
-        ('2fa_disabled', '2FA Disabled'),
-    ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='security_logs')
-    action = models.CharField(max_length=50, choices=ACTION_CHOICES)
-    ip_address = models.GenericIPAddressField(null=True, blank=True)
-    user_agent = models.CharField(max_length=255, blank=True, null=True)
-    details = models.TextField(blank=True, null=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        ordering = ['-timestamp']
-    
-    def __str__(self):
-        return f"{self.user} - {self.action} - {self.timestamp}"

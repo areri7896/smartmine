@@ -536,6 +536,30 @@
 
 </script>
 
+<!-- Reveal Balance Modal -->
+<div class="modal fade" id="revealModal" tabindex="-1" aria-labelledby="revealModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-bottom-0">
+        <h5 class="modal-title" id="revealModalLabel">Verify Identity to Reveal Balance</h5>
+        <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <img src="{% static 'assets/media/images/icons/security.png' %}" alt="Security" style="width: 80px;"
+          class="mb-3">
+        <p class="mb-4">Click below to confirm your identity via your authenticator app.</p>
+        <form action="{% url 'verify_otp_reveal' %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-lg btn-pill w-100">Verify and Reveal</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
 {% block js %}
 <!-- Start::Global Bundle Scripts (used by all pages) -->
 <!-- Bootstrap JS (place before closing </body>) -->
@@ -558,24 +582,4 @@
 <!-- End::Page Scripts -->
 {% endblock %}
 
-<!-- Reveal Balance Modal -->
-<div class="modal fade" id="revealModal" tabindex="-1" aria-labelledby="revealModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-dark text-white">
-      <div class="modal-header border-bottom-0">
-        <h5 class="modal-title" id="revealModalLabel">Verify Identity to Reveal Balance</h5>
-        <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center py-4">
-        <img src="{% static 'assets/media/images/icons/security.png' %}" alt="Security" style="width: 80px;"
-          class="mb-3">
-        <p class="mb-4">Click below to confirm your identity via your authenticator app.</p>
-        <form action="{% url 'verify_otp_reveal' %}" method="post">
-          {% csrf_token %}
-          <button type="submit" class="btn btn-primary btn-lg btn-pill w-100">Verify and Reveal</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock %}

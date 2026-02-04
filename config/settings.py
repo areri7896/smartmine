@@ -67,9 +67,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     "channels", 
     'django_celery_beat',
     'django_crontab',
+    'referrals',
 
 
     #third party apps
@@ -140,12 +142,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # Social Account Provider Settings
 SOCIALACCOUNT_PROVIDERS = {
@@ -161,25 +163,6 @@ SOCIALACCOUNT_PROVIDERS = {
         'FETCH_USERINFO': True,
     }
 }
-
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': config('POSTGRES_DB'),
-#         'USER': config('POSTGRES_USER'),
-#         'PASSWORD': config('POSTGRES_PASSWORD'),
-#         'HOST': config('POSTGRES_HOST'),
-#         'PORT': config('POSTGRES_PORT'),
-#     }}
 
 # DATABASES = {
 #     'default': {
@@ -297,7 +280,7 @@ ACCOUNT_USERNAME_BLACKLIST = ['admin', 'staff', 'office']
 ACCOUNT_SIGNUP_FIELDS= ['email*', 'password1*', 'password2*']
 
 
-# ACCOUNT_SIGNUP_FORM_CLASS = 'main.forms.CustomSignupForm'
+ACCOUNT_SIGNUP_FORM_CLASS = 'referrals.forms.ReferralSignupForm'
 
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'account_login'  # Redirect to styled login page
@@ -352,6 +335,18 @@ AXES_COOLOFF_TIME = 1  # 1 hour
 AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
 AXES_RESET_ON_SUCCESS = True
 
-# Two Factor Settings
+# Referral System Settings
+REFERRAL_CONFIG = {
+    'ENABLED': True,
+    'CODE_LENGTH': 8,
+    'LEVEL_COMMISSIONS': {
+        1: 0.05,  # 5% for level 1
+        2: 0.02,  # 2% for level 2
+        3: 0.01,  # 1% for level 3
+    },
+    'SIGNUP_BONUS_REFERRER': 100.00,
+    'SIGNUP_BONUS_REFERRED': 50.00,
+    'REWARD_TRIGGERS': ['deposit', 'trade', 'investment'],
+}
 LOGIN_URL = 'account_login'  # Use allauth login URL
 TWO_FACTOR_REMEMBER_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days

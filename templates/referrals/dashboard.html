@@ -1,0 +1,193 @@
+{% extends 'src/dashboard/basic.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Referral Summary Cards -->
+        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+            <div class="card bg-dark border-secondary">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold text-white">Total Referrals</p>
+                                <h5 class="font-weight-bolder mb-0 text-white">
+                                    {{ total_referrals }}
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-primary shadow text-center border-radius-md">
+                                <i class="ni ni-users-single text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+            <div class="card bg-dark border-secondary">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold text-white">Total Earnings</p>
+                                <h5 class="font-weight-bolder mb-0 text-white">
+                                    KES {{ total_earnings|floatformat:2|intcomma }}
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-success shadow text-center border-radius-md">
+                                <i class="ni ni-money-coins text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
+            <div class="card bg-dark border-secondary">
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="numbers">
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold text-white">Pending Bonus</p>
+                                <h5 class="font-weight-bolder mb-0 text-white">
+                                    KES {{ pending_earnings|floatformat:2|intcomma }}
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4 text-end">
+                            <div class="icon icon-shape bg-gradient-warning shadow text-center border-radius-md">
+                                <i class="ni ni-calendar-grid-58 text-lg opacity-10" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Referral Link Section -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header pb-0 bg-transparent border-bottom border-secondary">
+                    <h6 class="text-white">Your Referral Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="text-white">Your Referral Code</label>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control bg-dark text-white border-secondary" value="{{ referral_code }}" id="refCode" readonly>
+                                <button class="btn btn-outline-primary mb-0" type="button" onclick="copyToClipboard('refCode')">Copy</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-white">Referral Link</label>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control bg-dark text-white border-secondary" value="{{ referral_link }}" id="refLink" readonly>
+                                <button class="btn btn-outline-primary mb-0" type="button" onclick="copyToClipboard('refLink')">Copy Link</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tables -->
+    <div class="row mt-4">
+        <div class="col-lg-8 col-md-6 mb-md-0 mb-4">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header pb-0 bg-transparent border-bottom border-secondary">
+                    <div class="row">
+                        <div class="col-lg-6 col-7">
+                            <h6 class="text-white">Your Referrals</h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body px-0 pb-2">
+                    <div class="table-responsive">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">User</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Level</th>
+                                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for referral in referrals %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex px-2 py-1">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm text-white">{{ referral.referred.username }}</h6>
+                                                <p class="text-xs text-secondary mb-0">{{ referral.referred.email }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0 text-white">Level {{ referral.level }}</p>
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <span class="text-secondary text-xs font-weight-bold">{{ referral.created_at|date:"M d, Y" }}</span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4">
+                                        <p class="text-white">You haven't referred anyone yet.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header pb-0 bg-transparent border-bottom border-secondary">
+                    <h6 class="text-white">Recent Rewards</h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="timeline timeline-one-side">
+                        {% for reward in recent_rewards %}
+                        <div class="timeline-block mb-3">
+                            <span class="timeline-step">
+                                <i class="ni ni-bell-55 text-success text-gradient"></i>
+                            </span>
+                            <div class="timeline-content">
+                                <h6 class="text-white text-sm font-weight-bold mb-0">KES {{ reward.amount|floatformat:2 }} - {{ reward.get_reward_type_display }}</h6>
+                                <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">{{ reward.created_at|naturaltime }}</p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-white text-sm">No rewards earned yet.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(id) {
+    var copyText = document.getElementById(id);
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); /* For mobile devices */
+    navigator.clipboard.writeText(copyText.value);
+    
+    // Optional: Show a toast or update button text
+    alert("Copied: " + copyText.value);
+}
+</script>
+{% endblock %}

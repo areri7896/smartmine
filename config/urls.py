@@ -25,6 +25,7 @@ from two_factor.urls import urlpatterns as tf_urls
 urlpatterns = [
     path('maze/clearcache/', include('clearcache.urls')),
     path('maze/', admin.site.urls),
+    path('referrals/', include('referrals.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('accounts/', include('allauth.urls')),
     path('', include('smartmine.urls')),

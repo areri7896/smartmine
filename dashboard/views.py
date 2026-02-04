@@ -234,6 +234,15 @@ def mpesa_callback(request):
                 wallet_obj.balance += Decimal(amount)
                 wallet_obj.save()
 
+                # Trigger Referral Rewards
+                from referrals.utils import process_referral_rewards
+                process_referral_rewards(
+                    user=transaction_obj.user,
+                    amount=amount,
+                    reward_type='deposit',
+                    transaction_id=transaction_id
+                )
+
                 return JsonResponse({'success': True, 'message': 'Deposit validated successfully.'}, status=200)
             except DepositTransaction.DoesNotExist:
                 return JsonResponse({'error': 'Transaction not found.'}, status=404)
@@ -268,6 +277,16 @@ def confirm_investment(request, plan_id):
                     plan=plan,
                     quantity=1
                 )
+                
+                # Trigger Referral Rewards for Investment
+                from referrals.utils import process_referral_rewards
+                process_referral_rewards(
+                    user=request.user,
+                    amount=plan.price, # Assuming plan has a price field or investment has principal
+                    reward_type='investment',
+                    transaction_id=f"INV-{investment.id}"
+                )
+                
                 messages.success(request, f'Successfully invested in {plan.name}!')
                 return redirect('market')
             except ValueError as e:
@@ -677,6 +696,15 @@ def trade(request):
                     total=cost_usd
                 )
                 messages.success(request, f"Bought {amount_val} {currency} for ${cost_usd:.2f}")
+
+                # Trigger Referral Rewards for Trade (Buy)
+                from referrals.utils import process_referral_rewards
+                process_referral_rewards(
+                    user=request.user,
+                    amount=cost_kes, # Commission on the TRADE volume
+                    reward_type='trade',
+                    transaction_id=f"TRADE-BUY-{request.user.id}-{timezone.now().timestamp()}"
+                )
                 
             elif action == 'sell':
                 # User wants to sell 'amount_val' quantity of 'currency'

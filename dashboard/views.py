@@ -290,9 +290,14 @@ def invest(request, plan_id):
 
 @login_required
 def profile(request):
+    try:
+        profile = request.user.profile
+    except Profile.DoesNotExist:
+        profile = Profile.objects.create(user=request.user)
+
     if request.method == 'POST':
         user_form = CustomUserChangeForm(request.POST, instance=request.user)
-        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        profile_form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
 
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
@@ -305,7 +310,7 @@ def profile(request):
             messages.error(request, 'Please correct the error below.')
     else:
         user_form = CustomUserChangeForm(instance=request.user)
-        profile_form = ProfileUpdateForm(instance=request.user.profile)
+        profile_form = ProfileUpdateForm(instance=profile)
 
     context = {
         'user_form': user_form,
@@ -345,7 +350,7 @@ def accept_terms(request):
     if request.method == 'POST' and request.user.is_authenticated:
         request.user.profile.show_terms_modal = False
         request.user.profile.save()
-        return JsonResponse({'status': 'success'})
+        return redirect('profile')
     return JsonResponse({'status': 'error'}, status=400)
 
 # --- FIXED LOGIC FUNCTIONS ---

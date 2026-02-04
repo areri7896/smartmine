@@ -37,5 +37,4 @@ urlpatterns += [
     re_path(r'^media/(?P<path>.*)$', serve, {
         'document_root': settings.MEDIA_ROOT,
     }),
-    re_path(r'^.*$', RedirectView.as_view(pattern_name='signin', permanent=False)),
 ]

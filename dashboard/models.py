@@ -158,10 +158,14 @@ class Investment(models.Model):
                 # Lock wallet
                 wallet = Wallet.objects.select_for_update().get(user=user)
                 
+                # Calculate KES cost
+                usd_to_kes_rate = Decimal('129.0')
+                cost_kes = principal * usd_to_kes_rate
+
                 # Check balance
-                if wallet.balance < principal:
+                if wallet.balance < cost_kes:
                     raise ValueError(
-                        f"Insufficient balance. Required: {principal}, Available: {wallet.balance}"
+                        f"Insufficient balance. Required: {cost_kes} KES, Available: {wallet.balance} KES"
                     )
                 
                 # Calculate expected profit
@@ -171,7 +175,7 @@ class Investment(models.Model):
                 
                 # Deduct from wallet
                 balance_before = wallet.balance
-                wallet.balance -= principal
+                wallet.balance -= cost_kes
                 wallet.save()
                 
                 # Create investment
@@ -198,6 +202,7 @@ class Investment(models.Model):
                     wallet=wallet,
                     transaction_type='investment',
                     amount=principal,
+                    currency='USD',
                     balance_before=balance_before,
                     balance_after=wallet.balance,
                     reference_id=f"INV-{investment.id}-START",

@@ -296,7 +296,7 @@
   </script>
   {% endif %}
 
-  {% if request.user.profile.show_terms_modal %}
+  {% if request.user.profile.show_terms_modal and not request.user.profile.is_complete %}
   <!-- Modal terms and conditions for smartmine-->
   <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -437,7 +437,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Script to show modal on page load -->
-  {% if request.user.is_authenticated and request.user.profile.show_terms_modal %}
+  {% if request.user.is_authenticated and request.user.profile.show_terms_modal and not request.user.profile.is_complete %}
   <script type="text/javascript">
     $(document).ready(function () {
       setTimeout(function () {
@@ -458,6 +458,7 @@
         headers: { 'X-CSRFToken': '{{ csrf_token }}' },
         success: function (response) {
           console.log('Terms modal flag updated');
+          window.location.href = "{% url 'profile' %}";
         }
       });
     });

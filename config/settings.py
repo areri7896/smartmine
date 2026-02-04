@@ -147,6 +147,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 #     }
 # }
 
+# Social Account Provider Settings
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
@@ -157,12 +158,7 @@ SOCIALACCOUNT_PROVIDERS = {
             'access_type': 'online',
         },
         'OAUTH_PKCE_ENABLED': True,
-    }
-}
-
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'FETCH_USERINFO' : True
+        'FETCH_USERINFO': True,
     }
 }
 
@@ -258,25 +254,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Provider specific settings
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        # 'APP': {
-        #     'client_id': '',
-        #     'secret': '',
-        #     'key': ''
-        # },
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        },
 
-        'OAUTH_PKCE_ENABLED' : True
-    }
-}
 
 
 
@@ -322,7 +300,7 @@ ACCOUNT_SIGNUP_FIELDS= ['email*', 'password1*', 'password2*']
 # ACCOUNT_SIGNUP_FORM_CLASS = 'main.forms.CustomSignupForm'
 
 LOGIN_REDIRECT_URL = 'dashboard'
-LOGOUT_REDIRECT_URL = '/dashboard/signin/'
+LOGOUT_REDIRECT_URL = 'account_login'  # Redirect to styled login page
 AUTO_LOGOUT = 5
 
 # Auto Logout Settings
@@ -375,5 +353,5 @@ AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
 AXES_RESET_ON_SUCCESS = True
 
 # Two Factor Settings
-LOGIN_URL = 'signin'
+LOGIN_URL = 'account_login'  # Use allauth login URL
 TWO_FACTOR_REMEMBER_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days

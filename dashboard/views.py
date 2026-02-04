@@ -320,25 +320,29 @@ def profile(request):
 
 @login_not_required
 def signin(request):
-    if request.method == 'POST':
-        username = request.POST.get('username') or request.POST.get('email') # Fallback to email if username empty
-        password = request.POST.get('password')
-
-        # Try to find user by username or email for better UX (optional but good practice)
-        # Note: 'authenticate' usually expects 'username' keyword arg but it can be the actual username string.
-        # If the user enters email as username, standard auth might fail unless configured.
-        # Based on previous code, it seemed to just pass username.
-        
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            next_url = request.POST.get('next') or request.GET.get('next') or 'dashboard'
-            return redirect(next_url)
-        else:
-            messages.error(request, 'Wrong username or password! Please Check and try again!')
+    from allauth.account.forms import LoginForm
     
-    return render(request, 'src/dashboard/sign-in.html') # User was viewing sign-in.html, not account/login.html
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            # Allauth handles authentication internally
+            username = form.cleaned_data.get('login')
+            password = form.cleaned_data.get('password')
+            
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                login(request, user)
+                next_url = request.POST.get('next') or request.GET.get('next') or 'dashboard'
+                return redirect(next_url)
+            else:
+                messages.error(request, 'Wrong username or password! Please Check and try again!')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = LoginForm()
+    
+    return render(request, 'account/login.html', {'form': form})
 
 @login_required
 def logoutUser(request):

@@ -72,17 +72,23 @@ def process_referral_rewards(user, amount, reward_type, transaction_id=None):
                     )
                     
                     # Credit Referrer's Wallet
+                    # select_for_update() prevents a lost-update race condition when
+                    # two qualifying transactions (e.g. deposit + investment) complete
+                    # simultaneously for the same referrer.
                     try:
                         from dashboard.models import Wallet
-                        wallet, _ = Wallet.objects.get_or_create(user=referral.referrer)
+                        wallet, created = Wallet.objects.get_or_create(user=referral.referrer)
+                        # Re-acquire with a row lock inside the atomic block
+                        wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
                         wallet.balance += reward_amount
                         wallet.save()
-                        
+
                         reward.status = 'paid'
                         reward.save()
                     except ImportError:
-                        pass # Dashboard app not found or Wallet model move
+                        pass  # Dashboard app not found or Wallet model moved
                     except Exception as e:
-                        print(f"Error crediting wallet: {e}")
+                        import logging
+                        logging.getLogger(__name__).error(f"Error crediting referral wallet: {e}")
     
     return True

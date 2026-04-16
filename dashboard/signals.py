@@ -16,7 +16,7 @@ def log_user_login(sender, request, user, **kwargs):
     user_agent = request.META.get('HTTP_USER_AGENT', '')
     SecurityLog.objects.create(
         user=user,
-        action='login',
+        action='login_success',
         ip_address=ip,
         user_agent=user_agent,
         details="User logged in successfully"
@@ -34,6 +34,43 @@ def log_user_logout(sender, request, user, **kwargs):
             user_agent=user_agent,
             details="User logged out"
         )
+
+@receiver(user_login_failed)
+def log_user_login_failed(sender, credentials, request, **kwargs):
+    ip = get_client_ip(request)
+    user_agent = request.META.get('HTTP_USER_AGENT', '')
+    # user_login_failed doesn't pass user if user not found, but we can try to look it up by username/email in credentials
+    # However, strict SecurityLog requires a User FK. If no user, we can't log to a specific user.
+    # We will only log if we can find a user, or if we change SecurityLog to allow null user (not requested).
+    # For now, let's skip or try to find user. 
+    # Actually, the user requirement is strict. We can only log if we know the user.
+    pass
+
+from allauth.account.signals import password_changed, password_set, email_confirmed
+
+@receiver(password_changed)
+def log_password_changed(request, user, **kwargs):
+    ip = get_client_ip(request)
+    user_agent = request.META.get('HTTP_USER_AGENT', '')
+    SecurityLog.objects.create(
+        user=user,
+        action='password_change',
+        ip_address=ip,
+        user_agent=user_agent,
+        details="Password changed successfully"
+    )
+
+@receiver(password_set)
+def log_password_set(request, user, **kwargs):
+    ip = get_client_ip(request)
+    user_agent = request.META.get('HTTP_USER_AGENT', '')
+    SecurityLog.objects.create(
+        user=user,
+        action='password_change',
+        ip_address=ip,
+        user_agent=user_agent,
+        details="Password set successfully"
+    )
 
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User

@@ -208,23 +208,120 @@ def subscribe(request):
         try:
             validate_email(email)
         except ValidationError:
-            return JsonResponse({"error": "Invalid email format, renter the email and try again"}, status=400)
+            return JsonResponse({"error": "Invalid email format, re-enter the email and try again"}, status=400)
 
         # Check if email already exists
         if Subscriber.objects.filter(email=email).exists():
-            return JsonResponse({"error": "You are already subscribed! Thank you for you interest"}, status=400)
+            return JsonResponse({"error": "You are already subscribed! Thank you for your interest"}, status=400)
 
         # Save email to database
         Subscriber.objects.create(email=email)
 
         # Send confirmation email
-        subject = "Thank You for Subscribing! To Smartmine"
-        message = f"Greetings,\n\nThank you for subscribing to Smartmine updates. You'll now receive the latest news about our exchange, products and services.\n\nBest Regards,\nSmartmine Company Team"
-        send_mail(subject, message, "your-email@gmail.com", [email])
+        subject = "Welcome to SmartMine! 🎉"
+        message = f"""Dear Subscriber,
 
-        return JsonResponse({"success": "Subscribed successfully!"})
+Thank you for subscribing to SmartMine updates!
+
+We're thrilled to have you join our community. You'll now receive:
+• Latest news about our crypto exchange platform
+• Updates on new products and services
+• Exclusive offers and early access to features
+• Market insights and trading tips
+
+Stay tuned for exciting updates!
+
+Best Regards,
+The SmartMine Team
+
+---
+SmartMine - Your Trusted Crypto Mining & Trading Platform
+Website: https://www.smrtmine.com
+Email: info@smrtmine.com
+
+If you wish to unsubscribe, please contact us at info@smrtmine.com
+"""
+        
+        # Send email using configured email backend
+        try:
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email="info@smrtmine.com",  # Use configured sender
+                recipient_list=[email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            print(f"Failed to send subscription email: {e}")
+            # Still return success since subscription was saved
+
+        return JsonResponse({
+            "success": "✅ Subscribed successfully! Check your email for confirmation.",
+            "message": "Thank you for subscribing to SmartMine updates!"
+        })
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+@login_not_required
+def unsubscribe(request):
+    """Allow users to unsubscribe from the newsletter"""
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip()
+
+        # Validate email
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({"error": "Invalid email format, please enter a valid email"}, status=400)
+
+        # Check if email exists in subscribers
+        try:
+            subscriber = Subscriber.objects.get(email=email)
+            subscriber.delete()
+
+            # Send unsubscribe confirmation email
+            subject = "You've Been Unsubscribed from SmartMine"
+            message = f"""Dear Subscriber,
+
+We're sorry to see you go!
+
+You have been successfully unsubscribed from SmartMine updates. You will no longer receive emails from us.
+
+If this was a mistake, you can resubscribe anytime by visiting our website at https://www.smrtmine.com
+
+We appreciate your time with us and hope to see you again in the future!
+
+Best Regards,
+The SmartMine Team
+
+---
+SmartMine - Your Trusted Crypto Mining & Trading Platform
+Website: https://www.smrtmine.com
+Email: info@smrtmine.com
+"""
+            
+            # Send confirmation email
+            try:
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email="info@smrtmine.com",
+                    recipient_list=[email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                print(f"Failed to send unsubscribe confirmation email: {e}")
+                # Still return success since unsubscription was completed
+
+            return JsonResponse({
+                "success": "✅ Unsubscribed successfully!",
+                "message": "You have been removed from our mailing list."
+            })
+        except Subscriber.DoesNotExist:
+            return JsonResponse({"error": "Email not found in our subscriber list"}, status=404)
+
+    # GET request - show unsubscribe page
+    return render(request, 'src/landing/unsubscribe.html')
 
 # def company(request):
 #     return render(request, 'src/landing/company.html', {})

@@ -8,6 +8,7 @@ from . import views as dashboard_views
 urlpatterns = [
     path('', dashboard_views.dashboard, name='dashboard'),
     path('signin/', dashboard_views.signin, name='signin'),
+    path('access-restricted/', dashboard_views.access_restricted, name='access_restricted'),
     # path('logout/', dashboard_views.logoutUser, name='logout'),
     path('exchange/', dashboard_views.exchange, name='exchange'),
     path('trade/', dashboard_views.trade, name='trade'),

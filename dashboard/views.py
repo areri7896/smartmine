@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, login_not_required
 from django.core.mail import send_mail
-from .models import Investment, Wallet, Transaction, Withdrawal, Depo_Verification, DepositTransaction, MpesaResponse, InvestmentPlan, Profile, SecurityLog, Trade
+from .models import Investment, Wallet, Transaction, Withdrawal, Depo_Verification, DepositTransaction, MpesaResponse, InvestmentPlan, Profile, SecurityLog, Trade, ExchangeRate
 from .forms import CustomUserChangeForm, ProfileUpdateForm
 from django_otp.decorators import otp_required
 from binance.client import Client
@@ -24,17 +24,68 @@ from django.core.paginator import Paginator
 from django.core.cache import cache
 from decimal import Decimal
 
-# Helper function for currency conversion (Mock implementation based on context)
+# Helper function for currency conversion
 def fetch_pair_conversion(base, quote, amount):
-    # This logic was missing in snippet but referenced. Assuming static rate or similar.
-    # Logic extracted from user context or standard placeholder.
     if base == 'KES' and quote == 'USD':
-        return amount / 129.0 # Example rate
+        rate = float(ExchangeRate.get_rate())
+        return amount / rate
     return amount
+
+# ---------------------------------------------------------------------------
+# Safaricom M-Pesa callback security
+# ---------------------------------------------------------------------------
+# Official Safaricom production IP ranges (as of 2024).
+# Ref: https://developer.safaricom.co.ke/APIs/MpesaExpressSimulate
+SAFARICOM_IP_ALLOWLIST = {
+    # Production
+    '196.201.214.200', '196.201.214.206',
+    '196.201.213.114', '196.201.214.207',
+    '196.201.214.208', '196.201.213.44',
+    '196.201.212.127', '196.201.212.138',
+    '196.201.212.129', '196.201.212.136',
+    '196.201.212.74',
+    # Sandbox (for local/staging testing)
+    '196.201.214.200',
+}
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR', '')
+    return ip
+
+def is_safaricom_request(request):
+    """
+    Returns True only if the request originates from a known Safaricom IP.
+    In DEBUG mode, all IPs are allowed (for local sandbox simulator testing).
+    """
+    from django.conf import settings
+    if settings.DEBUG:
+        return True  # Allow all IPs in development
+    ip = get_client_ip(request)
+    return ip in SAFARICOM_IP_ALLOWLIST
+
+def log_security_action(user, action, details, request=None):
+    ip = get_client_ip(request) if request else None
+    user_agent = request.META.get('HTTP_USER_AGENT', '') if request else None
+    SecurityLog.objects.create(
+        user=user,
+        action=action,
+        ip_address=ip,
+        user_agent=user_agent,
+        details=details
+    )
 
 @login_not_required
 def index(request):
     return render(request, 'index.html')
+
+@login_not_required
+def access_restricted(request):
+    """Display a custom access restriction page instead of a generic error"""
+    return render(request, 'src/dashboard/access_restricted.html')
 
 def home(request):
     return render(request, 'src/dashboard/home.html')
@@ -139,6 +190,13 @@ def wallet(request):
                     status='Pending'
                 )
 
+                log_security_action(
+                    request.user, 
+                    'deposit_initiated', 
+                    f"Initiated deposit of {amount} KES via M-Pesa", 
+                    request
+                )
+
                 # Initialize M-Pesa client and initiate STK Push
                 cl = MpesaClient()
                 account_reference = 'reference'
@@ -202,56 +260,106 @@ def wallet(request):
 
 @csrf_exempt
 def mpesa_callback(request):
+    """
+    M-Pesa STK Push callback.
+
+    Security:
+    - Validates the source IP against Safaricom's known IP range.
+    - Uses select_for_update() + atomic() to prevent double-credit race conditions.
+    - Only credits the wallet if the DepositTransaction is still 'Pending'.
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+
+    # ── Security: reject requests from unknown IPs ──────────────────────────
+    if not is_safaricom_request(request):
+        ip = get_client_ip(request)
+        logger.warning(f"M-Pesa callback rejected — unknown IP: {ip}")
+        return JsonResponse({'error': 'Forbidden'}, status=403)
+
     try:
         data = json.loads(request.body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data received.'}, status=400)
+
+    try:
         body = data.get('Body', {}).get('stkCallback', {})
         result_code = body.get('ResultCode')
         checkout_request_id = body.get('CheckoutRequestID')
         metadata = body.get('CallbackMetadata', {}).get('Item', [])
+
         transaction_id = None
         amount = None
         phone_number = None
 
         for item in metadata:
-            if item['Name'] == 'MpesaReceiptNumber':
-                transaction_id = item['Value']
-            elif item['Name'] == 'Amount':
-                amount = float(item['Value'])
-            elif item['Name'] == 'PhoneNumber':
-                phone_number = str(item['Value'])
+            name = item.get('Name')
+            value = item.get('Value')
+            if name == 'MpesaReceiptNumber':
+                transaction_id = value
+            elif name == 'Amount':
+                amount = Decimal(str(value))
+            elif name == 'PhoneNumber':
+                phone_number = str(value)
 
-        if result_code == 0:
+        if result_code != 0:
+            logger.info(f"M-Pesa callback: failed transaction (code {result_code}) for {checkout_request_id}")
+            return JsonResponse({'error': 'M-Pesa transaction failed.'}, status=400)
+
+        # ── Atomic: prevents race condition if Safaricom sends duplicate callback ──
+        with transaction.atomic():
             try:
-                transaction_obj = DepositTransaction.objects.get(
+                # Re-check status inside the lock — prevents double-credit
+                transaction_obj = DepositTransaction.objects.select_for_update().get(
                     checkout_request_id=checkout_request_id,
                     status='Pending'
                 )
-                transaction_obj.transaction_id = transaction_id
-                transaction_obj.status = 'Completed'
-                transaction_obj.save()
-
-                wallet_obj, _ = Wallet.objects.get_or_create(user=transaction_obj.user)
-                wallet_obj.balance += Decimal(amount)
-                wallet_obj.save()
-
-                # Trigger Referral Rewards
-                from referrals.utils import process_referral_rewards
-                process_referral_rewards(
-                    user=transaction_obj.user,
-                    amount=amount,
-                    reward_type='deposit',
-                    transaction_id=transaction_id
-                )
-
-                return JsonResponse({'success': True, 'message': 'Deposit validated successfully.'}, status=200)
             except DepositTransaction.DoesNotExist:
-                return JsonResponse({'error': 'Transaction not found.'}, status=404)
-        else:
-            return JsonResponse({'error': 'M-Pesa transaction failed.'}, status=400)
+                logger.warning(
+                    f"M-Pesa callback: DepositTransaction not found or already processed "
+                    f"(checkout_id={checkout_request_id})"
+                )
+                # Return 200 so Safaricom does not keep retrying
+                return JsonResponse({'message': 'Already processed or not found.'}, status=200)
 
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON data received.'}, status=400)
+            # Mark deposit as completed
+            transaction_obj.transaction_id = transaction_id
+            transaction_obj.status = 'Completed'
+            transaction_obj.save()
+
+            # Credit wallet — locked with select_for_update
+            wallet_obj, _ = Wallet.objects.select_for_update().get_or_create(
+                user=transaction_obj.user
+            )
+            wallet_obj.balance += amount
+            wallet_obj.save()
+
+            # Audit log
+            log_security_action(
+                transaction_obj.user,
+                'deposit_completed',
+                f"Deposit of {amount} KES completed via M-Pesa (Tx: {transaction_id})",
+                None
+            )
+
+        # Referral rewards are processed OUTSIDE the atomic block to avoid
+        # rolling back the wallet credit if the referral code path fails.
+        try:
+            from referrals.utils import process_referral_rewards
+            process_referral_rewards(
+                user=transaction_obj.user,
+                amount=float(amount),
+                reward_type='deposit',
+                transaction_id=transaction_id
+            )
+        except Exception as ref_err:
+            logger.error(f"Referral reward error after deposit {transaction_id}: {ref_err}")
+
+        logger.info(f"M-Pesa deposit completed: {transaction_id}, amount={amount} KES")
+        return JsonResponse({'success': True, 'message': 'Deposit validated successfully.'}, status=200)
+
     except Exception as e:
+        logger.error(f"M-Pesa callback unhandled error: {e}", exc_info=True)
         return JsonResponse({'error': f'An error occurred: {str(e)}'}, status=500)
 
 # ... [Reconstructed other views based on memory/standard implementation] ...
@@ -276,6 +384,13 @@ def confirm_investment(request, plan_id):
                     user=request.user,
                     plan=plan,
                     quantity=1
+                )
+
+                log_security_action(
+                    request.user, 
+                    'investment_created', 
+                    f"Invested {plan.price} USDT in plan '{plan.name}'", 
+                    request
                 )
                 
                 # Trigger Referral Rewards for Investment
@@ -323,6 +438,14 @@ def profile(request):
             profile = profile_form.save(commit=False)
             profile.is_complete = True
             profile.save()
+            
+            log_security_action(
+                request.user, 
+                'profile_update', 
+                "User profile details updated", 
+                request
+            )
+            
             messages.success(request, 'Your profile has been updated successfully!')
             return redirect('dashboard')
         else:
@@ -449,22 +572,56 @@ def withdraw(request):
         if phone_number and amount:
             try:
                 amount_decimal = Decimal(amount)
-                # Check for sufficient balance
-                wallet = Wallet.objects.filter(user=request.user).first()
-                if not wallet or wallet.balance < amount_decimal:
-                    messages.error(request, "Insufficient balance for this withdrawal.")
-                    return redirect('wallet')
+                
+                # Use atomic transaction to ensure consistency
+                with transaction.atomic():
+                    # Lock wallet
+                    wallet = Wallet.objects.select_for_update().get(user=request.user)
+                    
+                    # Check for sufficient balance
+                    if wallet.balance < amount_decimal:
+                        messages.error(request, "Insufficient balance for this withdrawal.")
+                        return redirect('wallet')
 
-                # Create withdrawal record
-                Withdrawal.objects.create(
-                    user=request.user,
-                    phone_number=phone_number,
-                    amount=amount_decimal,
-                    status='pending'
-                )
-                messages.success(request, "Withdrawal request submitted successfully and is pending approval.")
+                    # Deduct balance immediately
+                    balance_before = wallet.balance
+                    wallet.balance -= amount_decimal
+                    wallet.save()
+
+                    # Create withdrawal record
+                    withdrawal = Withdrawal.objects.create(
+                        user=request.user,
+                        phone_number=phone_number,
+                        amount=amount_decimal,
+                        status='pending'
+                    )
+                    
+                    # Record transaction
+                    Transaction.objects.create(
+                        user=request.user,
+                        wallet=wallet,
+                        transaction_type='withdraw',
+                        amount=amount_decimal,
+                        balance_before=balance_before,
+                        balance_after=wallet.balance,
+                        reference_id=f"WITHDRAW-{withdrawal.id}-PENDING",
+                        status='pending'
+                    )
+                    
+                    log_security_action(
+                        request.user, 
+                        'withdrawal_request', 
+                        f"Requested withdrawal of {amount_decimal} KES to {phone_number}", 
+                        request
+                    )
+                    
+                messages.success(request, "Withdrawal request submitted successfully. Funds have been reserved and are pending approval.")
+            except Wallet.DoesNotExist:
+                messages.error(request, "Wallet not found. Please contact support.")
             except (ValueError, Decimal.InvalidOperation):
                 messages.error(request, "Invalid amount entered.")
+            except Exception as e:
+                messages.error(request, f"An error occurred: {str(e)}")
         else:
             messages.error(request, "Please provide both phone number and amount.")
             
@@ -488,6 +645,12 @@ def verif(request):
                     verification_code=verification_code,
                     amount=Decimal(amount),
                     is_completed=0 # 0 for Pending
+                )
+                log_security_action(
+                    request.user, 
+                    'deposit_initiated', 
+                    f"Submitted manual deposit verification for {amount} KES (Code: {verification_code})", 
+                    request
                 )
                 messages.success(request, "Transaction details shared successfully. We will verify and update your balance shortly.")
             except (ValueError, Decimal.InvalidOperation):
@@ -650,87 +813,162 @@ def exchange(request):
         messages.error(request, "Error loading exchange.")
         return redirect('dashboard')
 
+def _get_live_price(currency: str) -> Decimal:
+    """
+    Fetch the live USD price for the given crypto currency from Binance.
+
+    Raises:
+        RuntimeError: If the price feed is unavailable. Never falls back to a
+                      static constant because stale prices cause real KES losses.
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+
+    symbol_map = {
+        'BTC': 'BTCUSDT',
+        'ETH': 'ETHUSDT',
+        'BNB': 'BNBUSDT',
+        'SOL': 'SOLUSDT',
+        'XRP': 'XRPUSDT',
+    }
+    binance_symbol = symbol_map.get(currency.upper())
+    if not binance_symbol:
+        raise RuntimeError(f"Unsupported trading pair: {currency}")
+
+    try:
+        client = Client()  # anonymous public endpoint — no API key needed for ticker
+        ticker = client.get_ticker(symbol=binance_symbol)
+        price = Decimal(str(ticker['lastPrice']))
+        if price <= 0:
+            raise ValueError(f"Invalid price returned for {binance_symbol}: {price}")
+        logger.info(f"Live price for {binance_symbol}: {price} USD")
+        return price
+    except Exception as e:
+        logger.error(f"Failed to fetch live price for {binance_symbol}: {e}")
+        raise RuntimeError(
+            f"Price feed unavailable for {currency}. Please try again in a moment."
+        ) from e
+
+
 @login_required
 def trade(request):
     if request.method == 'POST':
-        action = request.POST.get('action') # 'buy' or 'sell'
-        amount_usd_str = request.POST.get('balance_amount') 
-        
-        currency = request.POST.get('balance_currency', 'BTC') 
-        
+        import logging
+        logger = logging.getLogger(__name__)
+
+        action = request.POST.get('action')            # 'buy' or 'sell'
+        amount_usd_str = request.POST.get('balance_amount')
+        currency = request.POST.get('balance_currency', 'BTC')
+
         try:
             amount_val = Decimal(amount_usd_str)
             if amount_val <= 0:
                 raise ValueError("Amount must be positive.")
 
-            wallet = Wallet.objects.get(user=request.user)
-            user_portfolio = get_portfolio(request.user)
-            
-            # Get Current Price (Mock/Approx)
-            price = Decimal('96000.0') # Default fallback
-            if currency == 'ETH': price = Decimal('2700.0')
-            elif currency == 'BNB': price = Decimal('580.0')
-            
-            # Recalculate KES/USD conversion
-            usd_to_kes_rate = Decimal('129.0')
-            
+            # ── Live price fetch (C-3 fix) ─────────────────────────────────────
+            # We NEVER fall back to a static price. If Binance is unavailable
+            # the trade is rejected here to protect both the user and the platform.
+            try:
+                price = _get_live_price(currency)
+            except RuntimeError as price_err:
+                messages.error(request, str(price_err))
+                return redirect('exchange')
+            # ──────────────────────────────────────────────────────────────────
+
+            # KES/USD conversion — loaded from database, not hardcoded
+            usd_to_kes_rate = ExchangeRate.get_rate()
+
+            with transaction.atomic():
+                wallet = Wallet.objects.select_for_update().get(user=request.user)
+                user_portfolio = get_portfolio(request.user)
+
+                if action == 'buy':
+                    # Amount entered is the QUANTITY of crypto to buy
+                    cost_usd = amount_val * price
+                    cost_kes = cost_usd * usd_to_kes_rate
+
+                    if wallet.balance < cost_kes:
+                        messages.error(request, "Insufficient funds in wallet.")
+                        return redirect('exchange')
+
+                    wallet.balance -= cost_kes
+                    wallet.save()
+
+                    Trade.objects.create(
+                        user=request.user,
+                        symbol=currency,
+                        side='BUY',
+                        amount=amount_val,
+                        price=price,
+                        total=cost_usd
+                    )
+
+                elif action == 'sell':
+                    current_holdings = user_portfolio.get(currency, Decimal('0.0'))
+                    if current_holdings < amount_val:
+                        messages.error(
+                            request,
+                            f"Insufficient {currency} balance. You have {current_holdings}."
+                        )
+                        return redirect('exchange')
+
+                    earnings_usd = amount_val * price
+                    earnings_kes = earnings_usd * usd_to_kes_rate
+
+                    wallet.balance += earnings_kes
+                    wallet.save()
+
+                    Trade.objects.create(
+                        user=request.user,
+                        symbol=currency,
+                        side='SELL',
+                        amount=amount_val,
+                        price=price,
+                        total=earnings_usd
+                    )
+
+                else:
+                    messages.error(request, "Invalid trade action.")
+                    return redirect('exchange')
+
+            # Logging and referral rewards (outside the atomic block so a
+            # referral failure never rolls back the completed trade)
             if action == 'buy':
-                # Simplified: Amount entered is QUANTITY to Buy
                 cost_usd = amount_val * price
                 cost_kes = cost_usd * usd_to_kes_rate
-                
-                if wallet.balance < cost_kes:
-                    messages.error(request, "Insufficient Funds in Wallet.")
-                    return redirect('exchange')
-                
-                # Execute Buy
-                wallet.balance -= cost_kes
-                wallet.save()
-                
-                Trade.objects.create(
-                    user=request.user,
-                    symbol=currency,
-                    side='BUY',
-                    amount=amount_val,
-                    price=price,
-                    total=cost_usd
+                log_security_action(
+                    request.user,
+                    'trade_executed',
+                    f"Bought {amount_val} {currency} @ ${price:.2f} (live) for ${cost_usd:.2f}",
+                    request
                 )
-                messages.success(request, f"Bought {amount_val} {currency} for ${cost_usd:.2f}")
+                messages.success(request, f"Bought {amount_val} {currency} @ ${price:.2f} for ${cost_usd:.2f}")
 
-                # Trigger Referral Rewards for Trade (Buy)
-                from referrals.utils import process_referral_rewards
-                process_referral_rewards(
-                    user=request.user,
-                    amount=cost_kes, # Commission on the TRADE volume
-                    reward_type='trade',
-                    transaction_id=f"TRADE-BUY-{request.user.id}-{timezone.now().timestamp()}"
-                )
-                
+                try:
+                    from referrals.utils import process_referral_rewards
+                    process_referral_rewards(
+                        user=request.user,
+                        amount=float(cost_kes),
+                        reward_type='trade',
+                        transaction_id=f"TRADE-BUY-{request.user.id}-{timezone.now().timestamp()}"
+                    )
+                except Exception as ref_err:
+                    logger.error(f"Referral reward error after buy trade: {ref_err}")
+
             elif action == 'sell':
-                # User wants to sell 'amount_val' quantity of 'currency'
-                current_holdings = user_portfolio.get(currency, Decimal('0.0'))
-                if current_holdings < amount_val:
-                    messages.error(request, f"Insufficient {currency} Balance. You have {current_holdings}.")
-                    return redirect('exchange')
-                
-                # Execute Sell
                 earnings_usd = amount_val * price
-                earnings_kes = earnings_usd * usd_to_kes_rate
-                
-                wallet.balance += earnings_kes
-                wallet.save()
-                
-                Trade.objects.create(
-                    user=request.user,
-                    symbol=currency,
-                    side='SELL',
-                    amount=amount_val,
-                    price=price,
-                    total=earnings_usd
+                log_security_action(
+                    request.user,
+                    'trade_executed',
+                    f"Sold {amount_val} {currency} @ ${price:.2f} (live) for ${earnings_usd:.2f}",
+                    request
                 )
-                messages.success(request, f"Sold {amount_val} {currency} for ${earnings_usd:.2f}")
-                
+                messages.success(request, f"Sold {amount_val} {currency} @ ${price:.2f} for ${earnings_usd:.2f}")
+
+        except (ValueError, Decimal.InvalidOperation):
+            messages.error(request, "Invalid amount entered.")
         except Exception as e:
-            messages.error(request, f"Trade Failed: {e}")
-            
+            logger.error(f"Trade failed: {e}", exc_info=True)
+            messages.error(request, "Trade failed. Please try again.")
+
     return redirect('exchange')

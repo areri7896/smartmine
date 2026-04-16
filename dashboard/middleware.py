@@ -42,6 +42,7 @@ class LoginEnforcementMiddleware:
         if not request.user.is_authenticated:
             # Exempt Paths
             if (request.path.startswith('/dashboard/signin') or 
+                request.path.startswith('/dashboard/access-restricted') or
                 request.path.startswith('/maze/') or 
                 request.path.startswith('/static/') or 
                 request.path.startswith('/media/') or 
@@ -50,7 +51,7 @@ class LoginEnforcementMiddleware:
                 request.path == '/'):
                 pass
             else:
-                return redirect('signin')
+                return redirect('access_restricted')
         
         response = self.get_response(request)
         return response

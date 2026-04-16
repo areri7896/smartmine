@@ -3,9 +3,7 @@
 
 {% block content %}
 <div class="container">
-  <div class="hero__content">
-    <div class="sign-in">
-      <div class="sign-in-card">
+
   <h1 class="my-3">{% block title %}{% trans "Permission Denied" %}{% endblock %}</h1>
 
   <p class="fb-regular my-3">{% blocktrans trimmed %}The page you requested, enforces users to verify using
@@ -21,7 +19,6 @@
     <a href="{% url 'two_factor:setup' %}" class="btn btn-primary">
     {% trans "Enable Two-Factor Authentication" %}</a>
   </p>
-      </div>
-      </div>
-    </div></div>
+    
+  </div>
 {% endblock %}

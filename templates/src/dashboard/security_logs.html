@@ -76,7 +76,7 @@
                         <tr style="background: rgba(255,255,255,0.05);">
                             <td>
                                 <span
-                                    class="badge {% if 'success' in log.action or 'enable' in log.action %}bg-success{% elif 'failed' in log.action %}bg-danger{% else %}bg-info{% endif %}">
+                                    class="badge {% if 'success' in log.action or 'enable' in log.action or 'completed' in log.action or 'executed' in log.action or 'change' in log.action or 'update' in log.action %}bg-success{% elif 'failed' in log.action %}bg-danger{% elif 'initiated' in log.action or 'request' in log.action or 'create' in log.action %}bg-warning{% else %}bg-info{% endif %}">
                                     {{ log.get_action_display }}
                                 </span>
                             </td>

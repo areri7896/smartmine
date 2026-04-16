@@ -22,7 +22,69 @@ class Depo_VerificationAdmin(admin.ModelAdmin):
 admin.site.register(Kline, KlineAdmin)
 admin.site.register(Withdrawal, WithdrawalAdmin)
 admin.site.register(Depo_Verification,Depo_VerificationAdmin)
-admin.site.register(Investment)
+@admin.register(Investment)
+class InvestmentAdmin(admin.ModelAdmin):
+    list_display = (
+        'user', 
+        'plan', 
+        'principal_amount', 
+        'status', 
+        'start_date', 
+        'end_date', 
+        'days_profit_paid', 
+        'total_profit_paid'
+    )
+    list_filter = ('status', 'plan', 'start_date', 'end_date')
+    search_fields = ('user__username', 'user__first_name', 'user__last_name', 'plan__name')
+    actions = ['trigger_daily_profit', 'force_complete_investment']
+
+    @admin.action(description="Trigger Daily Profit for Selected Investments")
+    def trigger_daily_profit(self, request, queryset):
+        success_count = 0
+        skipped_count = 0
+        error_count = 0
+        
+        for investment in queryset:
+            try:
+                if investment.process_daily_profit():
+                    success_count += 1
+                else:
+                    skipped_count += 1
+            except Exception as e:
+                error_count += 1
+                self.message_user(
+                    request, 
+                    f"Error processing investment {investment.id}: {str(e)}", 
+                    level='ERROR'
+                )
+        
+        self.message_user(
+            request,
+            f"Profit Processing: {success_count} success, {skipped_count} skipped, {error_count} errors."
+        )
+
+    @admin.action(description="Force Complete Selected Investments")
+    def force_complete_investment(self, request, queryset):
+        success_count = 0
+        error_count = 0
+        
+        for investment in queryset:
+            try:
+                investment.complete_investment()
+                success_count += 1
+            except Exception as e:
+                error_count += 1
+                self.message_user(
+                    request, 
+                    f"Error completing investment {investment.id}: {str(e)}", 
+                    level='ERROR'
+                )
+        
+        self.message_user(
+            request, 
+            f"Completion Processing: {success_count} completed, {error_count} errors."
+        )
+
 admin.site.register(InvestmentPlan)
 admin.site.register(MpesaCallback)
 # admin.site.register(Wallet)
@@ -114,3 +176,21 @@ class SecurityLogAdmin(admin.ModelAdmin):
     list_filter = ('action', 'timestamp')
     search_fields = ('user__username', 'ip_address', 'details')
     readonly_fields = ('user', 'action', 'ip_address', 'user_agent', 'details', 'timestamp')
+
+
+@admin.register(ExchangeRate)
+class ExchangeRateAdmin(admin.ModelAdmin):
+    list_display = ('usd_to_kes', 'is_active', 'updated_at', 'note')
+    list_filter = ('is_active',)
+    list_editable = ('is_active',)
+    readonly_fields = ('updated_at',)
+    ordering = ('-updated_at',)
+
+    def save_model(self, request, obj, form, change):
+        """
+        When a new active rate is saved, deactivate all other rates
+        to enforce the singleton constraint.
+        """
+        if obj.is_active:
+            ExchangeRate.objects.exclude(pk=obj.pk).update(is_active=False)
+        super().save_model(request, obj, form, change)

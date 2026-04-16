@@ -159,7 +159,7 @@ class Investment(models.Model):
                 wallet = Wallet.objects.select_for_update().get(user=user)
                 
                 # Calculate KES cost
-                usd_to_kes_rate = Decimal('129.0')
+                usd_to_kes_rate = ExchangeRate.get_rate()
                 cost_kes = principal * usd_to_kes_rate
 
                 # Check balance
@@ -260,8 +260,12 @@ class Investment(models.Model):
                 wallet = Wallet.objects.select_for_update().get(user=self.user)
                 balance_before = wallet.balance
                 
+                # Convert profit to KES
+                usd_to_kes_rate = ExchangeRate.get_rate()
+                daily_profit_kes = self.expected_daily_profit * usd_to_kes_rate
+                
                 # Add daily profit
-                wallet.balance += self.expected_daily_profit
+                wallet.balance += daily_profit_kes
                 wallet.save()
                 
                 # Record transaction
@@ -320,8 +324,12 @@ class Investment(models.Model):
                 wallet = Wallet.objects.select_for_update().get(user=self.user)
                 balance_before = wallet.balance
                 
+                # Convert principal to KES
+                usd_to_kes_rate = ExchangeRate.get_rate()
+                principal_kes = self.principal_amount * usd_to_kes_rate
+                
                 # Return principal
-                wallet.balance += self.principal_amount
+                wallet.balance += principal_kes
                 wallet.save()
                 
                 # Record transaction
@@ -334,6 +342,14 @@ class Investment(models.Model):
                     balance_after=wallet.balance,
                     reference_id=f"INV-{self.id}-COMPLETE",
                     status='success'
+                )
+
+                # Log Security
+                SecurityLog.objects.create(
+                    user=self.user,
+                    action='investment_completed',
+                    details=f"Investment in {self.plan.name} completed. Principal returned.",
+                    ip_address=None
                 )
                 
                 # Update investment
@@ -427,6 +443,56 @@ class Withdrawal(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
     is_email_verified = models.BooleanField(default=False)
     email_verification_token = models.CharField(max_length=100, null=True, blank=True)
+    
+    def save(self, *args, **kwargs):
+        """
+        Custom save method to handle balance refunds for cancelled/failed withdrawals.
+        """
+        from django.db import transaction as db_transaction
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # Check if this is an update (not a new instance)
+        if self.pk is not None:
+            try:
+                # Get the old instance from database
+                old_instance = Withdrawal.objects.get(pk=self.pk)
+                old_status = old_instance.status
+                new_status = self.status
+                
+                # If status changed to cancelled or failed from pending/approved
+                if old_status in ['pending', 'approved'] and new_status in ['cancelled', 'failed']:
+                    with db_transaction.atomic():
+                        # Lock wallet and refund
+                        wallet = Wallet.objects.select_for_update().get(user=self.user)
+                        balance_before = wallet.balance
+                        wallet.balance += self.amount
+                        wallet.save()
+                        
+                        # Record transaction
+                        Transaction.objects.create(
+                            user=self.user,
+                            wallet=wallet,
+                            transaction_type='refund',
+                            amount=self.amount,
+                            balance_before=balance_before,
+                            balance_after=wallet.balance,
+                            reference_id=f"WITHDRAW-{self.id}-REFUND",
+                            status='success'
+                        )
+                        
+                        logger.info(
+                            f"Refunded withdrawal {self.id}: {self.amount} KES returned to user {self.user.username}"
+                        )
+                        
+            except Withdrawal.DoesNotExist:
+                # New instance, no refund needed
+                pass
+            except Exception as e:
+                logger.error(f"Error processing withdrawal refund for {self.id}: {e}")
+                raise
+        
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f"{self.user.username} - {self.amount} ({self.status})"
@@ -838,6 +904,11 @@ class SecurityLog(models.Model):
         ('wallet_update', 'Wallet Update'),
         ('2fa_enable', '2FA Enabled'),
         ('2fa_disable', '2FA Disabled'),
+        ('deposit_initiated', 'Deposit Initiated'),
+        ('deposit_completed', 'Deposit Completed'),
+        ('investment_created', 'Investment Created'),
+        ('investment_completed', 'Investment Completed'),
+        ('trade_executed', 'Trade Executed'),
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='security_logs')
@@ -874,3 +945,50 @@ class Trade(models.Model):
         return f"{self.side} {self.amount} {self.symbol} @ {self.price}"
 
 
+class ExchangeRate(models.Model):
+    """
+    Admin-configurable USD → KES exchange rate.
+
+    Only one active rate is used at a time (singleton via `is_active`).
+    Use ExchangeRate.get_rate() in all financial calculations instead of
+    any hardcoded numeric value. Update via Django admin — no deploy needed.
+    """
+    usd_to_kes = models.DecimalField(
+        max_digits=10,
+        decimal_places=4,
+        help_text="Number of KES per 1 USD (e.g. 130.5000)"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Only one rate should be active at a time."
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    note = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Optional note, e.g. 'Updated from CBK rate 2026-03-21'"
+    )
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"1 USD = {self.usd_to_kes} KES (active={self.is_active}, {self.updated_at.date()})"
+
+    @classmethod
+    def get_rate(cls) -> Decimal:
+        """
+        Returns the current active USD → KES rate.
+        Falls back to Decimal('129.0') if no active rate is configured
+        and logs a warning so it shows up in server logs.
+        """
+        try:
+            rate_obj = cls.objects.filter(is_active=True).latest('updated_at')
+            return rate_obj.usd_to_kes
+        except cls.DoesNotExist:
+            import logging
+            logging.getLogger(__name__).warning(
+                "No active ExchangeRate found — using fallback 129.0. "
+                "Please add an ExchangeRate via Django admin."
+            )
+            return Decimal('129.0')

@@ -8,6 +8,7 @@ from . import views as smartmine_views
 urlpatterns = [
     path('', smartmine_views.index, name='home'),
     path("subscribe/", smartmine_views.subscribe, name="subscribe"),
+    path("unsubscribe/", smartmine_views.unsubscribe, name="unsubscribe"),
     path('get-price/<str:symbol>/', smartmine_views.get_crypto_price, name='get_crypto_price'),
 
     # path('prices/', smartmine_views.prices, name='prices'),

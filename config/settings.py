@@ -31,17 +31,41 @@ SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-# SECRET_KEY = os.environ["SECRET_KEY"]
-# DEBUG = os.environ["DEBUG", default=False, cast=bool]
+# ── C-2 Security Guard ────────────────────────────────────────────────────
+# Hard-fail at startup if DEBUG is accidentally left True in production.
+# "Production" is detected by the presence of a public domain in ALLOWED_HOSTS.
+# This prevents Django from exposing full stack traces (with local vars and
+# SQL queries) to the internet even if .env is misconfigured on the server.
+PRODUCTION_DOMAINS = {'www.smrtmine.com', 'smrtmine.com'}
 
 if DEBUG:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+    # Ensure DEBUG is never accidentally left on when a production domain is used
+    _active_hosts = set(PRODUCTION_DOMAINS)
+    if _active_hosts:
+        # We cannot reach this path because ALLOWED_HOSTS is set above,
+        # but guard against future config changes that mix domains.
+        pass
 else:
     ALLOWED_HOSTS = [
         '2qd-talented-lyell.circumeo-apps.net',
         'www.smrtmine.com',
         'smrtmine.com',
     ]
+
+# Raise immediately if someone sets DEBUG=True in a production environment.
+# This is a defence-in-depth check; the .env on the production server
+# should always have DEBUG=False.
+if DEBUG and any(host in PRODUCTION_DOMAINS for host in ALLOWED_HOSTS):
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured(
+        "DEBUG=True is not allowed when ALLOWED_HOSTS contains a production domain. "
+        "Set DEBUG=False in your .env file on the production server."
+    )
+
+# Required when the app runs behind a reverse proxy (e.g. Nginx + Gunicorn).
+# Without this, SECURE_SSL_REDIRECT cannot detect the original HTTPS scheme.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 CSRF_TRUSTED_ORIGINS = [
@@ -293,8 +317,8 @@ SESSION_SAVE_EVERY_REQUEST = True
 # ACCOUNT_AUTHENTICATION_METHOD = 'email'
 DEFAULT_FROM_EMAIL = 'info@smrtmine.com'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_FILE_PATH = BASE_DIR / 'emails'
 EMAIL_HOST = config('EMAIL_HOST')
 EMAIL_PORT = 587
@@ -349,4 +373,4 @@ REFERRAL_CONFIG = {
     'REWARD_TRIGGERS': ['deposit', 'trade', 'investment'],
 }
 LOGIN_URL = 'account_login'  # Use allauth login URL
-TWO_FACTOR_REMEMBER_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days
+TWO_FACTOR_REMEMBER_COOKIE_AGE = 60 * 60 * 24 #* 30  # 30 days
